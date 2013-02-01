@@ -16,7 +16,16 @@ namespace ygo {
 
     }
 
+DuelPlayer* NetServer::InsertPlayer(DuelPlayer &dp)
+{
 
+
+	users[dp.bev] = dp;
+	bufferevent_setcb(dp.bev, ServerEchoRead, NULL, ServerEchoEvent, this);
+	bufferevent_enable(dp.bev, EV_READ);
+    return &(users[dp.bev]);
+
+}
 
 bool NetServer::StartServer(unsigned short port) {
 	if(net_evbase)
@@ -229,6 +238,7 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) {
 	case CTOS_PLAYER_INFO: {
 		CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
 		BufferIO::CopyWStr(pkt->name, dp->name, 20);
+		printf("playerinfo ricevuto da NetServer\n");
 		break;
 	}
 	case CTOS_CREATE_GAME: {

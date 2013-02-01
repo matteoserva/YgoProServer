@@ -1,6 +1,7 @@
 #include "config.h"
 #include "menu_handler.h"
 #include "netserver.h"
+#include "GameServer.h"
 #include "duelclient.h"
 #include "deck_manager.h"
 #include "replay_mode.h"
@@ -32,6 +33,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_JOIN_HOST: {
+
 
 
 				char ip[20];
@@ -70,11 +72,11 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case BUTTON_HOST_CONFIRM: {
 				BufferIO::CopyWStr(mainGame->ebServerName->getText(), mainGame->gameConf.gamename, 20);
 
-				NetServer* netServer = new NetServer();
-				if(!netServer->StartServer(mainGame->gameConf.serverport))
+				GameServer* gameServer = new GameServer();
+				if(!gameServer->StartServer(mainGame->gameConf.serverport))
 					break;
 				if(!DuelClient::StartClient(0x7f000001, mainGame->gameConf.serverport)) {
-					netServer->StopServer();
+					gameServer->StopServer();
 					break;
 				}
 				mainGame->btnHostConfirm->setEnabled(false);

@@ -29,6 +29,10 @@ public:
 	 void StopServer();
 	 void StopBroadcast();
 	 void StopListen();
+	 DuelPlayer* InsertPlayer(DuelPlayer &dp);
+
+
+
 	 void BroadcastEvent(evutil_socket_t fd, short events, void* arg);
 	 static void ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx);
 	 static void ServerAcceptError(evconnlistener *listener, void* ctx);

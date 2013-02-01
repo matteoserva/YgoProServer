@@ -97,18 +97,20 @@ struct STOC_HS_WatchChange {
 };
 
 class DuelMode;
-
+class NetServer;
 struct DuelPlayer {
 	unsigned short name[20];
 	DuelMode* game;
 	unsigned char type;
 	unsigned char state;
 	bufferevent* bev;
+	NetServer* netServer;
 	DuelPlayer() {
 		game = 0;
 		type = 0;
 		state = 0;
 		bev = 0;
+        netServer=0;
 	}
 };
 
