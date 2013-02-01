@@ -35,7 +35,7 @@ public:
 	 void StopServer();
 	 void StopBroadcast();
 	 void StopListen();
-
+static void keepAlive(evutil_socket_t fd, short events, void* arg);
     void clientStarted();
          void createGame();
 	 void BroadcastEvent(evutil_socket_t fd, short events, void* arg);

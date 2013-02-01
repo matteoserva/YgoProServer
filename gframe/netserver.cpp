@@ -60,17 +60,26 @@ void NetServer::createGame()
 void NetServer::DisconnectPlayer(DuelPlayer* dp) {
     gameServer->DisconnectPlayer(dp);
 }
+
+
+void NetServer::keepAlive(evutil_socket_t fd, short events, void* arg) {
+    printf("keepAlive\n");
+    event* ev1 = (event*)arg;
+        timeval timeout = {5, 0};
+
+
+}
+
 int NetServer::ServerThread(void* parama) {
     NetServer* that = (NetServer*)parama;
 
     sleep(1);
     printf("sono serverthread netserver\n");
-    timeval timeout = {0, 0};
+    timeval timeout = {5, 0};
 
-   event* ev1 = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, NULL, NULL);
-
+   event* ev1 = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, ev1);
+    event_add(ev1, &timeout);
 	event_base_dispatch(that->net_evbase);
-
 
     printf("netserver thread terminato\n");
     	if(that->duel_mode){
@@ -79,6 +88,8 @@ int NetServer::ServerThread(void* parama) {
 		delete that->duel_mode;
 
 	}
+	event_free(ev1);
+
 	event_base_free(that->net_evbase);
 	that->createGame();
 

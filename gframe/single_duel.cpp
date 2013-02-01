@@ -40,7 +40,7 @@ void SingleDuel::Chat(DuelPlayer* dp, void* pdata, int len) {
 }
 
 void SingleDuel::updateStatus()
-{/*
+{
     if(players[0] && players[1])
     {
         netServer->state = NetServer::State::FULL;
@@ -51,7 +51,7 @@ void SingleDuel::updateStatus()
     {
         netServer->state=NetServer::State::STOPPED;
         printf("server vuoto\n");
-    }*/
+    }
 
 
 
