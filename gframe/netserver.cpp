@@ -55,8 +55,8 @@ void NetServer::StopServer() {
 	if(duel_mode){
 		//duel_mode->EndDuel();
 		//event_free(duel_mode->etimer);
-		delete duel_mode;
-		duel_mode=0;
+		//delete duel_mode;
+		//duel_mode=0;
 	}
 
 
