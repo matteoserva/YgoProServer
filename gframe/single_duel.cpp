@@ -38,6 +38,27 @@ void SingleDuel::Chat(DuelPlayer* dp, void* pdata, int len) {
 			netServer->ReSendToPlayer(*pit);
 	}
 }
+
+void SingleDuel::updateStatus()
+{/*
+    if(players[0] && players[1])
+    {
+        netServer->state = NetServer::State::FULL;
+        printf("server pieno\n");
+    }
+
+    else
+    {
+        netServer->state=NetServer::State::STOPPED;
+        printf("server vuoto\n");
+    }*/
+
+
+
+
+}
+
+
 void SingleDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 	if(!is_creater) {
 		if(dp->game && dp->type != 0xff) {
@@ -138,10 +159,15 @@ void SingleDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 		scwc.watch_count = observers.size();
 		netServer->SendPacketToPlayer(dp, STOC_HS_WATCH_CHANGE, scwc);
 	}
+	updateStatus();
 }
 void SingleDuel::LeaveGame(DuelPlayer* dp) {
+
+    printf("singleduel, leavegame\n");
 	if(dp == host_player) {
 		EndDuel();
+		    printf("host bbandona\n");
+
 		netServer->StopServer();
 	} else if(dp->type == NETPLAYER_TYPE_OBSERVER) {
 		observers.erase(dp);
@@ -192,6 +218,7 @@ void SingleDuel::LeaveGame(DuelPlayer* dp) {
 			netServer->StopServer();
 		}
 	}
+	updateStatus();
 }
 void SingleDuel::ToDuelist(DuelPlayer* dp) {
 	if(dp->type != NETPLAYER_TYPE_OBSERVER)
@@ -225,6 +252,7 @@ void SingleDuel::ToDuelist(DuelPlayer* dp) {
 	STOC_TypeChange sctc;
 	sctc.type = (dp == host_player ? 0x10 : 0) | dp->type;
 	netServer->SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
+	updateStatus();
 }
 void SingleDuel::ToObserver(DuelPlayer* dp) {
 	if(dp->type > 1)
@@ -244,6 +272,7 @@ void SingleDuel::ToObserver(DuelPlayer* dp) {
 	STOC_TypeChange sctc;
 	sctc.type = (dp == host_player ? 0x10 : 0) | dp->type;
 	netServer->SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
+	updateStatus();
 }
 void SingleDuel::PlayerReady(DuelPlayer* dp, bool is_ready) {
 	if(dp->type > 1)
@@ -272,6 +301,10 @@ void SingleDuel::PlayerReady(DuelPlayer* dp, bool is_ready) {
 		netServer->SendPacketToPlayer(players[1 - dp->type], STOC_HS_PLAYER_CHANGE, scpc);
 	for(auto pit = observers.begin(); pit != observers.end(); ++pit)
 		netServer->SendPacketToPlayer(*pit, STOC_HS_PLAYER_CHANGE, scpc);
+
+
+
+
 }
 void SingleDuel::PlayerKick(DuelPlayer* dp, unsigned char pos) {
 	if(pos > 1 || dp != host_player || dp == players[pos] || !players[pos])
@@ -309,7 +342,10 @@ void SingleDuel::StartDuel(DuelPlayer* dp) {
 	if(!ready[0] || !ready[1])
 		return;
 	netServer->StopListen();
+	netServer->clientStarted();
 	//netServer->StopBroadcast();
+
+	printf("partita avviata\n");
 	netServer->SendPacketToPlayer(players[0], STOC_DUEL_START);
 	netServer->ReSendToPlayer(players[1]);
 	for(auto oit = observers.begin(); oit != observers.end(); ++oit) {
@@ -322,6 +358,9 @@ void SingleDuel::StartDuel(DuelPlayer* dp) {
 	hand_result[1] = 0;
 	players[0]->state = CTOS_HAND_RESULT;
 	players[1]->state = CTOS_HAND_RESULT;
+	time_elapsed = 0;
+	last_response=0xff;
+
 }
 void SingleDuel::HandResult(DuelPlayer* dp, unsigned char res) {
 	if(res > 3)
@@ -1321,6 +1360,9 @@ void SingleDuel::EndDuel() {
 	memcpy(pbuf, &last_replay.pheader, sizeof(ReplayHeader));
 	pbuf += sizeof(ReplayHeader);
 	memcpy(pbuf, last_replay.comp_data, last_replay.comp_size);
+
+	printf("singleduel, endduel\n");
+
 	netServer->SendBufferToPlayer(players[0], STOC_REPLAY, replaybuf, sizeof(ReplayHeader) + last_replay.comp_size);
 	netServer->ReSendToPlayer(players[1]);
 	for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1471,8 +1513,17 @@ int SingleDuel::MessageHandler(long fduel, int type) {
 }
 void SingleDuel::SingleTimer(evutil_socket_t fd, short events, void* arg) {
 	SingleDuel* sd = static_cast<SingleDuel*>(arg);
-	sd->time_elapsed++;
+
+	printf("tempo passato ignorato\n");
+
+
+    printf("secondi passati: %d su %d\n, last %d\n",sd->time_elapsed,sd->time_limit[sd->last_response],sd->last_response);
+	if(sd->netServer->state != NetServer::State::PLAYING)
+        return;
+
+        sd->time_elapsed++;
 	if(sd->time_elapsed >= sd->time_limit[sd->last_response]) {
+	    printf("tempo scaduto veramente\n");
 		unsigned char wbuf[3];
 		uint32 player = sd->last_response;
 		wbuf[0] = MSG_WIN;

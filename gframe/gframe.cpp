@@ -2,6 +2,8 @@
 #include "game.h"
 #include "data_manager.h"
 #include <event2/thread.h>
+#include "GameServer.h"
+
 
 int enable_log = 0;
 bool exit_on_return = false;
@@ -20,6 +22,7 @@ int main(int argc, char* argv[]) {
 	ygo::mainGame = &_game;
 	if(!ygo::mainGame->Initialize())
 		return 0;
+
 
 	for(int i = 1; i < argc; ++i) {
 		/*command line args:

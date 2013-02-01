@@ -35,7 +35,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case BUTTON_JOIN_HOST: {
                 GameServer* gameServer = new GameServer();
 				if(!gameServer->StartServer(9999))
-					break;
+					;
 
 
 				char ip[20];

@@ -22,7 +22,6 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="GameServer.cpp" />
 		<Unit filename="GameServer.h" />
 		<Unit filename="gframe/CGUIButton.h" />
 		<Unit filename="gframe/CGUIEditBox.cpp" />
@@ -802,6 +801,7 @@
 		<Unit filename="ocgcore/processor.cpp" />
 		<Unit filename="ocgcore/scriptlib.cpp" />
 		<Unit filename="ocgcore/scriptlib.h" />
+		<Unit filename="server/GameServer.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

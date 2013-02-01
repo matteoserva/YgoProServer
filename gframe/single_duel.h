@@ -11,7 +11,7 @@ class SingleDuel: public DuelMode {
 public:
 
 
-
+    void updateStatus();
 	SingleDuel(bool is_match);
 	virtual ~SingleDuel();
 	virtual void Chat(DuelPlayer* dp, void* pdata, int len);

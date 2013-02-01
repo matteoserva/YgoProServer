@@ -23,16 +23,21 @@ private:
 	 unsigned short last_sent;
 
 public:
+    enum State {STOPPED,FULL,PLAYING};
+    State state;
     GameServer* gameServer;
     NetServer();
+
+
+
 	 bool StartServer(unsigned short port);
 	 bool StartBroadcast();
 	 void StopServer();
 	 void StopBroadcast();
 	 void StopListen();
 
-
-
+    void clientStarted();
+         void createGame();
 	 void BroadcastEvent(evutil_socket_t fd, short events, void* arg);
 	 static void ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx);
 	 static void ServerAcceptError(evconnlistener *listener, void* ctx);

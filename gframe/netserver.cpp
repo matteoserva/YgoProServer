@@ -13,17 +13,38 @@ namespace ygo {
         duel_mode = 0;
         last_sent = 0;
 
+        createGame();
 
 
-        duel_mode = new TagDuel();
-			duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
+        //
+    }
+void NetServer::clientStarted()
+{
+      state = PLAYING;
+
+
+}
+void NetServer::createGame()
+{
+        net_evbase = event_base_new();
+        duel_mode = new SingleDuel(false);
+            duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
+
+        Thread::NewThread(ServerThread, this);
+
         BufferIO::CopyWStr(L"", duel_mode->name, 20);
 		BufferIO::CopyWStr(L"", duel_mode->pass, 20);
 
 		HostInfo info;
 		info.rule=0;
 		info.mode=0;
+		info.draw_count=1;
+		info.no_check_deck=false;
+		info.start_hand=5;
 		info.lflist=1;
+		info.time_limit=20;
+		info.start_lp=8000;
+		info.enable_priority=false;
 		unsigned int hash = 1;
 		for(auto lfit = deckManager._lfList.begin(); lfit != deckManager._lfList.end(); ++lfit) {
 			if(info.lflist == lfit->hash) {
@@ -34,32 +55,60 @@ namespace ygo {
 		if(hash == 1)
 			info.lflist = deckManager._lfList[0].hash;
 		duel_mode->host_info = info;
-
-    }
-
+		duel_mode->setNetServer(this);
+}
 void NetServer::DisconnectPlayer(DuelPlayer* dp) {
     gameServer->DisconnectPlayer(dp);
 }
+int NetServer::ServerThread(void* parama) {
+    NetServer* that = (NetServer*)parama;
+
+    sleep(1);
+    printf("sono serverthread netserver\n");
+    timeval timeout = {0, 0};
+
+   event* ev1 = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, NULL, NULL);
+
+	event_base_dispatch(that->net_evbase);
+
+
+    printf("netserver thread terminato\n");
+    	if(that->duel_mode){
+		that->duel_mode->EndDuel();
+		event_free(that->duel_mode->etimer);
+		delete that->duel_mode;
+
+	}
+	event_base_free(that->net_evbase);
+	that->createGame();
+
+
+	return 0;
+}
+
 
 
 void NetServer::StopListen()
 {
 
+    //event_base_loopexit(net_evbase, 0);
     //TODO this.state = stopped
 }
 
 
 
 void NetServer::StopServer() {
-
-	if(duel_mode){
-		//duel_mode->EndDuel();
-		//event_free(duel_mode->etimer);
-		//delete duel_mode;
-		//duel_mode=0;
-	}
+    if(net_evbase)
+		{
+            event_base_loopexit(net_evbase, 0);
 
 
+		}
+		printf("server stoppato\n");
+
+	printf("netserver server stoppato");
+    state = STOPPED;
+       // createGame();
 }
 
 
