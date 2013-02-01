@@ -802,6 +802,9 @@
 		<Unit filename="ocgcore/scriptlib.cpp" />
 		<Unit filename="ocgcore/scriptlib.h" />
 		<Unit filename="server/GameServer.cpp" />
+		<Unit filename="server/Main.cpp" />
+		<Unit filename="server/RoomManager.cpp" />
+		<Unit filename="server/RoomManager.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

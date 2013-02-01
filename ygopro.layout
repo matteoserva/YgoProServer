@@ -4,28 +4,61 @@
 	<File name="GameServer.h" open="1" top="0" tabpos="4">
 		<Cursor position="515" topLine="1" />
 	</File>
-	<File name="gframe/menu_handler.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="1109" topLine="22" />
+	<File name="gframe/COSOperator.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="4545" topLine="178" />
 	</File>
-	<File name="gframe/netserver.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="834" topLine="39" />
+	<File name="gframe/client_field.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="170" topLine="45" />
 	</File>
-	<File name="gframe/netserver.h" open="1" top="0" tabpos="3">
-		<Cursor position="648" topLine="15" />
+	<File name="gframe/client_field.h" open="0" top="0" tabpos="0">
+		<Cursor position="297" topLine="7" />
+	</File>
+	<File name="gframe/deck_manager.cpp" open="1" top="0" tabpos="10">
+		<Cursor position="109" topLine="152" />
+	</File>
+	<File name="gframe/game.cpp" open="1" top="1" tabpos="8">
+		<Cursor position="12151" topLine="360" />
+	</File>
+	<File name="gframe/game.h" open="1" top="0" tabpos="9">
+		<Cursor position="76" topLine="4" />
+	</File>
+	<File name="gframe/gframe.cpp" open="1" top="0" tabpos="7">
+		<Cursor position="511" topLine="14" />
+	</File>
+	<File name="gframe/menu_handler.cpp" open="0" top="0" tabpos="2">
+		<Cursor position="1005" topLine="21" />
+	</File>
+	<File name="gframe/netserver.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="2408" topLine="102" />
+	</File>
+	<File name="gframe/netserver.h" open="1" top="0" tabpos="2">
+		<Cursor position="717" topLine="16" />
 	</File>
 	<File name="gframe/network.h" open="0" top="0" tabpos="0">
 		<Cursor position="2015" topLine="105" />
 	</File>
-	<File name="gframe/single_duel.cpp" open="1" top="0" tabpos="5">
-		<Cursor position="50160" topLine="1464" />
+	<File name="gframe/single_duel.cpp" open="1" top="0" tabpos="11">
+		<Cursor position="4764" topLine="157" />
 	</File>
 	<File name="gframe/single_duel.h" open="0" top="0" tabpos="0">
 		<Cursor position="156" topLine="9" />
 	</File>
+	<File name="gframe/single_mode.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="0" topLine="39" />
+	</File>
 	<File name="gframe/tag_duel.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="54790" topLine="1558" />
 	</File>
-	<File name="server/GameServer.cpp" open="1" top="0" tabpos="4">
-		<Cursor position="4343" topLine="153" />
+	<File name="server/GameServer.cpp" open="1" top="0" tabpos="5">
+		<Cursor position="3946" topLine="39" />
+	</File>
+	<File name="server/Main.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="24" topLine="0" />
+	</File>
+	<File name="server/RoomManager.cpp" open="1" top="0" tabpos="3">
+		<Cursor position="618" topLine="11" />
+	</File>
+	<File name="server/RoomManager.h" open="1" top="0" tabpos="4">
+		<Cursor position="103" topLine="0" />
 	</File>
 </CodeBlocks_layout_file>

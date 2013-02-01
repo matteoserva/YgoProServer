@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 	if(!ygo::mainGame->Initialize())
 		return 0;
 
-	                ygo::GameServer* gameServer = new ygo::GameServer();
+                ygo::GameServer* gameServer = new ygo::GameServer();
 				if(!gameServer->StartServer(9999))
 
 

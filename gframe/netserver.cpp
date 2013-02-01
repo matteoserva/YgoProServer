@@ -80,10 +80,11 @@ int NetServer::ServerThread(void* parama) {
    event* ev1 = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, ev1);
     event_add(ev1, &timeout);
 	event_base_dispatch(that->net_evbase);
-
+    event_del(ev1);
     printf("netserver thread terminato\n");
     	if(that->duel_mode){
 		that->duel_mode->EndDuel();
+		event_del(that->duel_mode->etimer);
 		event_free(that->duel_mode->etimer);
 		delete that->duel_mode;
 
@@ -111,7 +112,7 @@ void NetServer::StopListen()
 void NetServer::StopServer() {
     if(net_evbase)
 		{
-            event_base_loopexit(net_evbase, 0);
+                //event_base_loopexit(net_evbase, 0);
 
 
 		}

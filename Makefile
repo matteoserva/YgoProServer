@@ -16,10 +16,11 @@ OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 
 
 # include directories
-INCLUDES =  -I /usr/include/lua5.2/ -I /usr/include/irrlicht/ -I /usr/include/freetype2/ -I $(IRRLICHT_SOURCE_DIR) -I ./ocgcore/ -I ./gframe/ -I ./server/
+INCLUDES =  -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I $(IRRLICHT_SOURCE_DIR) -I ./ocgcore/ -I ./gframe/ -I ./server/
+INCLUDES+=  -I /usr/include/irrlicht/
 
 # C compiler flags (-g -O2 -Wall)
-CCFLAGS = -std=c++0x -O0 -g
+CCFLAGS = -std=c++0x -O3 
 
 # compiler
 CC = gcc

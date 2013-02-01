@@ -142,6 +142,7 @@ void GameServer::ServerEchoEvent(bufferevent* bev, short events, void* ctx) {
 int GameServer::ServerThread(void* parama) {
     GameServer*that = (GameServer*)parama;
 	event_base_dispatch(that->net_evbase);
+
 	for(auto bit = that->users.begin(); bit != that->users.end(); ++bit) {
 		bufferevent_disable(bit->first, EV_READ);
 		bufferevent_free(bit->first);
@@ -164,6 +165,7 @@ int GameServer::ServerThread(void* parama) {
 void GameServer::DisconnectPlayer(DuelPlayer* dp) {
 	auto bit = users.find(dp->bev);
 	if(bit != users.end()) {
+	    dp->netServer=NULL;
 		bufferevent_flush(dp->bev, EV_WRITE, BEV_FLUSH);
 		bufferevent_disable(dp->bev, EV_READ);
 		bufferevent_free(dp->bev);

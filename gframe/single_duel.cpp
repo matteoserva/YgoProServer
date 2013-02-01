@@ -164,11 +164,13 @@ void SingleDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 void SingleDuel::LeaveGame(DuelPlayer* dp) {
 
     printf("singleduel, leavegame\n");
+    dp->game=NULL;
 	if(dp == host_player) {
+        players[0]=0;
 		EndDuel();
 		    printf("host bbandona\n");
 
-		netServer->StopServer();
+
 	} else if(dp->type == NETPLAYER_TYPE_OBSERVER) {
 		observers.erase(dp);
 		if(!pduel) {
@@ -217,8 +219,12 @@ void SingleDuel::LeaveGame(DuelPlayer* dp) {
 				netServer->ReSendToPlayer(*oit);
 			//if(play)
 			//netServer->StopServer();
+			players[1]=0;
 		}
 	}
+    if(!players[1] && !players[0])
+        netServer->StopServer();
+        else
 	updateStatus();
 }
 void SingleDuel::ToDuelist(DuelPlayer* dp) {
@@ -526,7 +532,7 @@ void SingleDuel::DuelEndProc() {
 		netServer->ReSendToPlayer(players[1]);
 		for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 			netServer->ReSendToPlayer(*oit);
-		netServer->StopServer();
+		//netServer->StopServer();
 	} else {
 		int winc[3] = {0, 0, 0};
 		for(int i = 0; i < duel_count; ++i)
