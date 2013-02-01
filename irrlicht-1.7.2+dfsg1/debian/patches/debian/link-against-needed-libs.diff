@@ -1,0 +1,28 @@
+From: Christoph Egger <Christoph.Egger@gmx.de>
+Subject: [PATCH] debian/link-against-needed-libs
+
+There are quite some libraries irrlicht needs but does not link
+against. This patch makes irrlicht link correctly against all the
+needed libraries.
+
+Signed-off-by: Christoph Egger <Christoph.Egger@gmx.de>
+
+---
+ source/Irrlicht/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/source/Irrlicht/Makefile b/source/Irrlicht/Makefile
+index 9e177d0..ee81845 100644
+--- a/source/Irrlicht/Makefile
++++ b/source/Irrlicht/Makefile
+@@ -82,7 +82,7 @@ LIB_PATH = ../../lib/$(SYSTEM)
+ INSTALL_DIR = /usr/local/lib
+ sharedlib install: SHARED_LIB = libIrrlicht.so
+ staticlib sharedlib: LDFLAGS += --no-export-all-symbols --add-stdcall-alias
+-sharedlib: LDFLAGS += -L/usr/X11R6/lib$(LIBSELECT) -lGL -lXxf86vm
++sharedlib: LDFLAGS += -L/usr/X11R6/lib$(LIBSELECT) -lGL -lXxf86vm -lX11 -lz -lpng -ljpeg -lbz2
+ staticlib sharedlib: CXXINCS += -I/usr/X11R6/include
+ 
+ #OSX specific options
+-- 
+tg: (d80abc9..) debian/link-against-needed-libs (depends on: debian/use-system-libs.diff)
