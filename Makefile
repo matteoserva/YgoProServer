@@ -29,7 +29,7 @@ CPP = g++
 LIBS = 
 
 # compile flags
-LDFLAGS = -levent -llua5.2 -lGL -lGLU -lsqlite3 -lIrrlicht -lfreetype  -levent_pthreads
+LDFLAGS = -levent -llua5.2 -lGL -lGLU -lsqlite3  -lfreetype  -levent_pthreads -lIrrlicht
 
 default: $(OUT)
 

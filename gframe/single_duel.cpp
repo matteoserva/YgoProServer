@@ -215,7 +215,8 @@ void SingleDuel::LeaveGame(DuelPlayer* dp) {
 			netServer->ReSendToPlayer(players[1]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 				netServer->ReSendToPlayer(*oit);
-			netServer->StopServer();
+			//if(play)
+			//netServer->StopServer();
 		}
 	}
 	updateStatus();

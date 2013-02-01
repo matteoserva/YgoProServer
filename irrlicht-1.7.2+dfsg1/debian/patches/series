@@ -1,6 +1,0 @@
-debian/arch-support.diff -p1
-debian/correct-install.diff -p1
-debian/link-against-needed-libs.diff -p1
-debian/remove-svn-soname.diff -p1
-debian/use-system-libs.diff.diff -p1
-debian/linker-options.diff -p1

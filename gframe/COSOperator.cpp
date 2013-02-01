@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2010 Nikolaus Gebhardt
+/*// Copyright (C) 2002-2010 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -209,3 +209,4 @@ bool COSOperator::getSystemMemory(u32* Total, u32* Avail) const
 
 
 } // end namespace
+*/
