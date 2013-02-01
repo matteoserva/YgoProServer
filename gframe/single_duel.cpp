@@ -171,7 +171,7 @@ void SingleDuel::LeaveGame(DuelPlayer* dp) {
 		    printf("host bbandona\n");
 
 
-	} else if(dp->type == NETPLAYER_TYPE_OBSERVER) {
+	} if(dp->type == NETPLAYER_TYPE_OBSERVER) {
 		observers.erase(dp);
 		if(!pduel) {
 			STOC_HS_WatchChange scwc;

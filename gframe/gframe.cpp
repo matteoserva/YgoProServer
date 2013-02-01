@@ -3,8 +3,6 @@
 #include "data_manager.h"
 #include <event2/thread.h>
 #include "GameServer.h"
-
-
 int enable_log = 0;
 bool exit_on_return = false;
 
@@ -18,10 +16,10 @@ int main(int argc, char* argv[]) {
 #else
 	evthread_use_pthreads();
 #endif //_WIN32
-
-
 	ygo::Game _game;
 	ygo::mainGame = &_game;
+	//if(!ygo::mainGame->Initialize())
+		//return 0;
 
 
 	if(!ygo::mainGame->Initialize())
@@ -32,12 +30,41 @@ int main(int argc, char* argv[]) {
 
 
                     ;
-
-                    while(1)
+while(1)
                         sleep(1);
 
 
-	//ygo::mainGame->MainLoop();
+	for(int i = 1; i < argc; ++i) {
+		/*command line args:
+		 * -j: join host (host info from system.conf)
+		 * -d: deck edit
+		 * -r: replay */
+		if(argv[i][0] == '-' && argv[i][1] == 'e') {
+			ygo::dataManager.LoadDB(&argv[i][2]);
+		} else if(!strcmp(argv[i], "-j") || !strcmp(argv[i], "-d") || !strcmp(argv[i], "-r")) {
+			exit_on_return = true;
+			irr::SEvent event;
+			event.EventType = irr::EET_GUI_EVENT;
+			event.GUIEvent.EventType = irr::gui::EGET_BUTTON_CLICKED;
+			if(!strcmp(argv[i], "-j")) {
+				event.GUIEvent.Caller = ygo::mainGame->btnLanMode;
+				ygo::mainGame->device->postEventFromUser(event);
+				//TODO: wait for wLanWindow show. if network connection faster than wLanWindow, wLanWindow will still show on duel scene.
+				event.GUIEvent.Caller = ygo::mainGame->btnJoinHost;
+				ygo::mainGame->device->postEventFromUser(event);
+			} else if(!strcmp(argv[i], "-d")) {
+				event.GUIEvent.Caller = ygo::mainGame->btnDeckEdit;
+				ygo::mainGame->device->postEventFromUser(event);
+			} else if(!strcmp(argv[i], "-r")) {
+				event.GUIEvent.Caller = ygo::mainGame->btnReplayMode;
+				ygo::mainGame->device->postEventFromUser(event);
+				ygo::mainGame->lstReplayList->setSelected(0);
+				event.GUIEvent.Caller = ygo::mainGame->btnLoadReplay;
+				ygo::mainGame->device->postEventFromUser(event);
+			}
+		}
+	}
+	ygo::mainGame->MainLoop();
 #ifdef _WIN32
 	WSACleanup();
 #else

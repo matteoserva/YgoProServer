@@ -22,7 +22,7 @@ Game* mainGame;
 
 bool Game::Initialize() {
 	srand(time(0));
-	LoadConfig();
+	LoadConfig();/*
 	irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
 	params.AntiAlias = gameConf.antialias;
 	if(gameConf.use_d3d)
@@ -32,7 +32,7 @@ bool Game::Initialize() {
 	params.WindowSize = irr::core::dimension2d<u32>(1024, 640);
 	device = irr::createDeviceEx(params);
 	if(!device)
-		return false;
+		return false;*/
 	linePattern = 0x0f0f;
 	waitFrame = 0;
 	signalFrame = 0;
@@ -46,16 +46,16 @@ bool Game::Initialize() {
 	memset(&dInfo, 0, sizeof(DuelInfo));
 	memset(chatTiming, 0, sizeof(chatTiming));
 	deckManager.LoadLFList();
-	driver = device->getVideoDriver();
-	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
-	imageManager.SetDevice(device);
-	if(!imageManager.Initial())
-		return false;
+	//driver = device->getVideoDriver();
+	//driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
+	//imageManager.SetDevice(device);
+	//if(!imageManager.Initial())
+		//return false;
 	if(!dataManager.LoadDB("cards.cdb"))
 		return false;
 	if(!dataManager.LoadStrings("strings.conf"))
 		return false;
-	env = device->getGUIEnvironment();
+	/*env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 	adFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 12);
 	lpcFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 48);
@@ -483,7 +483,7 @@ bool Game::Initialize() {
 		SColor col = env->getSkin()->getColor((EGUI_DEFAULT_COLOR)i);
 		col.setAlpha(224);
 		env->getSkin()->setColor((EGUI_DEFAULT_COLOR)i, col);
-	}
+	}*/
 	return true;
 }
 void Game::MainLoop() {
