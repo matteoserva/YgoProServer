@@ -19,7 +19,7 @@ OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 INCLUDES =  -I /usr/include/lua5.2/ -I /usr/include/irrlicht/ -I /usr/include/freetype2/ -I $(IRRLICHT_SOURCE_DIR) -I ./ocgcore/ -I ./gframe/ -I ./server/
 
 # C compiler flags (-g -O2 -Wall)
-CCFLAGS = -std=c++0x
+CCFLAGS = -std=c++0x -O0 -g
 
 # compiler
 CC = gcc

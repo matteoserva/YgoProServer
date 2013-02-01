@@ -8,11 +8,11 @@
 #include <set>
 #include <unordered_map>
 
-namespace ygo {
 
+namespace ygo {
+class GameServer;
 class NetServer {
 private:
-	std::unordered_map<bufferevent*, DuelPlayer> users;
 	 unsigned short server_port;
 	 event_base* net_evbase;
 	 event* broadcast_ev;
@@ -23,13 +23,13 @@ private:
 	 unsigned short last_sent;
 
 public:
+    GameServer* gameServer;
     NetServer();
 	 bool StartServer(unsigned short port);
 	 bool StartBroadcast();
 	 void StopServer();
 	 void StopBroadcast();
 	 void StopListen();
-	 DuelPlayer* InsertPlayer(DuelPlayer &dp);
 
 
 

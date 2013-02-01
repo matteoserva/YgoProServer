@@ -1,7 +1,7 @@
 #include "netserver.h"
 #include "single_duel.h"
 #include "tag_duel.h"
-
+#include "GameServer.h"
 namespace ygo {
 
     NetServer::NetServer()
@@ -14,183 +14,55 @@ namespace ygo {
         last_sent = 0;
 
 
+
+        duel_mode = new TagDuel();
+			duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
+        BufferIO::CopyWStr(L"", duel_mode->name, 20);
+		BufferIO::CopyWStr(L"", duel_mode->pass, 20);
+
+		HostInfo info;
+		info.rule=0;
+		info.mode=0;
+		info.lflist=1;
+		unsigned int hash = 1;
+		for(auto lfit = deckManager._lfList.begin(); lfit != deckManager._lfList.end(); ++lfit) {
+			if(info.lflist == lfit->hash) {
+				hash = info.lflist;
+				break;
+			}
+		}
+		if(hash == 1)
+			info.lflist = deckManager._lfList[0].hash;
+		duel_mode->host_info = info;
+
     }
 
-DuelPlayer* NetServer::InsertPlayer(DuelPlayer &dp)
+void NetServer::DisconnectPlayer(DuelPlayer* dp) {
+    gameServer->DisconnectPlayer(dp);
+}
+
+
+void NetServer::StopListen()
 {
 
-
-	users[dp.bev] = dp;
-	bufferevent_setcb(dp.bev, ServerEchoRead, NULL, ServerEchoEvent, this);
-	bufferevent_enable(dp.bev, EV_READ);
-    return &(users[dp.bev]);
-
+    //TODO this.state = stopped
 }
 
-bool NetServer::StartServer(unsigned short port) {
-	if(net_evbase)
-		return false;
-	net_evbase = event_base_new();
-	if(!net_evbase)
-		return false;
-	sockaddr_in sin;
-	memset(&sin, 0, sizeof(sin));
-	server_port = port;
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = htonl(INADDR_ANY);
-	sin.sin_port = htons(port);
-	listener = evconnlistener_new_bind(net_evbase, ServerAccept, this,
-	                                   LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, -1, (sockaddr*)&sin, sizeof(sin));
-	if(!listener) {
-		event_base_free(net_evbase);
-		net_evbase = 0;
-		return false;
-	}
-	evconnlistener_set_error_cb(listener, ServerAcceptError);
-	Thread::NewThread(ServerThread, this);
-	return true;
-}
-bool NetServer::StartBroadcast() {
-	if(!net_evbase)
-		return false;
-	SOCKET udp = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	BOOL opt = TRUE;
-	setsockopt(udp, SOL_SOCKET, SO_BROADCAST, (const char*)&opt, sizeof(BOOL));
-	sockaddr_in addr;
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(7920);
-	addr.sin_addr.s_addr = 0;
-	if(bind(udp, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
-		closesocket(udp);
-		return false;
-	}
-	//broadcast_ev = event_new(net_evbase, udp, EV_READ | EV_PERSIST, BroadcastEvent, NULL);
-	//event_add(broadcast_ev, NULL);
-	return true;
-}
+
+
 void NetServer::StopServer() {
-	if(!net_evbase)
-		return;
-	if(duel_mode)
-		duel_mode->EndDuel();
-	event_base_loopexit(net_evbase, 0);
-}
-void NetServer::StopBroadcast() {
-	if(!net_evbase || !broadcast_ev)
-		return;
-	event_del(broadcast_ev);
-	evutil_socket_t fd;
-	event_get_assignment(broadcast_ev, 0, &fd, 0, 0, 0);
-	evutil_closesocket(fd);
-	event_free(broadcast_ev);
-	broadcast_ev = 0;
-}
-void NetServer::StopListen() {
-	evconnlistener_disable(listener);
-	StopBroadcast();
-}
-void NetServer::BroadcastEvent(evutil_socket_t fd, short events, void* arg) {
-	sockaddr_in bc_addr;
-	socklen_t sz = sizeof(sockaddr_in);
-	char buf[256];
-	int ret = recvfrom(fd, buf, 256, 0, (sockaddr*)&bc_addr, &sz);
-	if(ret == -1)
-		return;
-	HostRequest* pHR = (HostRequest*)buf;
-	if(pHR->identifier == NETWORK_CLIENT_ID) {
-		SOCKADDR_IN sockTo;
-		sockTo.sin_addr.s_addr = bc_addr.sin_addr.s_addr;
-		sockTo.sin_family = AF_INET;
-		sockTo.sin_port = htons(7921);
-		HostPacket hp;
-		hp.identifier = NETWORK_SERVER_ID;
-		hp.port = server_port;
-		hp.version = PRO_VERSION;
-		hp.host = duel_mode->host_info;
-		BufferIO::CopyWStr(duel_mode->name, hp.name, 20);
-		sendto(fd, (const char*)&hp, sizeof(HostPacket), 0, (sockaddr*)&sockTo, sizeof(sockTo));
+
+	if(duel_mode){
+		//duel_mode->EndDuel();
+		//event_free(duel_mode->etimer);
+		delete duel_mode;
+		duel_mode=0;
 	}
-}
-void NetServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx) {
-	NetServer* that = (NetServer*)ctx;
-	bufferevent* bev = bufferevent_socket_new(that->net_evbase, fd, BEV_OPT_CLOSE_ON_FREE);
-	DuelPlayer dp;
-	dp.name[0] = 0;
-	dp.type = 0xff;
-	dp.bev = bev;
-	that->users[bev] = dp;
-	bufferevent_setcb(bev, ServerEchoRead, NULL, ServerEchoEvent, ctx);
-	bufferevent_enable(bev, EV_READ);
-}
-void NetServer::ServerAcceptError(evconnlistener* listener, void* ctx) {
-    NetServer* that = (NetServer*)ctx;
-	event_base_loopexit(that->net_evbase, 0);
-}
-void NetServer::ServerEchoRead(bufferevent *bev, void *ctx) {
-    NetServer* that = (NetServer*)ctx;
 
 
-	evbuffer* input = bufferevent_get_input(bev);
-	size_t len = evbuffer_get_length(input);
-	unsigned short packet_len = 0;
-	while(true) {
-		if(len < 2)
-			return;
-		evbuffer_copyout(input, &packet_len, 2);
-		if(len < packet_len + 2)
-			return;
-		evbuffer_remove(input, that->net_server_read, packet_len + 2);
-		if(packet_len)
-			that->HandleCTOSPacket(&(that->users[bev]), &(that->net_server_read[2]), packet_len);
-		len -= packet_len + 2;
-	}
 }
-void NetServer::ServerEchoEvent(bufferevent* bev, short events, void* ctx) {
-    NetServer* that = (NetServer*)ctx;
-	if (events & (BEV_EVENT_EOF | BEV_EVENT_ERROR)) {
-		DuelPlayer* dp = &(that->users[bev]);
-		DuelMode* dm = dp->game;
-		if(dm)
-			dm->LeaveGame(dp);
-		else that->DisconnectPlayer(dp);
-	}
-}
-int NetServer::ServerThread(void* parama) {
-    NetServer*that = (NetServer*)parama;
-	event_base_dispatch(that->net_evbase);
-	for(auto bit = that->users.begin(); bit != that->users.end(); ++bit) {
-		bufferevent_disable(bit->first, EV_READ);
-		bufferevent_free(bit->first);
-	}
-	that->users.clear();
-	evconnlistener_free(that->listener);
-	that->listener = 0;
-	if(that->broadcast_ev) {
-		evutil_socket_t fd;
-		event_get_assignment(that->broadcast_ev, 0, &fd, 0, 0, 0);
-		evutil_closesocket(fd);
-		event_free(that->broadcast_ev);
-		that->broadcast_ev = 0;
-	}
-	if(that->duel_mode) {
-		event_free(that->duel_mode->etimer);
-		delete that->duel_mode;
-	}
-	that->duel_mode = 0;
-	event_base_free(that->net_evbase);
-	that->net_evbase = 0;
-	return 0;
-}
-void NetServer::DisconnectPlayer(DuelPlayer* dp) {
-	auto bit = users.find(dp->bev);
-	if(bit != users.end()) {
-		bufferevent_flush(dp->bev, EV_WRITE, BEV_FLUSH);
-		bufferevent_disable(dp->bev, EV_READ);
-		bufferevent_free(dp->bev);
-		users.erase(bit);
-	}
-}
+
+
 void NetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) {
 	char* pdata = data;
 	unsigned char pktType = BufferIO::ReadUInt8(pdata);
@@ -273,7 +145,6 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) {
 		BufferIO::CopyWStr(pkt->name, duel_mode->name, 20);
 		BufferIO::CopyWStr(pkt->pass, duel_mode->pass, 20);
 		duel_mode->JoinGame(dp, 0, true);
-		StartBroadcast();
 		break;
 	}
 	case CTOS_JOIN_GAME: {
