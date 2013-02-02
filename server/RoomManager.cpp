@@ -32,7 +32,7 @@ int i = 0;
             i++;
 	   }
 
-        if(elencoServer.size() >= 50)
+        if(elencoServer.size() >= 500)
         {
             return NULL;
 

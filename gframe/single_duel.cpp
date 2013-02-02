@@ -45,6 +45,10 @@ void SingleDuel::updateStatus()
     {
         netServer->state = NetServer::State::FULL;
         printf("server pieno\n");
+
+
+
+
     }
 
     else
@@ -309,7 +313,8 @@ void SingleDuel::PlayerReady(DuelPlayer* dp, bool is_ready) {
 	for(auto pit = observers.begin(); pit != observers.end(); ++pit)
 		netServer->SendPacketToPlayer(*pit, STOC_HS_PLAYER_CHANGE, scpc);
 
-
+    if(players[0] && players[1] && ready[0] && ready[1])
+        StartDuel(players[0]);
 
 
 }

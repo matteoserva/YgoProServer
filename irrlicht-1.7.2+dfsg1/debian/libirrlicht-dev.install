@@ -1,0 +1,4 @@
+include/* usr/include/irrlicht
+usr/lib/lib*.a
+usr/lib/lib*.so
+

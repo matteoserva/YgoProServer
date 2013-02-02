@@ -1,0 +1,16 @@
+Description: Drop unknown linker options.
+Bug-Debian: 628282
+Bug-Ubuntu: 771053
+Author: Matthias Klose <doko@ubuntu.com>
+Origin: vendor
+Last-Update: 2011-09-15
+--- a/source/Irrlicht/Makefile
++++ b/source/Irrlicht/Makefile
+@@ -81,7 +81,6 @@
+ LIB_PATH = ../../lib/$(SYSTEM)
+ INSTALL_DIR = /usr/local/lib
+ sharedlib install: SHARED_LIB = libIrrlicht.so
+-staticlib sharedlib: LDFLAGS += --no-export-all-symbols --add-stdcall-alias
+ sharedlib: LDFLAGS += -L/usr/X11R6/lib$(LIBSELECT) -lGL -lXxf86vm -lX11 -lz -lpng -ljpeg -lbz2
+ staticlib sharedlib: CXXINCS += -I/usr/X11R6/include
+ 

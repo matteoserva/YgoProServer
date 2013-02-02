@@ -47,6 +47,7 @@ void Game::DrawSelectionLine(irr::video::S3DVertex* vec, bool strip, int width, 
 	}
 }
 void Game::DrawBackGround() {
+    /*
 	static int selFieldAlpha = 255;
 	static int selFieldDAlpha = -10;
 	matrix4 im = irr::core::IdentityMatrix;
@@ -154,9 +155,9 @@ void Game::DrawBackGround() {
 		matManager.mSelField.DiffuseColor = selFieldAlpha << 24;
 		driver->setMaterial(matManager.mSelField);
 		driver->drawVertexPrimitiveList(&matManager.vFields[index], 4, matManager.iRectangle, 2);
-	}
+	}*/
 }
-void Game::DrawCards() {
+void Game::DrawCards() {/*
 	for(int p = 0; p < 2; ++p) {
 		for(int i = 0; i < 5; ++i)
 			if(dField.mzone[p][i])
@@ -176,9 +177,10 @@ void Game::DrawCards() {
 			DrawCard(dField.extra[p][i]);
 	}
 	for(auto cit = dField.overlay_cards.begin(); cit != dField.overlay_cards.end(); ++cit)
-		DrawCard(*cit);
+		DrawCard(*cit);*/
 }
 void Game::DrawCard(ClientCard* pcard) {
+    /*
 	driver->setTransform(irr::video::ETS_WORLD, pcard->mTransform);
 	if(pcard->aniFrame) {
 		if(pcard->is_moving) {
@@ -238,10 +240,10 @@ void Game::DrawCard(ClientCard* pcard) {
 		atk.setTranslation(pcard->curPos + vector3df(0, -atkdy / 4.0f - 0.35f, 0.05f));
 		driver->setTransform(irr::video::ETS_WORLD, atk);
 		driver->drawVertexPrimitiveList(matManager.vSymbol, 4, matManager.iRectangle, 2);
-	}
+	}*/
 }
 void Game::DrawMisc() {
-	static irr::core::vector3df act_rot(0, 0, 0);
+	/*static irr::core::vector3df act_rot(0, 0, 0);
 	irr::core::matrix4 im, ic, it;
 	act_rot.Z += 0.02;
 	im.setRotationRadians(act_rot);
@@ -416,10 +418,10 @@ void Game::DrawMisc() {
 	if(dField.remove[1].size()) {
 		numFont->draw(dataManager.GetNumString(dField.remove[1].size()), recti(386, 320, 443, 340), 0xff000000, true, false, 0);
 		numFont->draw(dataManager.GetNumString(dField.remove[1].size()), recti(386, 321, 445, 341), 0xffffff00, true, false, 0);
-	}
+	}*/
 }
 void Game::DrawGUI() {
-	if(imageLoading.size()) {
+	/*if(imageLoading.size()) {
 		std::map<irr::gui::CGUIImageButton*, int>::iterator mit;
 		for(mit = imageLoading.begin(); mit != imageLoading.end(); ++mit)
 			mit->first->setImage(imageManager.GetTexture(mit->second));
@@ -494,10 +496,10 @@ void Game::DrawGUI() {
 		} else
 			fadingList.erase(fthis);
 	}
-	env->drawAll();
+	env->drawAll();*/
 }
 void Game::DrawSpec() {
-	if(showcard) {
+	/*if(showcard) {
 		switch(showcard) {
 		case 1: {
 			driver->draw2DImage(imageManager.GetTexture(showcardcode), position2di(574, 150));
@@ -675,10 +677,10 @@ void Game::DrawSpec() {
 			textFont->draw(chatMsg[i].c_str(), rect<s32>(305, 595 - 20 * i, 1020, 615 - 20 * i), 0xff000000, false, false);
 			textFont->draw(chatMsg[i].c_str(), rect<s32>(306, 596 - 20 * i, 1021, 616 - 20 * i), chatColor[chatType[i]], false, false);
 		}
-	}
+	}*/
 }
 void Game::ShowElement(irr::gui::IGUIElement * win, int autoframe) {
-	FadingUnit fu;
+	/*FadingUnit fu;
 	fu.fadingSize = win->getRelativePosition();
 	for(auto fit = fadingList.begin(); fit != fadingList.end(); ++fit)
 		if(win == fit->guiFading)
@@ -706,9 +708,9 @@ void Game::ShowElement(irr::gui::IGUIElement * win, int autoframe) {
 	}
 	win->setRelativePosition(irr::core::recti(center.X, center.Y, 0, 0));
 	fadingList.push_back(fu);
-}
+*/}
 void Game::HideElement(irr::gui::IGUIElement * win, bool set_action) {
-	FadingUnit fu;
+	/*FadingUnit fu;
 	fu.fadingSize = win->getRelativePosition();
 	for(auto fit = fadingList.begin(); fit != fadingList.end(); ++fit)
 		if(win == fit->guiFading)
@@ -732,23 +734,24 @@ void Game::HideElement(irr::gui::IGUIElement * win, bool set_action) {
 		for(int i = 0; i < 5; ++i)
 			btnCardSelect[i]->setDrawImage(false);
 	}
-	fadingList.push_back(fu);
+	fadingList.push_back(fu);*/
 }
 void Game::PopupElement(irr::gui::IGUIElement * element, int hideframe) {
-	element->getParent()->bringToFront(element);
+	/*element->getParent()->bringToFront(element);
 	dField.panel = element;
 	env->setFocus(element);
 	if(!hideframe)
 		ShowElement(element);
 	else ShowElement(element, hideframe);
-}
+*/}
 void Game::WaitFrameSignal(int frame) {
-	frameSignal.Reset();
+	/*frameSignal.Reset();
 	signalFrame = frame;
-	frameSignal.Wait();
+	frameSignal.Wait();*/
 }
 void Game::DrawThumb(code_pointer cp, position2di pos, std::unordered_map<int, int>* lflist) {
-	const int width = 44; //standard pic size, maybe it should be defined in game.h
+
+	/*const int width = 44; //standard pic size, maybe it should be defined in game.h
 	const int height = 64;
 	int code = cp->first;
 	int lcode = cp->second.alias;
@@ -772,10 +775,10 @@ void Game::DrawThumb(code_pointer cp, position2di pos, std::unordered_map<int, i
 			driver->draw2DImage(imageManager.tLim, recti(pos.X, pos.Y, pos.X + 20, pos.Y + 20), recti(0, 64, 64, 128), 0, 0, true);
 			break;
 		}
-	}
+	}*/
 }
 void Game::DrawDeckBd() {
-	wchar_t textBuffer[32];
+	/*wchar_t textBuffer[32];
 	//main deck
 	driver->draw2DRectangle(recti(310, 137, 410, 157), 0x400000ff, 0x400000ff, 0x40000000, 0x40000000);
 	driver->draw2DRectangleOutline(recti(309, 136, 410, 157));
@@ -884,6 +887,6 @@ void Game::DrawDeckBd() {
 	}
 	if(deckBuilder.is_draging) {
 		DrawThumb(deckBuilder.draging_pointer, position2di(deckBuilder.dragx - 22, deckBuilder.dragy - 32), deckBuilder.filterList);
-	}
+	}*/
 }
 }

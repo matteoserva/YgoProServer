@@ -1,0 +1,25 @@
+From: Christoph Egger <Christoph.Egger@gmx.de>
+Subject: [PATCH] debian/remove-svn-soname
+
+Upstream Build System currently adds a -SVN suffix we don't want on
+our library name so this patch removes it.
+
+Signed-off-by: Christoph Egger <Christoph.Egger@gmx.de>
+
+---
+ source/Irrlicht/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/source/Irrlicht/Makefile b/source/Irrlicht/Makefile
+index 5dfc821..a2a77a9 100644
+--- a/source/Irrlicht/Makefile
++++ b/source/Irrlicht/Makefile
+@@ -1,5 +1,5 @@
+ VERSION_MAJOR = 1
+-VERSION_MINOR = 7
++VERSION_MINOR = 7a
+ VERSION_RELEASE = 2
+ VERSION = $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_RELEASE)
+ # Irrlicht Engine 1.7.2
+-- 
+tg: (0d87b60..) debian/remove-svn-soname (depends on: master)

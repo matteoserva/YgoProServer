@@ -42,9 +42,10 @@ void NetServer::createGame()
 		info.no_check_deck=false;
 		info.start_hand=5;
 		info.lflist=1;
-		info.time_limit=20;
+		info.time_limit=120;
 		info.start_lp=8000;
 		info.enable_priority=false;
+		info.no_shuffle_deck=false;
 		unsigned int hash = 1;
 		for(auto lfit = deckManager._lfList.begin(); lfit != deckManager._lfList.end(); ++lfit) {
 			if(info.lflist == lfit->hash) {
