@@ -59,7 +59,7 @@
 		<Cursor position="263" topLine="0" />
 	</File>
 	<File name="gframe/netserver.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="927" topLine="195" />
+		<Cursor position="927" topLine="26" />
 	</File>
 	<File name="gframe/netserver.h" open="0" top="0" tabpos="2">
 		<Cursor position="717" topLine="16" />
@@ -68,7 +68,7 @@
 		<Cursor position="2015" topLine="105" />
 	</File>
 	<File name="gframe/single_duel.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="11596" topLine="0" />
+		<Cursor position="4649" topLine="180" />
 	</File>
 	<File name="gframe/single_duel.h" open="0" top="0" tabpos="0">
 		<Cursor position="156" topLine="9" />
@@ -80,7 +80,7 @@
 		<Cursor position="369" topLine="0" />
 	</File>
 	<File name="server/GameServer.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="1833" topLine="3" />
+		<Cursor position="1833" topLine="199" />
 	</File>
 	<File name="server/Main.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="24" topLine="0" />

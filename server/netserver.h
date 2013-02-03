@@ -21,15 +21,16 @@ private:
 	 char net_server_read[0x2000];
 	 char net_server_write[0x2000];
 	 unsigned short last_sent;
-
+     int players;
 public:
-    enum State {STOPPED,FULL,PLAYING};
+
+    enum State {STOPPED,FULL,PLAYING,ZOMBIE};
     State state;
     GameServer* gameServer;
     NetServer();
 
 
-
+     void LeaveGame(DuelPlayer* dp);
 	 bool StartServer(unsigned short port);
 	 bool StartBroadcast();
 	 void StopServer();

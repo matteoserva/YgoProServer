@@ -59,7 +59,25 @@ void NetServer::createGame()
 		duel_mode->setNetServer(this);
 }
 void NetServer::DisconnectPlayer(DuelPlayer* dp) {
+    /*
+        This is called from DuelMode only.(singleduel and tagduel)
+
+
+    */
+
     gameServer->DisconnectPlayer(dp);
+            players--;
+			printf("giocatori connessi:%d\n",players);
+
+
+	if(!players)
+	{
+	    printf("server vuoto. addio\n");
+
+	    event_base_loopexit(net_evbase, 0);
+
+
+	}
 }
 
 
@@ -99,7 +117,25 @@ int NetServer::ServerThread(void* parama) {
 	return 0;
 }
 
+void NetServer::LeaveGame(DuelPlayer* dp)
+{
+    if(state != ZOMBIE && dp->game == duel_mode)
+    {
 
+        duel_mode->LeaveGame(dp);
+    }
+
+
+}
+
+void NetServer::StopBroadcast()
+{
+
+    //event_base_loopexit(net_evbase, 0);
+    //TODO this.state = stopped
+
+
+}
 
 void NetServer::StopListen()
 {
@@ -113,20 +149,24 @@ void NetServer::StopListen()
 void NetServer::StopServer() {
     if(net_evbase)
 		{
-                //event_base_loopexit(net_evbase, 0);
+                event_base_loopexit(net_evbase, 0);
 
 
 		}
 		printf("server stoppato\n");
 
 	printf("netserver server stoppato");
-    state = STOPPED;
+    state = ZOMBIE;
        // createGame();
 }
 
 
 void NetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) {
 	char* pdata = data;
+
+	if(state==ZOMBIE)
+        return;
+
 	unsigned char pktType = BufferIO::ReadUInt8(pdata);
 	if((pktType != CTOS_SURRENDER) && (pktType != CTOS_CHAT) && (dp->state == 0xff || (dp->state && dp->state != pktType)))
 		return;
@@ -212,12 +252,16 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) {
 	case CTOS_JOIN_GAME: {
 		if(!duel_mode)
 			break;
+			 players++;
+			printf("giocatori connessi:%d\n",players);
 		duel_mode->JoinGame(dp, pdata, false);
 		break;
 	}
 	case CTOS_LEAVE_GAME: {
 		if(!duel_mode)
 			break;
+			 players--;
+			printf("giocatori connessi:%d\n",players);
 		duel_mode->LeaveGame(dp);
 		break;
 	}
