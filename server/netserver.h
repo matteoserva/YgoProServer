@@ -11,7 +11,7 @@
 
 namespace ygo {
 class GameServer;
-class NetServer {
+class CMNetServer {
 private:
 	 unsigned short server_port;
 	 event_base* net_evbase;
@@ -30,7 +30,7 @@ public:
     enum State {STOPPED,FULL,PLAYING,ZOMBIE};
     State state;
     GameServer* gameServer;
-    NetServer();
+    CMNetServer();
 
 
      void LeaveGame(DuelPlayer* dp);
@@ -50,6 +50,7 @@ static void keepAlive(evutil_socket_t fd, short events, void* arg);
 	 static int ServerThread(void* param);
 	 void DisconnectPlayer(DuelPlayer* dp);
 	 void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
+	 void SendMessageToPlayer(DuelPlayer*dp, char*msg);
 	 void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto) {
 		char* p = net_server_write;
 		BufferIO::WriteInt16(p, 1);

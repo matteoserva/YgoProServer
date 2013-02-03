@@ -14,14 +14,14 @@ namespace ygo {
     }
 
 
-NetServer* RoomManager::getFirstAvailableServer()
+CMNetServer* RoomManager::getFirstAvailableServer()
 {
 int i = 0;
-	   for(std::vector<NetServer*>::iterator it =elencoServer.begin(); it!=elencoServer.end();it++)
+	   for(std::vector<CMNetServer*>::iterator it =elencoServer.begin(); it!=elencoServer.end();it++)
 	   {
 
-          NetServer *p = *it;
-	      if(p->state == NetServer::State::STOPPED)
+          CMNetServer *p = *it;
+	      if(p->state == CMNetServer::State::STOPPED)
             {
                 printf("ho scelto il server %d\n",i);
                 return *it;
@@ -38,7 +38,7 @@ int i = 0;
 
         }
          printf("Server non trovato, creo uno nuovo \n");
-        NetServer *netServer = new NetServer();
+        CMNetServer *netServer = new CMNetServer();
         netServer->gameServer=gameServer;
         elencoServer.push_back(netServer);
         return netServer;

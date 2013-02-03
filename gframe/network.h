@@ -97,14 +97,14 @@ struct STOC_HS_WatchChange {
 };
 
 class DuelMode;
-class NetServer;
+class CMNetServer;
 struct DuelPlayer {
 	unsigned short name[20];
 	DuelMode* game;
 	unsigned char type;
 	unsigned char state;
 	bufferevent* bev;
-	NetServer* netServer;
+	CMNetServer* netServer;
 	DuelPlayer() {
 		game = 0;
 		type = 0;
@@ -115,13 +115,13 @@ struct DuelPlayer {
 };
 
 
-class NetServer;
+class CMNetServer;
 class DuelMode {
 public:
 
-    NetServer* netServer;
+    CMNetServer* netServer;
 
-    void setNetServer(NetServer* net)
+    void setNetServer(CMNetServer* net)
     {
         netServer=net;
     }

@@ -177,9 +177,14 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) 
 
 
 
-     if(dp->netServer == NULL)
+
+	unsigned char pktType = BufferIO::ReadUInt8(pdata);
+
+	     if(dp->netServer == NULL)
         {
-            NetServer* netServer = roomManager.getFirstAvailableServer();
+            if(pktType!=CTOS_PLAYER_INFO)
+                return;
+            CMNetServer* netServer = roomManager.getFirstAvailableServer();
             if(netServer == NULL)
             {
                 DisconnectPlayer(dp);
@@ -194,7 +199,8 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) 
             dp->netServer->HandleCTOSPacket(dp,data,len);
 
 		return;
-	unsigned char pktType = BufferIO::ReadUInt8(pdata);
+
+
 	if((pktType != CTOS_SURRENDER) && (pktType != CTOS_CHAT) && (dp->state == 0xff || (dp->state && dp->state != pktType)))
 		return;
 

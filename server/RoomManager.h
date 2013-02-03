@@ -12,12 +12,12 @@ namespace ygo {
     class RoomManager
     {
         public:
-            std::vector<NetServer *> elencoServer;
+            std::vector<CMNetServer *> elencoServer;
         GameServer* gameServer;
         void setGameServer(ygo::GameServer*);
 
         public:
-        NetServer* getFirstAvailableServer();
+        CMNetServer* getFirstAvailableServer();
 
     };
 
