@@ -22,6 +22,9 @@ private:
 	 char net_server_write[0x2000];
 	 unsigned short last_sent;
      int players;
+     void playerConnected();
+     void playerDisconnected();
+
 public:
 
     enum State {STOPPED,FULL,PLAYING,ZOMBIE};

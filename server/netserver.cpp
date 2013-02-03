@@ -24,6 +24,39 @@ void NetServer::clientStarted()
 
 
 }
+
+     void NetServer::playerConnected()
+     {
+          players++;
+			printf("giocatori connessi:%d\n",players);
+			if(players==2)
+			{
+			    printf("server full\n");
+			    state=FULL;
+			}
+
+     }
+     void NetServer::playerDisconnected(){
+
+      players--;
+			printf("giocatori connessi:%d\n",players);
+			if(players < 2 &&state==FULL)
+			{
+			    state=STOPPED;
+			    printf("server not full\n");
+
+			}
+			if(players==0)
+			{
+			        if(net_evbase)
+                    {
+                            event_base_loopexit(net_evbase, 0);
+                    }
+                    printf("server stoppato\n");
+			}
+
+     }
+
 void NetServer::createGame()
 {
         net_evbase = event_base_new();
@@ -57,17 +90,18 @@ void NetServer::createGame()
 			info.lflist = deckManager._lfList[0].hash;
 		duel_mode->host_info = info;
 		duel_mode->setNetServer(this);
+		state=STOPPED;
+		players=0;
 }
 void NetServer::DisconnectPlayer(DuelPlayer* dp) {
     /*
-        This is called from DuelMode only.(singleduel and tagduel)
+    //    This is called from DuelMode only.(singleduel and tagduel)
 
 
     */
-
+    printf("DisconnectPlayer called\n");
     gameServer->DisconnectPlayer(dp);
-            players--;
-			printf("giocatori connessi:%d\n",players);
+           playerDisconnected();
 
 
 	if(!players)
@@ -82,10 +116,10 @@ void NetServer::DisconnectPlayer(DuelPlayer* dp) {
 
 
 void NetServer::keepAlive(evutil_socket_t fd, short events, void* arg) {
-    printf("keepAlive\n");
+   // printf("keepAlive\n");
     event* ev1 = (event*)arg;
         timeval timeout = {5, 0};
-
+    //this function addresses a bug in libevent.
 
 }
 
@@ -124,7 +158,13 @@ void NetServer::LeaveGame(DuelPlayer* dp)
 
         duel_mode->LeaveGame(dp);
     }
+    else
+    {
+        //playerDisconnected();
+        DisconnectPlayer(dp);
 
+
+    }
 
 }
 
@@ -147,15 +187,9 @@ void NetServer::StopListen()
 
 
 void NetServer::StopServer() {
-    if(net_evbase)
-		{
-                event_base_loopexit(net_evbase, 0);
 
 
-		}
-		printf("server stoppato\n");
-
-	printf("netserver server stoppato");
+	printf("netserver server diventato zombie");
     state = ZOMBIE;
        // createGame();
 }
@@ -165,8 +199,11 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) {
 	char* pdata = data;
 
 	if(state==ZOMBIE)
-        return;
+        {
+            printf("pacchetto ricevuto per uno zombie, ignorato\n");
 
+        return;
+        }
 	unsigned char pktType = BufferIO::ReadUInt8(pdata);
 	if((pktType != CTOS_SURRENDER) && (pktType != CTOS_CHAT) && (dp->state == 0xff || (dp->state && dp->state != pktType)))
 		return;
@@ -252,16 +289,14 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) {
 	case CTOS_JOIN_GAME: {
 		if(!duel_mode)
 			break;
-			 players++;
-			printf("giocatori connessi:%d\n",players);
+			 playerConnected();
 		duel_mode->JoinGame(dp, pdata, false);
 		break;
 	}
 	case CTOS_LEAVE_GAME: {
 		if(!duel_mode)
 			break;
-			 players--;
-			printf("giocatori connessi:%d\n",players);
+			 playerDisconnected();
 		duel_mode->LeaveGame(dp);
 		break;
 	}
