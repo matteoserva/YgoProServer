@@ -114,10 +114,10 @@ void TagDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 	}
 }
 void TagDuel::LeaveGame(DuelPlayer* dp) {
-	if(dp == host_player) {
+	/*if(dp == host_player) {
 		EndDuel();
 		netServer->StopServer();
-	} else if(dp->type == NETPLAYER_TYPE_OBSERVER) {
+	} else*/ if(dp->type == NETPLAYER_TYPE_OBSERVER) {
 		observers.erase(dp);
 		if(!pduel) {
 			STOC_HS_WatchChange scwc;
@@ -247,6 +247,10 @@ void TagDuel::PlayerReady(DuelPlayer* dp, bool is_ready) {
 			netServer->SendPacketToPlayer(players[i], STOC_HS_PLAYER_CHANGE, scpc);
 	for(auto pit = observers.begin(); pit != observers.end(); ++pit)
 		netServer->SendPacketToPlayer(*pit, STOC_HS_PLAYER_CHANGE, scpc);
+
+	    if(ready[0] && ready[1]&&ready[2] && ready[3])
+        StartDuel(players[0]);
+
 }
 void TagDuel::PlayerKick(DuelPlayer* dp, unsigned char pos) {
 	if(pos > 3 || dp != host_player || dp == players[pos] || !players[pos])

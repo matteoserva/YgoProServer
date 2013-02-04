@@ -193,6 +193,7 @@ void SingleDuel::LeaveGame(DuelPlayer* dp) {
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 				netServer->ReSendToPlayer(*oit);
 			netServer->StopServer();
+			netServer->DisconnectPlayer(dp);
 		}
 	}
 }

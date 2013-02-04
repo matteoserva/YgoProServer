@@ -7,30 +7,41 @@
 #include "deck_manager.h"
 #include <set>
 #include <unordered_map>
-
+#include <map>
 
 namespace ygo {
 class GameServer;
+class RoomManager;
+
+class DuelPlayerInfo{
+
+
+};
+
 class CMNetServer {
 private:
+    //
+    unsigned char mode;
 	 unsigned short server_port;
-	 event_base* net_evbase;
+        RoomManager* roomManager;
 	 event* broadcast_ev;
 	 evconnlistener* listener;
 	 DuelMode* duel_mode;
 	 char net_server_read[0x2000];
 	 char net_server_write[0x2000];
 	 unsigned short last_sent;
-     int players;
-     void playerConnected();
-     void playerDisconnected();
-
+     int numPlayers;
+     std::map<DuelPlayer*, DuelPlayerInfo> players;
+     void playerConnected(DuelPlayer* dp);
+     void playerDisconnected(DuelPlayer* dp);
+    int getMaxPlayers();
+    void clientStarted();
 public:
 
-    enum State {STOPPED,FULL,PLAYING,ZOMBIE};
+    enum State {WAITING,FULL,PLAYING,ZOMBIE};
     State state;
     GameServer* gameServer;
-    CMNetServer();
+    CMNetServer(RoomManager*roomManager,unsigned char mode);
 
 
      void LeaveGame(DuelPlayer* dp);
@@ -39,27 +50,18 @@ public:
 	 void StopServer();
 	 void StopBroadcast();
 	 void StopListen();
-static void keepAlive(evutil_socket_t fd, short events, void* arg);
-    void clientStarted();
+
+
          void createGame();
 	 void BroadcastEvent(evutil_socket_t fd, short events, void* arg);
 	 static void ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx);
 	 static void ServerAcceptError(evconnlistener *listener, void* ctx);
 	 static void ServerEchoRead(bufferevent* bev, void* ctx);
 	 static void ServerEchoEvent(bufferevent* bev, short events, void* ctx);
-	 static int ServerThread(void* param);
 	 void DisconnectPlayer(DuelPlayer* dp);
 	 void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
 	 void SendMessageToPlayer(DuelPlayer*dp, char*msg);
-	 void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto) {
-		char* p = net_server_write;
-		BufferIO::WriteInt16(p, 1);
-		BufferIO::WriteInt8(p, proto);
-		last_sent = 3;
-		if(!dp)
-			return;
-		bufferevent_write(dp->bev, net_server_write, last_sent);
-	}
+	 void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
 	template<typename ST>
 	 void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st) {
 		char* p = net_server_write;

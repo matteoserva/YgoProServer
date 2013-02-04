@@ -90,7 +90,6 @@
 		<Unit filename="gframe/mymutex.h" />
 		<Unit filename="gframe/mysignal.h" />
 		<Unit filename="gframe/mythread.h" />
-		<Unit filename="gframe/netserver.cpp" />
 		<Unit filename="gframe/netserver.h" />
 		<Unit filename="gframe/network.h" />
 		<Unit filename="gframe/os.h" />
