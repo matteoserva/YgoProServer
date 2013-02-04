@@ -25,6 +25,7 @@ namespace ygo {
         RoomManager();
         ~RoomManager();
         CMNetServer* getFirstAvailableServer();
+        CMNetServer* getFirstAvailableServer(unsigned char mode);
     };
 
 

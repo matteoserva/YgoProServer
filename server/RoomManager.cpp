@@ -68,20 +68,17 @@ int RoomManager::RoomManagerThread(void* arg)
 
 }
 
-CMNetServer* RoomManager::getFirstAvailableServer()
+
+CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 {
-int i = 0;
+        int i = 0;
 	   for(std::vector<CMNetServer*>::iterator it =elencoServer.begin(); it!=elencoServer.end();it++)
 	   {
-
           CMNetServer *p = *it;
-	      if(p->state == CMNetServer::State::WAITING)
+	      if(p->state == CMNetServer::State::WAITING && p->mode == mode)
             {
                 printf("ho scelto il server %d\n",i);
                 return *it;
-
-
-
             }
             i++;
 	   }
@@ -89,7 +86,32 @@ int i = 0;
         if(elencoServer.size() >= 500)
         {
             return NULL;
+        }
+         printf("Server non trovato, creo uno nuovo \n");
+        CMNetServer *netServer = new CMNetServer(this,mode);
+        netServer->gameServer=gameServer;
+        elencoServer.push_back(netServer);
+        return netServer;
+        //netServer.gameServer=
 
+}
+CMNetServer* RoomManager::getFirstAvailableServer()
+{
+int i = 0;
+	   for(std::vector<CMNetServer*>::iterator it =elencoServer.begin(); it!=elencoServer.end();it++)
+	   {
+          CMNetServer *p = *it;
+	      if(p->state == CMNetServer::State::WAITING)
+            {
+                printf("ho scelto il server %d\n",i);
+                return *it;
+            }
+            i++;
+	   }
+
+        if(elencoServer.size() >= 500)
+        {
+            return NULL;
         }
          printf("Server non trovato, creo uno nuovo \n");
         CMNetServer *netServer = new CMNetServer(this,MODE_SINGLE);

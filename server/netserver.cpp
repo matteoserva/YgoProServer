@@ -334,7 +334,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
         duel_mode->JoinGame(dp, pdata, false);
         SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
-
+        SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel");
 
 
         break;

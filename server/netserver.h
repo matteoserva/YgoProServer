@@ -21,7 +21,7 @@ class DuelPlayerInfo{
 class CMNetServer {
 private:
 
-    unsigned char mode;
+
 	 unsigned short server_port;
         RoomManager* roomManager;
 	 event* broadcast_ev;
@@ -37,7 +37,7 @@ private:
     int getMaxPlayers();
     void clientStarted();
 public:
-
+    unsigned char mode;
     enum State {WAITING,FULL,PLAYING,ZOMBIE};
     State state;
     GameServer* gameServer;
