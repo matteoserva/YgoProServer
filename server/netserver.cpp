@@ -16,6 +16,7 @@ CMNetServer::CMNetServer(RoomManager*roomManager,unsigned char mode):roomManager
     duel_mode = 0;
     last_sent = 0;
 
+
     createGame();
 
 
@@ -140,10 +141,36 @@ void CMNetServer::createGame()
 }
 void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
 {
-
     printf("DisconnectPlayer called\n");
-    gameServer->DisconnectPlayer(dp);
+
+    auto bit = players.find(dp);
+	if(bit != players.end()) {
+	    gameServer->DisconnectPlayer(dp);
+	    playerDisconnected(dp);
+	}
+}
+
+void CMNetServer::ExtractPlayer(DuelPlayer* dp)
+{
+    //it removes the player from the duel without disconnecting its tcp connection
+    printf("ExtractPlayer called\n");
     playerDisconnected(dp);
+	LeaveGame(dp);
+}
+void CMNetServer::InsertPlayer(DuelPlayer* dp)
+{
+    //it insert forcefully the player in the server
+    printf("InsertPlayer called\n");
+    playerConnected(dp);
+    CTOS_JoinGame csjg;
+    csjg.version = PRO_VERSION;
+	csjg.gameid = 0;
+	BufferIO::CopyWStr("", csjg.pass, 20);
+	dp->game=0;
+	dp->type=0xff;
+    duel_mode->JoinGame(dp, &csjg, false);
+    //SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
+
 }
 
 
@@ -151,25 +178,18 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
 {
     if(state != ZOMBIE && dp->game == duel_mode)
     {
-
         duel_mode->LeaveGame(dp);
     }
     else
     {
         //playerDisconnected();
         DisconnectPlayer(dp);
-
-
     }
 
 }
 
 void CMNetServer::StopBroadcast()
 {
-
-
-
-
 }
 
 void CMNetServer::StopListen()
@@ -181,8 +201,6 @@ void CMNetServer::StopListen()
 
 void CMNetServer::StopServer()
 {
-
-
     printf("netserver server diventato zombie");
     state = ZOMBIE;
     // createGame();
@@ -193,11 +211,9 @@ void CMNetServer::SendMessageToPlayer(DuelPlayer*dp, char*msg)
     STOC_Chat scc;
     scc.player = dp->type;
     int msglen = BufferIO::CopyWStr(msg, scc.msg, 256);
-
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
-
-
 }
+
 
 void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto) {
 		char* p = net_server_write;
@@ -315,7 +331,6 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(!duel_mode)
             break;
         playerConnected(dp);
-
 
         duel_mode->JoinGame(dp, pdata, false);
         SendMessageToPlayer(dp,"Welcome to the CheckMate server!");

@@ -20,7 +20,7 @@ class DuelPlayerInfo{
 
 class CMNetServer {
 private:
-    //
+
     unsigned char mode;
 	 unsigned short server_port;
         RoomManager* roomManager;
@@ -63,16 +63,20 @@ public:
 	 void SendMessageToPlayer(DuelPlayer*dp, char*msg);
 	 void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
 	template<typename ST>
-	 void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st) {
-		char* p = net_server_write;
+	 void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st){
+        char* p = net_server_write;
 		BufferIO::WriteInt16(p, 1 + sizeof(ST));
 		BufferIO::WriteInt8(p, proto);
 		memcpy(p, &st, sizeof(ST));
 		last_sent = sizeof(ST) + 3;
 		if(dp)
 			bufferevent_write(dp->bev, net_server_write, last_sent);
-	}
+
+	 }
+	 void InsertPlayer(DuelPlayer* dp);
+	 void ExtractPlayer(DuelPlayer* dp);
 	 void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len) {
+
 		char* p = net_server_write;
 		BufferIO::WriteInt16(p, 1 + len);
 		BufferIO::WriteInt8(p, proto);
@@ -82,6 +86,7 @@ public:
 			bufferevent_write(dp->bev, net_server_write, last_sent);
 	}
 	 void ReSendToPlayer(DuelPlayer* dp) {
+
 		if(dp)
 			bufferevent_write(dp->bev, net_server_write, last_sent);
 	}

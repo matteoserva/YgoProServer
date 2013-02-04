@@ -172,6 +172,21 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp) {
 		users.erase(bit);
 	}
 }
+
+bool GameServer::handleChatCommand(DuelPlayer* dp,unsigned short* msg){
+
+    char messaggio[256];
+	int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
+	printf("ricevuto messaggio %s\n",messaggio);
+
+	return false;
+	dp->netServer->ExtractPlayer(dp);
+            CMNetServer* netServer = roomManager.getFirstAvailableServer();
+            dp->netServer=netServer;
+            netServer->InsertPlayer(dp);
+
+}
+
 void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) {
 	char* pdata = data;
 
@@ -180,23 +195,32 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) 
 
 	unsigned char pktType = BufferIO::ReadUInt8(pdata);
 
+
+        if(pktType ==CTOS_PLAYER_INFO) {
+                    CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
+                    printf("playerinfo ricevuto da GameServer\n");
+                    BufferIO::CopyWStr(pkt->name, dp->name, 20);
+                    return;
+                }
+
 	     if(dp->netServer == NULL)
+         {
+                CMNetServer* netServer = roomManager.getFirstAvailableServer();
+                if(netServer == NULL)
+                {
+                    DisconnectPlayer(dp);
+                    return;
+                }
+                dp->netServer = netServer;
+        }
+
+        if(pktType==CTOS_CHAT && handleChatCommand(dp,(unsigned short*)pdata))
         {
-            if(pktType!=CTOS_PLAYER_INFO)
-                return;
-            CMNetServer* netServer = roomManager.getFirstAvailableServer();
-            if(netServer == NULL)
-            {
-                DisconnectPlayer(dp);
-                return;
-            }
-
-            dp->netServer = netServer;
-
 
 
         }
-            dp->netServer->HandleCTOSPacket(dp,data,len);
+        else
+        dp->netServer->HandleCTOSPacket(dp,data,len);
 
 		return;
 
@@ -223,6 +247,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) 
 	case CTOS_CHAT: {
 		if(!dp->game)
 			return;
+
 		duel_mode->Chat(dp, pdata, len - 1);
 		break;
 	}
@@ -287,12 +312,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len) 
 		StartBroadcast();
 		break;
 	}
-	case CTOS_JOIN_GAME: {
-		if(!duel_mode)
-			break;
-		duel_mode->JoinGame(dp, pdata, false);
-		break;
-	}
+
 	case CTOS_LEAVE_GAME: {
 		if(!duel_mode)
 			break;

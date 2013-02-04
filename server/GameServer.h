@@ -49,6 +49,8 @@ public:
 			return;
 		bufferevent_write(dp->bev, net_server_write, last_sent);
 	}
+	bool handleChatCommand(DuelPlayer* dp,unsigned short* msg);
+
 	template<typename ST>
 	 void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st) {
 		char* p = net_server_write;
