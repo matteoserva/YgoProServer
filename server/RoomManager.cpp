@@ -72,14 +72,25 @@ int RoomManager::RoomManagerThread(void* arg)
 CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 {
         int i = 0;
-	   for(std::vector<CMNetServer*>::iterator it =elencoServer.begin(); it!=elencoServer.end();it++)
+	   for(auto it =elencoServer.begin(); it!=elencoServer.end();)
 	   {
           CMNetServer *p = *it;
+          printf("analizzo la lista server\n");
 	      if(p->state == CMNetServer::State::WAITING && p->mode == mode)
             {
                 printf("ho scelto il server %d\n",i);
                 return *it;
+            }else if(p->state == CMNetServer::State::DEAD)
+            {
+                printf("elimino il server %d\n",i);
+                delete (*it);
+                it=elencoServer.erase(it);
+            }else
+            {
+                ++it;
             }
+
+
             i++;
 	   }
 
@@ -98,14 +109,25 @@ CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 CMNetServer* RoomManager::getFirstAvailableServer()
 {
 int i = 0;
-	   for(std::vector<CMNetServer*>::iterator it =elencoServer.begin(); it!=elencoServer.end();it++)
+	   for(auto it =elencoServer.begin(); it!=elencoServer.end();)
 	   {
           CMNetServer *p = *it;
+          printf("analizzo la lista server\n");
 	      if(p->state == CMNetServer::State::WAITING)
             {
                 printf("ho scelto il server %d\n",i);
                 return *it;
+            }else if(p->state == CMNetServer::State::DEAD)
+            {
+                printf("elimino il server %d\n",i);
+                delete (*it);
+                it=elencoServer.erase(it);
+            }else
+            {
+                ++it;
             }
+
+
             i++;
 	   }
 

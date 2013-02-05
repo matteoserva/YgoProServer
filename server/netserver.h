@@ -38,7 +38,7 @@ private:
     void clientStarted();
 public:
     unsigned char mode;
-    enum State {WAITING,FULL,PLAYING,ZOMBIE};
+    enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};
     State state;
     GameServer* gameServer;
     CMNetServer(RoomManager*roomManager,unsigned char mode);

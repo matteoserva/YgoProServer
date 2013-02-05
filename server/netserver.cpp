@@ -69,7 +69,7 @@ void CMNetServer::playerDisconnected(DuelPlayer* dp )
     if(numPlayers==0)
     {
 
-        printf("server vuoto. addio\n");
+        printf("server vuoto. addio, morto\n");
 
             if(duel_mode)
             {
@@ -80,7 +80,7 @@ void CMNetServer::playerDisconnected(DuelPlayer* dp )
 
             }
 
-            createGame();
+            state=DEAD;
     }
 
 }
@@ -113,7 +113,7 @@ void CMNetServer::createGame()
     BufferIO::CopyWStr(L"", duel_mode->pass, 20);
 
     HostInfo info;
-    info.rule=0;
+    info.rule=2;
     info.mode=mode;
     info.draw_count=1;
     info.no_check_deck=false;
@@ -170,6 +170,10 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
 	dp->type=0xff;
     duel_mode->JoinGame(dp, &csjg, false);
     //SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
+        SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
+        SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel");
+    duel_mode->host_player=NULL;
+    //TODO
 
 }
 
@@ -201,7 +205,7 @@ void CMNetServer::StopListen()
 
 void CMNetServer::StopServer()
 {
-    printf("netserver server diventato zombie");
+    printf("netserver server diventato zombie\n");
     state = ZOMBIE;
     // createGame();
 }
@@ -330,11 +334,8 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!duel_mode)
             break;
-        playerConnected(dp);
 
-        duel_mode->JoinGame(dp, pdata, false);
-        SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
-        SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel");
+        InsertPlayer(dp);
 
 
         break;
@@ -373,7 +374,10 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!duel_mode || duel_mode->pduel)
             break;
+            duel_mode->host_player = dp;
         duel_mode->PlayerReady(dp, CTOS_HS_NOTREADY - pktType);
+        duel_mode->StartDuel(dp);
+        duel_mode->host_player=NULL;
         break;
     }
     case CTOS_HS_KICK:
