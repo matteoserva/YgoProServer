@@ -20,7 +20,8 @@ OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 INCLUDES =  -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I $(IRRLICHT_SOURCE_DIR) -I ./ocgcore/ -I ./gframe/ -I ./server/   -I /usr/include/irrlicht/
 
 # C compiler flags (-g -O2 -Wall)
-CCFLAGS = -std=c++0x -O0 -g -Wall
+CCFLAGS =  -O0 -g 
+CPPFLAGS = -std=c++0x -O0 -g
 
 # compiler
 CC = gcc
@@ -42,7 +43,7 @@ $(OUT): $(OBJ)
 	$(CC) $(INCLUDES) $(CCFLAGS) -c $< -o $@
 
 .cpp.o:
-	$(CPP) $(INCLUDES) $(CCFLAGS) -c $< -o $@
+	$(CPP) $(INCLUDES) $(CPPFLAGS) -c $< -o $@
 
 clean:
 	rm -f $(OBJ) $(OUT) 
