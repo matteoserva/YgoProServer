@@ -22,8 +22,8 @@ Game* mainGame;
 
 bool Game::Initialize() {
 	srand(time(0));
-	LoadConfig();/*
-	irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
+	//LoadConfig();/*
+	/*irr::SIrrlichtCreationParameters params = irr::SIrrlichtCreationParameters();
 	params.AntiAlias = gameConf.antialias;
 	if(gameConf.use_d3d)
 		params.DriverType = irr::video::EDT_DIRECT3D9;
@@ -54,7 +54,7 @@ bool Game::Initialize() {
 	if(!dataManager.LoadDB("cards.cdb"))
 		return false;
 	if(!dataManager.LoadStrings("strings.conf"))
-		return false;
+        return false;
 	/*env = device->getGUIEnvironment();
 	numFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 16);
 	adFont = irr::gui::CGUITTFont::createTTFont(env, gameConf.numfont, 12);
