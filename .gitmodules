@@ -1,0 +1,3 @@
+[submodule "ygopro"]
+	path = ygopro
+	url = https://github.com/Fluorohydride/ygopro.git

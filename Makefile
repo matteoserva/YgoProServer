@@ -1,23 +1,17 @@
+TARGET = ygopro-server
 
-
-IRRLICHT_SOURCE_DIR = ./irrlicht-1.7.2+dfsg1/source/Irrlicht/
-
+###############
 
 SRC = $(shell ls server/*.c server/*.cpp 2>/dev/null)
-SRC += $(shell ls gframe/lzma/*.c gframe/lzma/*.cpp 2>/dev/null)
-SRC += $(shell ls gframe/*.c gframe/*.cpp 2>/dev/null)
-SRC += $(shell ls ocgcore/*.c ocgcore/*.cpp 2>/dev/null)
+SRC += $(shell ls ygopro/gframe/lzma/*.c ygopro/gframe/lzma/*.cpp 2>/dev/null)
+SRC += ygopro/gframe/data_manager.cpp ygopro/gframe/deck_manager.cpp ygopro/gframe/replay.cpp
+SRC += $(shell ls ygopro/ocgcore/*.c ygopro/ocgcore/*.cpp 2>/dev/null)
 
-
-TARGET = ygopro
 OUT = $(TARGET)
 OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 
-
-
-
 # include directories
-INCLUDES =  -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I $(IRRLICHT_SOURCE_DIR) -I ./ocgcore/ -I ./gframe/ -I ./server/   -I /usr/include/irrlicht/
+INCLUDES = -I ./server/ -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I ./ygopro/ocgcore/ -I ./ygopro/gframe/  -I /usr/include/irrlicht/
 
 # C compiler flags (-g -O2 -Wall)
 CCFLAGS =  -O0 -g 
@@ -31,13 +25,11 @@ CPP = g++
 LIBS = 
 
 # compile flags
-LDFLAGS = -levent -llua5.2 -lGL -lGLU -lsqlite3  -lfreetype  -levent_pthreads -lIrrlicht
-
+LDFLAGS = -levent -llua5.2 -lsqlite3 -levent_pthreads
 default: $(OUT)
 
 $(OUT): $(OBJ)                                                                                                                                                                               
-	$(CC) -o $(OUT) $(OBJ) $(LDFLAGS)
-
+	$(CPP) -o $(OUT) $(OBJ) $(LDFLAGS)
 
 .c.o:
 	$(CC) $(INCLUDES) $(CCFLAGS) -c $< -o $@
