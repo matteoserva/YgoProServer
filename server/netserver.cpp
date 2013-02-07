@@ -17,9 +17,12 @@ CMNetServer::CMNetServer(RoomManager*roomManager,unsigned char mode):roomManager
 }
 void CMNetServer::clientStarted()
 {
-    state = PLAYING;
+    setState(PLAYING);
 }
-
+void CMNetServer::setState(State state)
+{
+    this->state=state;
+}
 
 void CMNetServer::destroyGame()
 {
@@ -41,6 +44,13 @@ int CMNetServer::getMaxDuelPlayers()
     return maxplayers;
 }
 
+void CMNetServer::playerReadinessChange(DuelPlayer *dp, bool isReady)
+{
+    players[dp].isReady = isReady;
+
+
+    printf("readiness change %d\n",isReady);
+}
 
 void CMNetServer::playerConnected(DuelPlayer *dp)
 {
@@ -67,7 +77,7 @@ void CMNetServer::updateServerState()
 {
     if(getNumDuelPlayers() < getMaxDuelPlayers() &&state==FULL)
     {
-        state=WAITING;
+        setState(WAITING);
         printf("server not full\n");
     }
     if(numPlayers==0 && state==ZOMBIE)
@@ -75,12 +85,12 @@ void CMNetServer::updateServerState()
         printf("server vuoto. addio, morto\n");
 
         destroyGame();
-        state=DEAD;
+        setState(DEAD);
     }
     if(getNumDuelPlayers()>=getMaxDuelPlayers())// && state==WAITING)
     {
         printf("server full\n");
-        state=FULL;
+        setState(FULL);
     }
 
 }
@@ -141,7 +151,7 @@ void CMNetServer::createGame()
         info.lflist = deckManager._lfList[0].hash;
     duel_mode->host_info = info;
     duel_mode->setNetServer(this);
-    state=WAITING;
+    setState(WAITING);
     numPlayers=0;
 }
 void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
@@ -165,7 +175,7 @@ void CMNetServer::ExtractPlayer(DuelPlayer* dp)
 }
 void CMNetServer::InsertPlayer(DuelPlayer* dp)
 {
-    //it inserts forcefully the player in the server
+    //it inserts forcefully the player into the server
     printf("InsertPlayer called\n");
     playerConnected(dp);
     CTOS_JoinGame csjg;
@@ -200,7 +210,7 @@ void CMNetServer::StopListen()
 void CMNetServer::StopServer()
 {   //the duel asked me to stop
     printf("netserver server diventato zombie\n");
-    state = ZOMBIE;
+    setState(ZOMBIE);
 }
 
 void CMNetServer::SendMessageToPlayer(DuelPlayer*dp, char*msg)
@@ -350,6 +360,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!duel_mode || duel_mode->pduel)
             break;
+        playerReadinessChange(dp,false);
         duel_mode->ToDuelist(dp);
         updateServerState();
         break;
@@ -367,8 +378,10 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!duel_mode || duel_mode->pduel)
             break;
-        duel_mode->host_player = dp;
+        playerReadinessChange(dp,CTOS_HS_NOTREADY - pktType);
+
         duel_mode->PlayerReady(dp, CTOS_HS_NOTREADY - pktType);
+        duel_mode->host_player = dp;
         duel_mode->StartDuel(dp);
         duel_mode->host_player=NULL;
         break;
@@ -385,7 +398,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!duel_mode || duel_mode->pduel)
             break;
-        duel_mode->StartDuel(dp);
+
         break;
     }
     }

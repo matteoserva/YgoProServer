@@ -11,15 +11,12 @@ TARGET = ygopro-client
 OUT = ../$(TARGET)
 OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 
-
-
-
 # include directories
-INCLUDES =  -I /usr/include/lua5.2/ -I /usr/include/irrlicht/ -I /usr/include/freetype2/ -I $(IRRLICHT_SOURCE_DIR) -I ../ygopro/ocgcore/ -I ../ygopro/gframe/ -I ./
+INCLUDES =  -I /usr/include/lua5.2/ -I /usr/include/irrlicht/ -I /usr/include/freetype2/  -I ../ygopro/ocgcore/ -I ../ygopro/gframe/ -I ./
 
 # C compiler flags (-g -O2 -Wall)
-CCFLAGS = -O2
-CPPFLAGS = -std=c++0x -O2 
+CCFLAGS = -O0 -g
+CPPFLAGS = -std=c++0x -O0 -g 
 # compiler
 CC = gcc
 CPP = g++

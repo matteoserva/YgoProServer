@@ -14,20 +14,27 @@ namespace ygo
 class GameServer;
 class RoomManager;
 
-class DuelPlayerInfo
+struct DuelPlayerInfo
 {
-
+    DuelPlayerInfo():isReady(false)
+    {
+    };
+bool isReady;
 
 };
 
 class CMNetServer
 {
+    public:
+    unsigned char mode;
+    enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};
+    State state;
 private:
     int getNumDuelPlayers();
     void updateServerState();
     void destroyGame();
     RoomManager* roomManager;
-
+    void playerReadinessChange(DuelPlayer *dp, bool isReady);
     DuelMode* duel_mode;
     char net_server_read[0x2000];
     char net_server_write[0x2000];
@@ -38,12 +45,9 @@ private:
     void playerDisconnected(DuelPlayer* dp);
     int getMaxDuelPlayers();
     void clientStarted();
-
+    void setState(State state);
 
 public:
-    unsigned char mode;
-    enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};
-    State state;
     GameServer* gameServer;
     CMNetServer(RoomManager*roomManager,unsigned char mode);
     void LeaveGame(DuelPlayer* dp);
