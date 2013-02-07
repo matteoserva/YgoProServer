@@ -14,35 +14,35 @@ bool Config::parseCommandLine(int argc, char**argv)
 {
     //true if you must stop
     opterr = 0;
-    for (int c; (c = getopt (argc, argv, "hc:p:")) != -1;)
+    for (int c; (c = getopt (argc, argv, ":hc:p:")) != -1;)
     {
 
         switch (c)
         {
-
-        case 'c':
-            configFile=optarg;
-            cout <<"ss "<<configFile<<endl;
-            break;
-        case 'h':
-            cout<<"-c configfile    for the config file"<<endl;
-            cout<<"-h               help "<<endl;
-            cout<<"-p num           port "<<endl;
-            return true;
-        case 'p':
-            serverport = stoi(optarg);
-            cout<<"command line, port set to: "<<serverport<<endl;
-            break;
-        case '?':
-            if (optopt == 'c')
+            case 'c':
+                configFile=optarg;
+                cout <<"ss "<<configFile<<endl;
+                break;
+            case 'h':
+                cout<<"-c configfile    for the config file"<<endl;
+                cout<<"-h               help "<<endl;
+                cout<<"-p num           port "<<endl;
+                return true;
+            case 'p':
+                serverport = stoi(optarg);
+                cout<<"command line, port set to: "<<serverport<<endl;
+                break;
+            case '?':
+                if (isprint (optopt))
+                    fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+                else
+                    fprintf (stderr,"Unknown option character `\\x%x'.\n",optopt);
+                return true;
+            case ':':
                 fprintf (stderr, "Option -%c requires an argument.\n", optopt);
-            else if (isprint (optopt))
-                fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-            else
-                fprintf (stderr,"Unknown option character `\\x%x'.\n",optopt);
-
-        default:
-            return true;
+                return true;
+            default:
+                return true;
         }
     }
 
