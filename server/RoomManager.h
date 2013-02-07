@@ -12,7 +12,8 @@ namespace ygo {
     class RoomManager
     {
         private:
-
+        void removeDeadRooms();
+        CMNetServer* createServer(unsigned char mode);
         static int RoomManagerThread(void* );
         static void keepAlive(evutil_socket_t fd, short events, void* arg);
         public:
