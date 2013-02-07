@@ -13,11 +13,7 @@ Config* Config::getInstance()
 bool Config::parseCommandLine(int argc, char**argv)
 {
     //true if you must stop
-
     opterr = 0;
-    bool success = true;
-
-
     for (int c; (c = getopt (argc, argv, "hc:p:")) != -1;)
     {
 
@@ -29,7 +25,9 @@ bool Config::parseCommandLine(int argc, char**argv)
             cout <<"ss "<<configFile<<endl;
             break;
         case 'h':
-            cout<<"-c configfile"<<endl;
+            cout<<"-c configfile    for the config file"<<endl;
+            cout<<"-h               help "<<endl;
+            cout<<"-p num           port "<<endl;
             return true;
         case 'p':
             serverport = stoi(optarg);
@@ -67,43 +65,54 @@ void Config::LoadConfig()
     if(!fp)
     {
         cerr<<"Couldn't open config file: "<<configFile<<endl;
-        return;
     }
-    char linebuf[256];
-    char strbuf[32];
-    char valbuf[256];
-    wchar_t wstr[256];
-
-    fseek(fp, 0, SEEK_END);
-    size_t fsize = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    int linenum=0;
-    for(int linenum=0; ftell(fp) < fsize; linenum++)
+    else
     {
-        fgets(linebuf, 250, fp);
-        int scanfSuccess = sscanf(linebuf, "%s = %s", strbuf, valbuf);
-        if(scanfSuccess <= 0 || strbuf[0] == '#')
-        {
-            //ignored line
-        }
-        else if(scanfSuccess < 2)
-        {
-            cerr<<"Could not parse line "<<linenum<<": "<<linebuf<<endl;
-        }
-        else if(!strcmp(strbuf,"serverport"))
-        {
-            serverport = stoi(valbuf);
-            cout<<"serverport set to: "<<serverport<<endl;
-            //istringstream ss(valbuf)>>
-        }
-        else
-            cerr<<"Could not understand the keyword at line"<<linenum<<": "<<strbuf<<endl;
-    }
-    fclose(fp);
-}
-Config::Config():configFile("server.conf"),serverport(9999)
-{
+        char linebuf[256];
+        char strbuf[32];
+        char valbuf[256];
+        wchar_t wstr[256];
 
+        fseek(fp, 0, SEEK_END);
+        size_t fsize = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
+        int linenum=0;
+        for(int linenum=0; ftell(fp) < fsize; linenum++)
+        {
+            fgets(linebuf, 250, fp);
+            int scanfSuccess = sscanf(linebuf, "%s = %s", strbuf, valbuf);
+            if(scanfSuccess <= 0 || strbuf[0] == '#')
+            {
+                //ignored line
+            }
+            else if(scanfSuccess < 2)
+            {
+                cerr<<"Could not parse line "<<linenum<<": "<<linebuf<<endl;
+            }
+            else if(!strcmp(strbuf,"serverport"))
+            {
+                if(serverport)
+                    cout<<"the serverport id already set, ignoring the one in the config file"<<endl;
+                else
+                {
+                    serverport = stoi(valbuf);
+                    cout<<"serverport set to: "<<serverport<<endl;
+                }
+                //istringstream ss(valbuf)>>
+            }
+            else
+                cerr<<"Could not understand the keyword at line"<<linenum<<": "<<strbuf<<endl;
+        }
+        fclose(fp);
+    }
+    if(!serverport)
+    {
+        cout<<"serverport not set, using default value of 9999"<<endl;
+        serverport = 9999;
+    }
+}
+Config::Config():configFile("server.conf"),serverport(0)
+{
 }
 
 }
