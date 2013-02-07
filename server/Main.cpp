@@ -1,6 +1,7 @@
 #include "GameServer.h"
-#include "game.h"
-#include "data_manager.h"
+#include "Config.h"
+
+using namespace ygo;
 const unsigned short PRO_VERSION = 0x12f0;
 int enable_log = 0;
 int main()
@@ -11,15 +12,11 @@ int main()
         evthread_use_pthreads();
     #endif //_WIN32
 
-    ygo::deckManager.LoadLFList();
-if(!ygo::dataManager.LoadDB("cards.cdb"))
-		return false;
-	if(!ygo::dataManager.LoadStrings("strings.conf"))
-        return false;
+    Config::getInstance()->LoadConfig();
 
 
     ygo::GameServer* gameServer = new ygo::GameServer();
-				if(!gameServer->StartServer(9999))
+				if(!gameServer->StartServer(Config::getInstance()->serverport))
                 ;
     while(1)
     {
