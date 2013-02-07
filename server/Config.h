@@ -10,9 +10,9 @@ namespace ygo
         static Config* getInstance();
         void LoadConfig();
         int serverport;
+        bool parseCommandLine(int argc, char**argv);
 
         private:
-
         Config();
         std::string configFile;
     };

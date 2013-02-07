@@ -4,29 +4,33 @@
 using namespace ygo;
 const unsigned short PRO_VERSION = 0x12f0;
 int enable_log = 0;
-int main()
+int main(int argc, char**argv)
 {
-    #ifdef _WIN32
-        evthread_use_windows_threads();
-    #else
-        evthread_use_pthreads();
-    #endif //_WIN32
+#ifdef _WIN32
+    evthread_use_windows_threads();
+#else
+    evthread_use_pthreads();
+#endif //_WIN32
 
-    Config::getInstance()->LoadConfig();
+    Config* config = Config::getInstance();
+    if(config->parseCommandLine(argc,argv))
+        return EXIT_SUCCESS;
+
+    config->LoadConfig();
 
 
     ygo::GameServer* gameServer = new ygo::GameServer();
-				if(!gameServer->StartServer(Config::getInstance()->serverport))
-                ;
-    while(1)
+    if(!gameServer->StartServer(config->serverport))
     {
-        sleep(1);
+        printf("cannot bind the server to port %d\n",config->serverport);
+    }
+    else
+    {
+        while(1)
+        {
+            sleep(1);
 
+        }
     }
     return EXIT_SUCCESS;
-
-
-
-
-
 }

@@ -1,6 +1,7 @@
 #include "Config.h"
 #include "data_manager.h"
 #include "deck_manager.h"
+#include <getopt.h>
 namespace ygo
 {
 using namespace std;
@@ -9,7 +10,52 @@ Config* Config::getInstance()
     static Config config;
     return &config;
 }
+bool Config::parseCommandLine(int argc, char**argv)
+{
+    //true if you must stop
 
+    opterr = 0;
+    bool success = true;
+
+
+    for (int c; (c = getopt (argc, argv, "hc:p:")) != -1;)
+    {
+
+        switch (c)
+        {
+
+        case 'c':
+            configFile=optarg;
+            cout <<"ss "<<configFile<<endl;
+            break;
+        case 'h':
+            cout<<"-c configfile"<<endl;
+            return true;
+        case 'p':
+            serverport = stoi(optarg);
+            cout<<"command line, port set to: "<<serverport<<endl;
+            break;
+        case '?':
+            if (optopt == 'c')
+                fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+            else if (isprint (optopt))
+                fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+            else
+                fprintf (stderr,"Unknown option character `\\x%x'.\n",optopt);
+
+        default:
+            return true;
+        }
+    }
+
+    if(optind < argc)
+    {
+        for (int index = optind; index < argc; index++)
+            printf ("Non-option argument %s\n", argv[index]);
+        return true;
+    }
+    return false;
+}
 void Config::LoadConfig()
 {
     deckManager.LoadLFList();
