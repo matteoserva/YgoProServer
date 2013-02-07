@@ -10,6 +10,9 @@ SRC += $(shell ls ygopro/ocgcore/*.c ygopro/ocgcore/*.cpp 2>/dev/null)
 OUT = $(TARGET)
 OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 
+.PHONY:	client
+
+
 # include directories
 INCLUDES = -I ./server/ -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I ./ygopro/ocgcore/ -I ./ygopro/gframe/  -I /usr/include/irrlicht/
 
@@ -26,7 +29,11 @@ LIBS =
 
 # compile flags
 LDFLAGS = -levent -llua5.2 -lsqlite3 -levent_pthreads
-default: $(OUT)
+
+default: client server
+server: $(OUT)
+
+
 
 $(OUT): $(OBJ)                                                                                                                                                                               
 	$(CPP) -o $(OUT) $(OBJ) $(LDFLAGS)
@@ -37,5 +44,13 @@ $(OUT): $(OBJ)
 .cpp.o:
 	$(CPP) $(INCLUDES) $(CPPFLAGS) -c $< -o $@
 
-clean:
-	rm -f $(OBJ) $(OUT) 
+clean:	client-clean server-clean
+
+client:
+	make -C client/
+
+client-clean:
+	make -C client/ clean
+
+server-clean:
+	rm -f $(OBJ) $(OUT)
