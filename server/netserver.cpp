@@ -9,9 +9,7 @@ namespace ygo
 CMNetServer::CMNetServer(RoomManager*roomManager,unsigned char mode):roomManager(roomManager)
 {
     this->mode = mode;
-    server_port = 0;
 
-    listener = 0;
     duel_mode = 0;
     last_sent = 0;
 
