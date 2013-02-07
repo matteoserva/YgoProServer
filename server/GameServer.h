@@ -17,7 +17,6 @@ private:
 	std::unordered_map<bufferevent*, DuelPlayer> users;
 	 unsigned short server_port;
 	 event_base* net_evbase;
-	 event* broadcast_ev;
 	 evconnlistener* listener;
 	 DuelMode* duel_mode;
 	 char net_server_read[0x2000];
@@ -28,9 +27,7 @@ public:
     RoomManager roomManager;
     GameServer();
 	 bool StartServer(unsigned short port);
-	 bool StartBroadcast();
 	 void StopServer();
-	 void StopBroadcast();
 	 void StopListen();
 	 void BroadcastEvent(evutil_socket_t fd, short events, void* arg);
 	 static void ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx);
