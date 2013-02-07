@@ -20,8 +20,9 @@ class DuelPlayerInfo{
 
 class CMNetServer {
 private:
-
-
+        int getNumDuelPlayers();
+        void updateServerState();
+    void destroyGame();
 	 unsigned short server_port;
         RoomManager* roomManager;
 	 event* broadcast_ev;
@@ -34,7 +35,7 @@ private:
      std::map<DuelPlayer*, DuelPlayerInfo> players;
      void playerConnected(DuelPlayer* dp);
      void playerDisconnected(DuelPlayer* dp);
-    int getMaxPlayers();
+    int getMaxDuelPlayers();
     void clientStarted();
 public:
     unsigned char mode;

@@ -1,4 +1,3 @@
-
 #include "netserver.h"
 #include "single_duel.h"
 #include "tag_duel.h"
@@ -16,18 +15,34 @@ CMNetServer::CMNetServer(RoomManager*roomManager,unsigned char mode):roomManager
     duel_mode = 0;
     last_sent = 0;
 
-
     createGame();
-
-
-    //
 }
 void CMNetServer::clientStarted()
 {
     state = PLAYING;
-
-
 }
+
+
+void CMNetServer::destroyGame()
+{
+    if(duel_mode)
+    {
+        duel_mode->EndDuel();
+        event_del(duel_mode->etimer);
+        event_free(duel_mode->etimer);
+        delete duel_mode;
+        duel_mode=0;
+    }
+}
+
+int CMNetServer::getMaxDuelPlayers()
+{
+    int maxplayers = 2;
+    if(mode == MODE_TAG)
+        maxplayers=4;
+    return maxplayers;
+}
+
 
 void CMNetServer::playerConnected(DuelPlayer *dp)
 {
@@ -36,7 +51,35 @@ void CMNetServer::playerConnected(DuelPlayer *dp)
     numPlayers=players.size();
 
     printf("giocatori connessi:%d\n",numPlayers);
-    if(numPlayers==getMaxPlayers())
+    updateServerState();
+}
+
+int CMNetServer::getNumDuelPlayers()
+{
+    int n=0;
+    for(auto it = players.cbegin(); it!=players.cend();++it)
+    {
+        if(it->first->type != NETPLAYER_TYPE_OBSERVER)
+            n++;
+    }
+    return n;
+}
+
+void CMNetServer::updateServerState()
+{
+    if(getNumDuelPlayers() < getMaxDuelPlayers() &&state==FULL)
+    {
+        state=WAITING;
+        printf("server not full\n");
+    }
+    if(numPlayers==0 && state==ZOMBIE)
+    {
+        printf("server vuoto. addio, morto\n");
+
+        destroyGame();
+        state=DEAD;
+    }
+    if(getNumDuelPlayers()>=getMaxDuelPlayers())// && state==WAITING)
     {
         printf("server full\n");
         state=FULL;
@@ -44,70 +87,34 @@ void CMNetServer::playerConnected(DuelPlayer *dp)
 
 }
 
-int CMNetServer::getMaxPlayers()
-{
-        int maxplayers = 2;
-    if(mode == MODE_TAG)
-        maxplayers=4;
-        return maxplayers;
-}
-
 void CMNetServer::playerDisconnected(DuelPlayer* dp )
 {
-
-    numPlayers--;
     players.erase(dp);
     numPlayers=players.size();
 
     printf("giocatori connessi:%d\n",numPlayers);
-    if(numPlayers < getMaxPlayers() &&state==FULL)
-    {
-        state=WAITING;
-        printf("server not full\n");
-
-    }
-    if(numPlayers==0)
-    {
-
-        printf("server vuoto. addio, morto\n");
-
-            if(duel_mode)
-            {
-                duel_mode->EndDuel();
-                event_del(duel_mode->etimer);
-                event_free(duel_mode->etimer);
-                delete duel_mode;
-
-            }
-
-            state=DEAD;
-    }
-
+    updateServerState();
 }
 
 void CMNetServer::createGame()
 {
 
-        event_base* net_evbase=roomManager->net_evbase;
-        if(mode == MODE_SINGLE)
-        {
-            duel_mode = new SingleDuel(false);
-            duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
-        }
-        else if(mode == MODE_MATCH)
-        {
-            duel_mode = new SingleDuel(true);
-            duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
-        }
-        else if(mode == MODE_TAG)
-        {
-            duel_mode = new TagDuel();
-            duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, TagDuel::TagTimer, duel_mode);
-        }
-
-
-
-
+    event_base* net_evbase=roomManager->net_evbase;
+    if(mode == MODE_SINGLE)
+    {
+        duel_mode = new SingleDuel(false);
+        duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
+    }
+    else if(mode == MODE_MATCH)
+    {
+        duel_mode = new SingleDuel(true);
+        duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
+    }
+    else if(mode == MODE_TAG)
+    {
+        duel_mode = new TagDuel();
+        duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, TagDuel::TagTimer, duel_mode);
+    }
 
     BufferIO::CopyWStr(L"", duel_mode->name, 20);
     BufferIO::CopyWStr(L"", duel_mode->pass, 20);
@@ -144,10 +151,11 @@ void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
     printf("DisconnectPlayer called\n");
 
     auto bit = players.find(dp);
-	if(bit != players.end()) {
-	    gameServer->DisconnectPlayer(dp);
-	    playerDisconnected(dp);
-	}
+    if(bit != players.end())
+    {
+        gameServer->DisconnectPlayer(dp);
+        playerDisconnected(dp);
+    }
 }
 
 void CMNetServer::ExtractPlayer(DuelPlayer* dp)
@@ -155,41 +163,32 @@ void CMNetServer::ExtractPlayer(DuelPlayer* dp)
     //it removes the player from the duel without disconnecting its tcp connection
     printf("ExtractPlayer called\n");
     playerDisconnected(dp);
-	LeaveGame(dp);
+    LeaveGame(dp);
 }
 void CMNetServer::InsertPlayer(DuelPlayer* dp)
 {
-    //it insert forcefully the player in the server
+    //it inserts forcefully the player in the server
     printf("InsertPlayer called\n");
     playerConnected(dp);
     CTOS_JoinGame csjg;
     csjg.version = PRO_VERSION;
-	csjg.gameid = 0;
-	BufferIO::CopyWStr("", csjg.pass, 20);
-	dp->game=0;
-	dp->type=0xff;
+    csjg.gameid = 0;
+    BufferIO::CopyWStr("", csjg.pass, 20);
+    dp->game=0;
+    dp->type=0xff;
     duel_mode->JoinGame(dp, &csjg, false);
-    //SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
-        SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
-        SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel");
+    SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
+    SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel");
     duel_mode->host_player=NULL;
-    //TODO
-
 }
 
 
 void CMNetServer::LeaveGame(DuelPlayer* dp)
 {
     if(state != ZOMBIE && dp->game == duel_mode)
-    {
         duel_mode->LeaveGame(dp);
-    }
     else
-    {
-        //playerDisconnected();
         DisconnectPlayer(dp);
-    }
-
 }
 
 void CMNetServer::StopBroadcast()
@@ -198,16 +197,12 @@ void CMNetServer::StopBroadcast()
 
 void CMNetServer::StopListen()
 {
-
 }
 
-
-
 void CMNetServer::StopServer()
-{
+{   //the duel asked me to stop
     printf("netserver server diventato zombie\n");
     state = ZOMBIE;
-    // createGame();
 }
 
 void CMNetServer::SendMessageToPlayer(DuelPlayer*dp, char*msg)
@@ -219,19 +214,20 @@ void CMNetServer::SendMessageToPlayer(DuelPlayer*dp, char*msg)
 }
 
 
-void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto) {
-		char* p = net_server_write;
-		BufferIO::WriteInt16(p, 1);
-		BufferIO::WriteInt8(p, proto);
-		last_sent = 3;
-		if(!dp)
-			return;
-		bufferevent_write(dp->bev, net_server_write, last_sent);
+void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
+{
+    char* p = net_server_write;
+    BufferIO::WriteInt16(p, 1);
+    BufferIO::WriteInt8(p, proto);
+    last_sent = 3;
+    if(!dp)
+        return;
+    bufferevent_write(dp->bev, net_server_write, last_sent);
 
-		if(proto == STOC_DUEL_START)
-            clientStarted();
+    if(proto == STOC_DUEL_START)
+        clientStarted();
 
-	}
+}
 void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
     char* pdata = data;
@@ -334,10 +330,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!duel_mode)
             break;
-
         InsertPlayer(dp);
-
-
         break;
     }
     case CTOS_LEAVE_GAME:
@@ -360,6 +353,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(!duel_mode || duel_mode->pduel)
             break;
         duel_mode->ToDuelist(dp);
+        updateServerState();
         break;
     }
     case CTOS_HS_TOOBSERVER:
@@ -367,6 +361,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(!duel_mode || duel_mode->pduel)
             break;
         duel_mode->ToObserver(dp);
+        updateServerState();
         break;
     }
     case CTOS_HS_READY:
@@ -374,7 +369,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!duel_mode || duel_mode->pduel)
             break;
-            duel_mode->host_player = dp;
+        duel_mode->host_player = dp;
         duel_mode->PlayerReady(dp, CTOS_HS_NOTREADY - pktType);
         duel_mode->StartDuel(dp);
         duel_mode->host_player=NULL;
