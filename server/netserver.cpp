@@ -28,6 +28,14 @@ void CMNetServer::destroyGame()
 {
     if(duel_mode)
     {
+        if(state != DEAD)
+        {
+            auto tempPlayers = players;
+            for(auto it =tempPlayers.cbegin(); it!=tempPlayers.cend(); ++it)
+            {
+                LeaveGame(it->first);
+            }
+        }
         duel_mode->EndDuel();
         event_del(duel_mode->etimer);
         event_free(duel_mode->etimer);
@@ -65,7 +73,7 @@ void CMNetServer::playerConnected(DuelPlayer *dp)
 int CMNetServer::getNumDuelPlayers()
 {
     int n=0;
-    for(auto it = players.cbegin(); it!=players.cend();++it)
+    for(auto it = players.cbegin(); it!=players.cend(); ++it)
     {
         if(it->first->type != NETPLAYER_TYPE_OBSERVER)
             n++;
@@ -208,7 +216,8 @@ void CMNetServer::StopListen()
 }
 
 void CMNetServer::StopServer()
-{   //the duel asked me to stop
+{
+    //the duel asked me to stop
     printf("netserver server diventato zombie\n");
     setState(ZOMBIE);
 }
