@@ -92,7 +92,7 @@ void Config::LoadConfig()
             else if(!strcmp(strbuf,"serverport"))
             {
                 if(serverport)
-                    cout<<"the serverport id already set, ignoring the one in the config file"<<endl;
+                    cout<<"the serverport is already set, ignoring the one in the config file"<<endl;
                 else
                 {
                     serverport = stoi(valbuf);
