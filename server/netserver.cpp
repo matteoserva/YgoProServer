@@ -38,22 +38,14 @@ void CMNetServer::auto_idle_cb(evutil_socket_t fd, short events, void* arg)
 
 void CMNetServer::clientStarted()
 {
-    setState(PLAYING);
+    if(state==FULL)
+        setState(PLAYING);
 }
 
 
 void CMNetServer::setState(State state)
 {
-    event_del(auto_idle);
     this->state=state;
-    if(state == FULL)
-    {
-        timeval timeout = {10, 0};
-
-        event_add(auto_idle, &timeout);
-
-
-    }
 }
 
 void CMNetServer::destroyGame()
@@ -88,8 +80,6 @@ int CMNetServer::getMaxDuelPlayers()
 void CMNetServer::playerReadinessChange(DuelPlayer *dp, bool isReady)
 {
     players[dp].isReady = isReady;
-
-
     printf("readiness change %d\n",isReady);
 }
 
@@ -116,6 +106,8 @@ int CMNetServer::getNumDuelPlayers()
 
 void CMNetServer::updateServerState()
 {
+    event_del(auto_idle);
+
     if(getNumDuelPlayers() < getMaxDuelPlayers() &&state==FULL)
     {
         setState(WAITING);
@@ -128,10 +120,12 @@ void CMNetServer::updateServerState()
         destroyGame();
         setState(DEAD);
     }
-    if(getNumDuelPlayers()>=getMaxDuelPlayers())// && state==WAITING)
+    if(getNumDuelPlayers()>=getMaxDuelPlayers() && state==WAITING))//
     {
         printf("server full\n");
         setState(FULL);
+        timeval timeout = {10, 0};
+        event_add(auto_idle, &timeout);
     }
 
 }
