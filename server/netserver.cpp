@@ -415,6 +415,26 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         playerReadinessChange(dp,false);
         duel_mode->ToDuelist(dp);
         updateServerState();
+
+
+        /*  to avoid a bug in the XXXduel.cpp
+            when a user clicks on "toduelist" his information
+            about other user's readiness is not updated
+        */
+        for(auto it = players.cbegin();it!=players.cend();++it)
+        {
+            if(it->first != dp && it->first->type != NETPLAYER_TYPE_OBSERVER && it->second.isReady)
+                {
+                   STOC_HS_PlayerChange scpc;
+                    scpc.status = (it->first->type << 4) |PLAYERCHANGE_READY;
+
+                    SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+                    printf("sent player change to p\n");
+                }
+        }
+
+
+
         break;
     }
     case CTOS_HS_TOOBSERVER:
