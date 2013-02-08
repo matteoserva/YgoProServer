@@ -38,12 +38,11 @@ private:
     void destroyGame();
     event* auto_idle;
     static void auto_idle_cb(evutil_socket_t fd, short events, void* arg);
-    RoomManager* roomManager;
+
     void playerReadinessChange(DuelPlayer *dp, bool isReady);
     DuelMode* duel_mode;
-    char net_server_read[0x2000];
-    char net_server_write[0x2000];
-    unsigned short last_sent;
+
+
     int numPlayers;
     std::map<DuelPlayer*, DuelPlayerInfo> players;
     void playerConnected(DuelPlayer* dp);
@@ -65,37 +64,13 @@ public:
     void createGame();
     void DisconnectPlayer(DuelPlayer* dp);
     void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
-    void SendMessageToPlayer(DuelPlayer*dp, char*msg);
-    void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
-    template<typename ST>
-    void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st)
-    {
-        char* p = net_server_write;
-        BufferIO::WriteInt16(p, 1 + sizeof(ST));
-        BufferIO::WriteInt8(p, proto);
-        memcpy(p, &st, sizeof(ST));
-        last_sent = sizeof(ST) + 3;
-        if(dp)
-            bufferevent_write(dp->bev, net_server_write, last_sent);
 
-    }
     void InsertPlayer(DuelPlayer* dp);
     void ExtractPlayer(DuelPlayer* dp);
-    void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
-    {
-        char* p = net_server_write;
-        BufferIO::WriteInt16(p, 1 + len);
-        BufferIO::WriteInt8(p, proto);
-        memcpy(p, buffer, len);
-        last_sent = len + 3;
-        if(dp)
-            bufferevent_write(dp->bev, net_server_write, last_sent);
-    }
-    void ReSendToPlayer(DuelPlayer* dp)
-    {
-        if(dp)
-            bufferevent_write(dp->bev, net_server_write, last_sent);
-    }
+
+    using CMNetServerInterface::SendPacketToPlayer;
+    void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
+
 };
 
 }

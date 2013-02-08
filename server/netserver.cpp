@@ -6,16 +6,24 @@
 namespace ygo
 {
 
-CMNetServer::CMNetServer(RoomManager*roomManager,unsigned char mode):CMNetServerInterface(),roomManager(roomManager)
+CMNetServer::CMNetServer(RoomManager*roomManager,unsigned char mode):CMNetServerInterface(roomManager)
 {
     this->mode = mode;
 
     duel_mode = 0;
-    last_sent = 0;
+
 
 
 
     createGame();
+
+}
+
+void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
+{
+    CMNetServerInterface::SendPacketToPlayer(dp,proto);
+    if(proto == STOC_DUEL_START)
+        clientStarted();
 
 }
 
@@ -250,29 +258,7 @@ void CMNetServer::StopServer()
     setState(ZOMBIE);
 }
 
-void CMNetServer::SendMessageToPlayer(DuelPlayer*dp, char*msg)
-{
-    STOC_Chat scc;
-    scc.player = dp->type;
-    int msglen = BufferIO::CopyWStr(msg, scc.msg, 256);
-    SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
-}
 
-
-void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
-{
-    char* p = net_server_write;
-    BufferIO::WriteInt16(p, 1);
-    BufferIO::WriteInt8(p, proto);
-    last_sent = 3;
-    if(!dp)
-        return;
-    bufferevent_write(dp->bev, net_server_write, last_sent);
-
-    if(proto == STOC_DUEL_START)
-        clientStarted();
-
-}
 
 void CMNetServer::toObserver(DuelPlayer* dp)
 {
