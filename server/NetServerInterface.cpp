@@ -33,20 +33,20 @@ void CMNetServerInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char prot
 
 
 
-        void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
-        {
-            char* p = net_server_write;
-            BufferIO::WriteInt16(p, 1 + len);
-            BufferIO::WriteInt8(p, proto);
-            memcpy(p, buffer, len);
-            last_sent = len + 3;
-            if(dp)
-                bufferevent_write(dp->bev, net_server_write, last_sent);
-        }
-        void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
-        {
-            if(dp)
-                bufferevent_write(dp->bev, net_server_write, last_sent);
-        }
+void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
+{
+    char* p = net_server_write;
+    BufferIO::WriteInt16(p, 1 + len);
+    BufferIO::WriteInt8(p, proto);
+    memcpy(p, buffer, len);
+    last_sent = len + 3;
+    if(dp)
+        bufferevent_write(dp->bev, net_server_write, last_sent);
+}
+void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
+{
+    if(dp)
+        bufferevent_write(dp->bev, net_server_write, last_sent);
+}
 
 }
