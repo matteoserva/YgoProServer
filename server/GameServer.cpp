@@ -154,6 +154,14 @@ bool GameServer::handleChatCommand(DuelPlayer* dp,unsigned short* msg)
         netServer->InsertPlayer(dp);
         return true;
     }
+    if(!strcmp(messaggio,"!match"))
+    {
+        dp->netServer->ExtractPlayer(dp);
+        CMNetServer* netServer = roomManager.getFirstAvailableServer(MODE_MATCH);
+        dp->netServer=netServer;
+        netServer->InsertPlayer(dp);
+        return true;
+    }
 
     return false;
 }

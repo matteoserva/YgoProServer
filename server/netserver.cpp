@@ -113,14 +113,14 @@ void CMNetServer::updateServerState()
         setState(WAITING);
         printf("server not full\n");
     }
-    if(numPlayers==0 && state==ZOMBIE)
+    if(numPlayers==0 && (state==ZOMBIE || state == WAITING))
     {
         printf("server vuoto. addio, morto\n");
 
         destroyGame();
         setState(DEAD);
     }
-    if(getNumDuelPlayers()>=getMaxDuelPlayers() && state==WAITING))//
+    if(getNumDuelPlayers()>=getMaxDuelPlayers() && state==WAITING)//
     {
         printf("server full\n");
         setState(FULL);
@@ -222,7 +222,7 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
     dp->type=0xff;
     duel_mode->JoinGame(dp, &csjg, false);
     SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
-    SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel");
+    SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel or !match");
     duel_mode->host_player=NULL;
 }
 
