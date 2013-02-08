@@ -25,6 +25,7 @@ namespace ygo {
         public:
         RoomManager();
         ~RoomManager();
+        bool InsertPlayer(DuelPlayer*dp);
         CMNetServer* getFirstAvailableServer();
         CMNetServer* getFirstAvailableServer(unsigned char mode);
     };

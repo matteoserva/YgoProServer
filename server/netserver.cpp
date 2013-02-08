@@ -6,7 +6,7 @@
 namespace ygo
 {
 
-CMNetServer::CMNetServer(RoomManager*roomManager,unsigned char mode):roomManager(roomManager)
+CMNetServer::CMNetServer(RoomManager*roomManager,unsigned char mode):CMNetServerInterface(),roomManager(roomManager)
 {
     this->mode = mode;
 

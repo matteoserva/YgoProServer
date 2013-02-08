@@ -141,7 +141,7 @@ bool GameServer::handleChatCommand(DuelPlayer* dp,unsigned short* msg)
     if(!strcmp(messaggio,"!tag"))
     {
         dp->netServer->ExtractPlayer(dp);
-        CMNetServer* netServer = roomManager.getFirstAvailableServer(MODE_TAG);
+        CMNetServerInterface* netServer = roomManager.getFirstAvailableServer(MODE_TAG);
         dp->netServer=netServer;
         netServer->InsertPlayer(dp);
         return true;
@@ -149,7 +149,7 @@ bool GameServer::handleChatCommand(DuelPlayer* dp,unsigned short* msg)
     if(!strcmp(messaggio,"!single"))
     {
         dp->netServer->ExtractPlayer(dp);
-        CMNetServer* netServer = roomManager.getFirstAvailableServer(MODE_SINGLE);
+        CMNetServerInterface* netServer = roomManager.getFirstAvailableServer(MODE_SINGLE);
         dp->netServer=netServer;
         netServer->InsertPlayer(dp);
         return true;
@@ -157,7 +157,7 @@ bool GameServer::handleChatCommand(DuelPlayer* dp,unsigned short* msg)
     if(!strcmp(messaggio,"!match"))
     {
         dp->netServer->ExtractPlayer(dp);
-        CMNetServer* netServer = roomManager.getFirstAvailableServer(MODE_MATCH);
+        CMNetServerInterface* netServer = roomManager.getFirstAvailableServer(MODE_MATCH);
         dp->netServer=netServer;
         netServer->InsertPlayer(dp);
         return true;
@@ -180,15 +180,11 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         return;
     }
 
+
     if(dp->netServer == NULL)
     {
-        CMNetServer* netServer = roomManager.getFirstAvailableServer();
-        if(netServer == NULL)
-        {
-            DisconnectPlayer(dp);
-            return;
-        }
-        dp->netServer = netServer;
+            if(!roomManager.InsertPlayer(dp))
+                return;
     }
 
     if(pktType==CTOS_CHAT && handleChatCommand(dp,(unsigned short*)pdata))

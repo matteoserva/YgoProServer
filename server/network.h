@@ -97,14 +97,14 @@ struct STOC_HS_WatchChange {
 };
 
 class DuelMode;
-class CMNetServer;
+class CMNetServerInterface;
 struct DuelPlayer {
 	unsigned short name[20];
 	DuelMode* game;
 	unsigned char type;
 	unsigned char state;
 	bufferevent* bev;
-	CMNetServer* netServer;
+	CMNetServerInterface* netServer;
 	DuelPlayer() {
 		game = 0;
 		type = 0;

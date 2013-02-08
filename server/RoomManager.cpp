@@ -78,6 +78,19 @@ CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
     //netServer.gameServer=
 
 }
+
+bool RoomManager::InsertPlayer(DuelPlayer*dp)
+{//true is success
+        CMNetServer* netServer = getFirstAvailableServer();
+        if(netServer == NULL)
+        {
+            gameServer->DisconnectPlayer(dp);
+            return false;
+        }
+        dp->netServer = netServer;
+        return true;
+}
+
 CMNetServer* RoomManager::getFirstAvailableServer()
 {
     int i = 0;

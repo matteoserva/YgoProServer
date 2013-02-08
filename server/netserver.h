@@ -8,7 +8,7 @@
 #include <set>
 #include <unordered_map>
 #include <map>
-
+#include "NetServerInterface.h"
 namespace ygo
 {
 class GameServer;
@@ -23,7 +23,10 @@ bool isReady;
 
 };
 
-class CMNetServer
+
+
+
+class CMNetServer:public CMNetServerInterface
 {
     public:
     unsigned char mode;
