@@ -33,6 +33,8 @@ private:
     int getNumDuelPlayers();
     void updateServerState();
     void destroyGame();
+    event* auto_idle;
+    static void auto_idle_cb(evutil_socket_t fd, short events, void* arg);
     RoomManager* roomManager;
     void playerReadinessChange(DuelPlayer *dp, bool isReady);
     DuelMode* duel_mode;
@@ -46,6 +48,7 @@ private:
     int getMaxDuelPlayers();
     void clientStarted();
     void setState(State state);
+    void toObserver(DuelPlayer*dp);
 
 public:
     GameServer* gameServer;

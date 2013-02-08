@@ -13,15 +13,47 @@ CMNetServer::CMNetServer(RoomManager*roomManager,unsigned char mode):roomManager
     duel_mode = 0;
     last_sent = 0;
 
+
+
     createGame();
+
 }
+
+void CMNetServer::auto_idle_cb(evutil_socket_t fd, short events, void* arg)
+{
+    CMNetServer* that = (CMNetServer*)arg;
+    printf("auto idle_cb\n");
+    if(that->state != FULL)
+        return;
+    for(auto it = that->players.cbegin();it!=that->players.cend();++it)
+    {
+        if(it->first->type != NETPLAYER_TYPE_OBSERVER && !(it->second.isReady))
+            {
+                that->SendMessageToPlayer(it->first,"You are moved to spectators for not being ready");
+                that->toObserver(it->first);
+
+            }
+    }
+}
+
 void CMNetServer::clientStarted()
 {
     setState(PLAYING);
 }
+
+
 void CMNetServer::setState(State state)
 {
+    event_del(auto_idle);
     this->state=state;
+    if(state == FULL)
+    {
+        timeval timeout = {10, 0};
+
+        event_add(auto_idle, &timeout);
+
+
+    }
 }
 
 void CMNetServer::destroyGame()
@@ -42,6 +74,7 @@ void CMNetServer::destroyGame()
         delete duel_mode;
         duel_mode=0;
     }
+    event_free(auto_idle);
 }
 
 int CMNetServer::getMaxDuelPlayers()
@@ -114,8 +147,8 @@ void CMNetServer::playerDisconnected(DuelPlayer* dp )
 
 void CMNetServer::createGame()
 {
-
     event_base* net_evbase=roomManager->net_evbase;
+    auto_idle = event_new(net_evbase, 0, EV_TIMEOUT , CMNetServer::auto_idle_cb, this);
     if(mode == MODE_SINGLE)
     {
         duel_mode = new SingleDuel(false);
@@ -161,6 +194,7 @@ void CMNetServer::createGame()
     duel_mode->setNetServer(this);
     setState(WAITING);
     numPlayers=0;
+
 }
 void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
 {
@@ -245,6 +279,15 @@ void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
         clientStarted();
 
 }
+
+void CMNetServer::toObserver(DuelPlayer* dp)
+{
+        duel_mode->ToObserver(dp);
+        playerReadinessChange(dp,false);
+        updateServerState();
+}
+
+
 void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
     char* pdata = data;
@@ -378,8 +421,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!duel_mode || duel_mode->pduel)
             break;
-        duel_mode->ToObserver(dp);
-        updateServerState();
+        toObserver(dp);
         break;
     }
     case CTOS_HS_READY:
