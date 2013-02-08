@@ -30,10 +30,10 @@ LIBS =
 # compile flags
 LDFLAGS = -levent -llua5.2 -lsqlite3 -levent_pthreads
 
-default: client server
+
 server: $(OUT)
 
-
+all: client server
 
 $(OUT): $(OBJ)                                                                                                                                                                               
 	$(CPP) -o $(OUT) $(OBJ) $(LDFLAGS)
