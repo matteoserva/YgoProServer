@@ -14,14 +14,7 @@ namespace ygo
 class GameServer;
 class RoomManager;
 
-struct DuelPlayerInfo
-{
-    DuelPlayerInfo():isReady(false)
-    {
-    };
-bool isReady;
 
-};
 
 
 
@@ -44,7 +37,7 @@ private:
 
 
     int numPlayers;
-    std::map<DuelPlayer*, DuelPlayerInfo> players;
+
     void playerConnected(DuelPlayer* dp);
     void playerDisconnected(DuelPlayer* dp);
     int getMaxDuelPlayers();
@@ -53,8 +46,8 @@ private:
     void toObserver(DuelPlayer*dp);
 
 public:
-    GameServer* gameServer;
-    CMNetServer(RoomManager*roomManager,unsigned char mode);
+
+    CMNetServer(RoomManager*roomManager,GameServer*,unsigned char mode);
     void LeaveGame(DuelPlayer* dp);
     bool StartServer(unsigned short port);
     bool StartBroadcast();

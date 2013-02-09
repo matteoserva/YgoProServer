@@ -6,7 +6,8 @@ namespace ygo
 
 
 
-CMNetServerInterface::CMNetServerInterface(RoomManager* roomManager):roomManager(roomManager),last_sent(0)
+CMNetServerInterface::CMNetServerInterface(RoomManager* roomManager,GameServer*gameServer):
+roomManager(roomManager),gameServer(gameServer),last_sent(0)
 {
 
 }

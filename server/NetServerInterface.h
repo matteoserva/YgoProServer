@@ -2,11 +2,23 @@
 #define _NetServerInterface_H_
 #include "network.h"
 
+
+
 namespace ygo
 {
 class DuelPlayer;
 
 class RoomManager;
+class GameServer;
+struct DuelPlayerInfo
+{
+    DuelPlayerInfo():isReady(false)
+    {
+    };
+bool isReady;
+
+};
+
 class CMNetServerInterface
 {
 private:
@@ -15,8 +27,10 @@ protected:
     RoomManager* roomManager;
     char net_server_read[0x2000];
     char net_server_write[0x2000];
+    std::map<DuelPlayer*, DuelPlayerInfo> players;
+    GameServer* gameServer;
 public:
-    CMNetServerInterface(RoomManager* roomManager);
+    CMNetServerInterface(RoomManager* roomManager,GameServer*gameServer);
     virtual ~CMNetServerInterface() {};
     virtual void ExtractPlayer(DuelPlayer* dp)=0;
     virtual void InsertPlayer(DuelPlayer* dp)=0;

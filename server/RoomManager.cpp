@@ -33,7 +33,8 @@ RoomManager::~RoomManager()
  */
 void RoomManager::keepAlive(evutil_socket_t fd, short events, void* arg)
 {
-//printf("roommanager keepalive\n");
+RoomManager*that = (RoomManager*) arg;
+that->removeDeadRooms();
 }
 
 int RoomManager::RoomManagerThread(void* arg)
@@ -71,7 +72,7 @@ CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 
         i++;
     }
-    removeDeadRooms();
+
 
     printf("Server non trovato, creo uno nuovo \n");
     return createServer(mode);
@@ -106,7 +107,7 @@ CMNetServer* RoomManager::getFirstAvailableServer()
 
         i++;
     }
-    removeDeadRooms();
+
 
     printf("Server non trovato, creo uno nuovo \n");
 
@@ -119,8 +120,8 @@ CMNetServer* RoomManager::createServer(unsigned char mode)
     {
         return NULL;
     }
-    CMNetServer *netServer = new CMNetServer(this,mode);
-    netServer->gameServer=gameServer;
+    CMNetServer *netServer = new CMNetServer(this,gameServer,mode);
+
     elencoServer.push_back(netServer);
     return netServer;
 }
