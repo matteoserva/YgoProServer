@@ -52,9 +52,7 @@ int RoomManager::RoomManagerThread(void* arg)
     printf("roommanager thread terminato\n");
 
     event_free(ev1);
-
     event_base_free(net_evbase);
-
 }
 
 CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
@@ -69,16 +67,10 @@ CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
             printf("ho scelto il server %d\n",i);
             return *it;
         }
-
-
         i++;
     }
-
-
     printf("Server non trovato, creo uno nuovo \n");
     return createServer(mode);
-    //netServer.gameServer=
-
 }
 
 bool RoomManager::InsertPlayer(DuelPlayer*dp)

@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <map>
 #include "NetServerInterface.h"
+#include "field.h"
 namespace ygo
 {
 class GameServer;
@@ -26,6 +27,8 @@ class CMNetServer:public CMNetServerInterface
     enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};
     State state;
 private:
+    void Victory(unsigned char winner);
+    unsigned char last_winner;
     int getNumDuelPlayers();
     void updateServerState();
     void destroyGame();
@@ -63,6 +66,7 @@ public:
 
     using CMNetServerInterface::SendPacketToPlayer;
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
+    void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
 
 };
 

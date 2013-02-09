@@ -19,6 +19,20 @@ void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
         clientStarted();
 
 }
+void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
+{
+    CMNetServerInterface::SendBufferToPlayer(dp,proto,buffer,len);
+    if(proto == STOC_GAME_MSG)
+    {
+        unsigned char* wbuf = (unsigned char*)buffer;
+        if(wbuf[0] == MSG_WIN)
+        {
+            printf("---------vittoria per il giocatore\n");
+            last_winner =wbuf[1];
+        }
+
+    }
+}
 
 void CMNetServer::auto_idle_cb(evutil_socket_t fd, short events, void* arg)
 {
@@ -243,10 +257,35 @@ void CMNetServer::StopListen()
 {
 }
 
+void CMNetServer::Victory(unsigned char winner)
+{
+        DuelPlayer* _players[4];
+        for(auto it = players.cbegin();it!= players.cend();++it)
+        {
+            if(it->first->type <= NETPLAYER_TYPE_PLAYER4)
+                _players[it->first->type] = it->first;
+        }
+        if(mode == MODE_SINGLE || mode == MODE_MATCH)
+        {
+            char win[20], lose[20];
+            BufferIO::CopyWStr(_players[winner]->name,win,20);
+            BufferIO::CopyWStr(_players[1-winner]->name,lose,20);
+            printf("and the winner is...%s, loser: %s\n",win,lose);
+
+        }
+
+
+}
+
+
 void CMNetServer::StopServer()
 {
     //the duel asked me to stop
     printf("netserver server diventato zombie\n");
+    if(state==PLAYING)
+    {
+        Victory(last_winner);
+    }
     setState(ZOMBIE);
 }
 
