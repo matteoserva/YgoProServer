@@ -2,7 +2,7 @@
 #ifndef ROOMMANAGER_H
 #define ROOMMANAGER_H
 #include <list>
-
+#include <mutex>
 #include "WaitingRoom.h"
 namespace ygo {
 
@@ -12,6 +12,7 @@ namespace ygo {
     class RoomManager
     {
         private:
+        std::mutex elencoServerMutex;
         WaitingRoom* waitingRoom;
         void removeDeadRooms();
         bool FillRoom(CMNetServer* room);

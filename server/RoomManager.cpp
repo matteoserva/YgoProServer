@@ -1,5 +1,4 @@
 
-
 #include "GameServer.h"
 #include "RoomManager.h"
 namespace ygo
@@ -33,9 +32,9 @@ RoomManager::~RoomManager()
 
 void RoomManager::keepAlive(evutil_socket_t fd, short events, void* arg)
 {
-RoomManager*that = (RoomManager*) arg;
-that->removeDeadRooms();
-that->FillAllRooms();
+    RoomManager*that = (RoomManager*) arg;
+    that->removeDeadRooms();
+    that->FillAllRooms();
 }
 
 int RoomManager::RoomManagerThread(void* arg)
@@ -74,17 +73,18 @@ CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 }
 
 bool RoomManager::InsertPlayer(DuelPlayer*dp)
-{//tfirst room
-        CMNetServer* netServer = getFirstAvailableServer();
-        if(netServer == nullptr)
-        {
-            gameServer->DisconnectPlayer(dp);
-            return false;
-        }
-        dp->netServer=netServer;
-        netServer->InsertPlayer(dp);
-        FillRoom(netServer);
-        return true;
+{
+    //tfirst room
+    CMNetServer* netServer = getFirstAvailableServer();
+    if(netServer == nullptr)
+    {
+        gameServer->DisconnectPlayer(dp);
+        return false;
+    }
+    dp->netServer=netServer;
+    netServer->InsertPlayer(dp);
+    FillRoom(netServer);
+    return true;
 }
 
 bool RoomManager::FillRoom(CMNetServer* room)
@@ -92,7 +92,7 @@ bool RoomManager::FillRoom(CMNetServer* room)
     if(room->state!= CMNetServer::State::WAITING)
         return true;
 
-    for(DuelPlayer* base = room->getFirstPlayer();room->state!= CMNetServer::State::FULL;)
+    for(DuelPlayer* base = room->getFirstPlayer(); room->state!= CMNetServer::State::FULL;)
     {
         DuelPlayer* dp = waitingRoom->ExtractBestMatchPlayer(base);
         if(dp == nullptr)
@@ -121,25 +121,27 @@ bool RoomManager::FillAllRooms()
 }
 
 bool RoomManager::InsertPlayerInWaitingRoom(DuelPlayer*dp)
-{//true is success
+{
+    //true is success
 
-        CMNetServerInterface* netServer = waitingRoom;
-        if(netServer == NULL)
-        {
-            gameServer->DisconnectPlayer(dp);
-            return false;
-        }
-        dp->netServer = netServer;
-        return true;
+    CMNetServerInterface* netServer = waitingRoom;
+    if(netServer == NULL)
+    {
+        gameServer->DisconnectPlayer(dp);
+        return false;
+    }
+    dp->netServer = netServer;
+    return true;
 }
 
 bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
-{//true is success
-        CMNetServer* netServer = getFirstAvailableServer(mode);
-        dp->netServer=netServer;
-        netServer->InsertPlayer(dp);
-        FillRoom(netServer);
-        return true;
+{
+    //true is success
+    CMNetServer* netServer = getFirstAvailableServer(mode);
+    dp->netServer=netServer;
+    netServer->InsertPlayer(dp);
+    FillRoom(netServer);
+    return true;
 }
 
 CMNetServer* RoomManager::getFirstAvailableServer()
@@ -166,6 +168,7 @@ CMNetServer* RoomManager::getFirstAvailableServer()
 }
 CMNetServer* RoomManager::createServer(unsigned char mode)
 {
+    std::lock_guard<std::mutex> guard(elencoServerMutex);
     if(elencoServer.size() >= 500)
     {
         return NULL;
@@ -178,6 +181,7 @@ CMNetServer* RoomManager::createServer(unsigned char mode)
 
 void RoomManager::removeDeadRooms()
 {
+    std::lock_guard<std::mutex> guard(elencoServerMutex);
     int i=0;
     //printf("analizzo la lista server e cerco i morti\n");
     for(auto it =elencoServer.begin(); it!=elencoServer.end();)
