@@ -35,6 +35,7 @@ void RoomManager::keepAlive(evutil_socket_t fd, short events, void* arg)
 {
 RoomManager*that = (RoomManager*) arg;
 that->removeDeadRooms();
+that->FillAllRooms();
 }
 
 int RoomManager::RoomManagerThread(void* arg)
@@ -82,10 +83,49 @@ CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 
 bool RoomManager::InsertPlayer(DuelPlayer*dp)
 {//tfirst room
-        CMNetServerInterface* netServer = getFirstAvailableServer();
+        CMNetServer* netServer = getFirstAvailableServer();
+        if(netServer == nullptr)
+        {
+            gameServer->DisconnectPlayer(dp);
+            return false;
+        }
         dp->netServer=netServer;
         netServer->InsertPlayer(dp);
+        FillRoom(netServer);
         return true;
+}
+
+bool RoomManager::FillRoom(CMNetServer* room)
+{
+    if(room->state!= CMNetServer::State::WAITING)
+        return true;
+
+    for(DuelPlayer* base = room->getFirstPlayer();room->state!= CMNetServer::State::FULL;)
+    {
+        DuelPlayer* dp = waitingRoom->ExtractBestMatchPlayer(base);
+        if(dp == nullptr)
+            return false;
+        dp->netServer=room;
+        room->InsertPlayer(dp);
+
+    }
+    return true;
+}
+
+bool RoomManager::FillAllRooms()
+{
+    for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
+    {
+        CMNetServer *p = *it;
+        if(p->state == CMNetServer::State::WAITING )
+        {
+            bool result = FillRoom(p);
+            if(!result)
+                return false;
+        }
+    }
+    return true;
+
 }
 
 bool RoomManager::InsertPlayerInWaitingRoom(DuelPlayer*dp)
@@ -103,9 +143,10 @@ bool RoomManager::InsertPlayerInWaitingRoom(DuelPlayer*dp)
 
 bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 {//true is success
-        CMNetServerInterface* netServer = getFirstAvailableServer(mode);
+        CMNetServer* netServer = getFirstAvailableServer(mode);
         dp->netServer=netServer;
         netServer->InsertPlayer(dp);
+        FillRoom(netServer);
         return true;
 }
 
@@ -146,7 +187,7 @@ CMNetServer* RoomManager::createServer(unsigned char mode)
 void RoomManager::removeDeadRooms()
 {
     int i=0;
-    printf("analizzo la lista server e cerco i morti\n");
+    //printf("analizzo la lista server e cerco i morti\n");
     for(auto it =elencoServer.begin(); it!=elencoServer.end();)
     {
         CMNetServer *p = *it;

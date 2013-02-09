@@ -254,6 +254,7 @@ void CMNetServer::StopServer()
 
 void CMNetServer::toObserver(DuelPlayer* dp)
 {
+        printf("to observer\n");
         duel_mode->ToObserver(dp);
         playerReadinessChange(dp,false);
         updateServerState();

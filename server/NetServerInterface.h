@@ -12,10 +12,11 @@ class RoomManager;
 class GameServer;
 struct DuelPlayerInfo
 {
-    DuelPlayerInfo():isReady(false)
+    DuelPlayerInfo():isReady(false),secondsWaiting(0)
     {
     };
 bool isReady;
+unsigned int secondsWaiting;
 
 };
 
@@ -36,7 +37,10 @@ public:
     virtual void InsertPlayer(DuelPlayer* dp)=0;
     virtual void LeaveGame(DuelPlayer* dp)=0;
     virtual void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)=0;
-
+    DuelPlayer* getFirstPlayer()
+    {
+        return players.begin()->first;
+    }
 
     void SendMessageToPlayer(DuelPlayer*dp, char*msg);
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
