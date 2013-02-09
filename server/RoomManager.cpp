@@ -10,12 +10,13 @@ namespace ygo
 void RoomManager::setGameServer(GameServer* gs)
 {
     gameServer = gs;
-
+    waitingRoom = new WaitingRoom(this,gs);
 }
 
 RoomManager::RoomManager()
 {
     net_evbase = event_base_new();
+    waitingRoom=0;
     Thread::NewThread(RoomManagerThread, this);
 
 }
@@ -25,12 +26,11 @@ RoomManager::~RoomManager()
     {
         event_base_loopexit(net_evbase, 0);
     }
+    delete waitingRoom;
 
 }
 
-/*
- * This function is needed to avoid a bug in libevent
- */
+
 void RoomManager::keepAlive(evutil_socket_t fd, short events, void* arg)
 {
 RoomManager*that = (RoomManager*) arg;
@@ -81,14 +81,31 @@ CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 }
 
 bool RoomManager::InsertPlayer(DuelPlayer*dp)
+{//tfirst room
+        CMNetServerInterface* netServer = getFirstAvailableServer();
+        dp->netServer=netServer;
+        netServer->InsertPlayer(dp);
+        return true;
+}
+
+bool RoomManager::InsertPlayerInWaitingRoom(DuelPlayer*dp)
 {//true is success
-        CMNetServer* netServer = getFirstAvailableServer();
+
+        CMNetServerInterface* netServer = waitingRoom;
         if(netServer == NULL)
         {
             gameServer->DisconnectPlayer(dp);
             return false;
         }
         dp->netServer = netServer;
+        return true;
+}
+
+bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
+{//true is success
+        CMNetServerInterface* netServer = getFirstAvailableServer(mode);
+        dp->netServer=netServer;
+        netServer->InsertPlayer(dp);
         return true;
 }
 
@@ -129,10 +146,11 @@ CMNetServer* RoomManager::createServer(unsigned char mode)
 void RoomManager::removeDeadRooms()
 {
     int i=0;
+    printf("analizzo la lista server e cerco i morti\n");
     for(auto it =elencoServer.begin(); it!=elencoServer.end();)
     {
         CMNetServer *p = *it;
-        printf("analizzo la lista server e cerco i morti\n");
+
         if(p->state == CMNetServer::State::DEAD)
         {
             printf("elimino il server %d\n",i);

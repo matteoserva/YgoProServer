@@ -132,39 +132,6 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
     }
 }
 
-bool GameServer::handleChatCommand(DuelPlayer* dp,unsigned short* msg)
-{
-    char messaggio[256];
-    int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
-    printf("ricevuto messaggio %s\n",messaggio);
-
-    if(!strcmp(messaggio,"!tag"))
-    {
-        dp->netServer->ExtractPlayer(dp);
-        CMNetServerInterface* netServer = roomManager.getFirstAvailableServer(MODE_TAG);
-        dp->netServer=netServer;
-        netServer->InsertPlayer(dp);
-        return true;
-    }
-    if(!strcmp(messaggio,"!single"))
-    {
-        dp->netServer->ExtractPlayer(dp);
-        CMNetServerInterface* netServer = roomManager.getFirstAvailableServer(MODE_SINGLE);
-        dp->netServer=netServer;
-        netServer->InsertPlayer(dp);
-        return true;
-    }
-    if(!strcmp(messaggio,"!match"))
-    {
-        dp->netServer->ExtractPlayer(dp);
-        CMNetServerInterface* netServer = roomManager.getFirstAvailableServer(MODE_MATCH);
-        dp->netServer=netServer;
-        netServer->InsertPlayer(dp);
-        return true;
-    }
-
-    return false;
-}
 
 void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
@@ -175,23 +142,23 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     if(pktType ==CTOS_PLAYER_INFO)
     {
         CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
-        printf("playerinfo ricevuto da GameServer\n");
         BufferIO::CopyWStr(pkt->name, dp->name, 20);
+        char name[20];
+        BufferIO::CopyWStr(pkt->name,name,20);
+
+        printf("GameServer:Player joined %s \n",name);
         return;
     }
 
 
     if(dp->netServer == NULL)
     {
-            if(!roomManager.InsertPlayer(dp))
-                return;
+        if(!roomManager.InsertPlayerInWaitingRoom(dp))
+            return;
     }
 
-    if(pktType==CTOS_CHAT && handleChatCommand(dp,(unsigned short*)pdata))
-    {
-    }
-    else
-        dp->netServer->HandleCTOSPacket(dp,data,len);
+
+    dp->netServer->HandleCTOSPacket(dp,data,len);
 
     return;
 

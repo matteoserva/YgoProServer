@@ -6,17 +6,10 @@
 namespace ygo
 {
 
-CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode):CMNetServerInterface(roomManager,gameServer)
+CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
+:CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0)
 {
-    this->mode = mode;
-
-    duel_mode = 0;
-
-
-
-
     createGame();
-
 }
 
 void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
@@ -229,8 +222,7 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
     dp->game=0;
     dp->type=0xff;
     duel_mode->JoinGame(dp, &csjg, false);
-    SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
-    SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel or !match");
+
     duel_mode->host_player=NULL;
 }
 

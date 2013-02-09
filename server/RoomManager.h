@@ -3,7 +3,7 @@
 #define ROOMMANAGER_H
 #include <list>
 
-
+#include "WaitingRoom.h"
 namespace ygo {
 
     class GameServer;
@@ -12,6 +12,7 @@ namespace ygo {
     class RoomManager
     {
         private:
+        WaitingRoom* waitingRoom;
         void removeDeadRooms();
         CMNetServer* createServer(unsigned char mode);
         static int RoomManagerThread(void* );
@@ -25,7 +26,9 @@ namespace ygo {
         public:
         RoomManager();
         ~RoomManager();
+        bool InsertPlayerInWaitingRoom(DuelPlayer*dp);
         bool InsertPlayer(DuelPlayer*dp);
+        bool InsertPlayer(DuelPlayer*dp,unsigned char mode);
         CMNetServer* getFirstAvailableServer();
         CMNetServer* getFirstAvailableServer(unsigned char mode);
     };
