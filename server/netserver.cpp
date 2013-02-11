@@ -212,9 +212,11 @@ void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
     auto bit = players.find(dp);
     if(bit != players.end())
     {
+        dp->netServer=nullptr;
         gameServer->DisconnectPlayer(dp);
         playerDisconnected(dp);
     }
+
 }
 
 void CMNetServer::ExtractPlayer(DuelPlayer* dp)
@@ -223,7 +225,6 @@ void CMNetServer::ExtractPlayer(DuelPlayer* dp)
     printf("ExtractPlayer called\n");
     playerDisconnected(dp);
     LeaveGame(dp);
-    updateServerState();
 }
 void CMNetServer::InsertPlayer(DuelPlayer* dp)
 {
@@ -236,6 +237,7 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
     BufferIO::CopyWStr("", csjg.pass, 20);
     dp->game=0;
     dp->type=0xff;
+    dp->netServer = this;
     duel_mode->JoinGame(dp, &csjg, false);
 
     duel_mode->host_player=NULL;
@@ -246,7 +248,7 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
 {
     if(state != ZOMBIE && dp->game == duel_mode)
         duel_mode->LeaveGame(dp);
-    else
+    //else
         DisconnectPlayer(dp);
 }
 
@@ -305,13 +307,22 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
     char* pdata = data;
 
+
+    unsigned char pktType = BufferIO::ReadUInt8(pdata);
     if(state==ZOMBIE)
     {
+        /*if(pktType==CTOS_LEAVE_GAME)
+        {
+            //not needed
+            playerDisconnected(dp);
+
+
+        }*/
         printf("pacchetto ricevuto per uno zombie, ignorato\n");
 
         return;
     }
-    unsigned char pktType = BufferIO::ReadUInt8(pdata);
+
     if((pktType != CTOS_SURRENDER) && (pktType != CTOS_CHAT) && (dp->state == 0xff || (dp->state && dp->state != pktType)))
         return;
     switch(pktType)
