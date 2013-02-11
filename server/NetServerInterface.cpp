@@ -23,6 +23,11 @@ void CMNetServerInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
 
 void CMNetServerInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
 {
+    if(players.find(dp) == players.end())
+    {
+        printf("sendpacket ignorato\n");
+        return;
+    }
     char* p = net_server_write;
     BufferIO::WriteInt16(p, 1);
     BufferIO::WriteInt8(p, proto);
@@ -40,6 +45,11 @@ void CMNetServerInterface::playerReadinessChange(DuelPlayer *dp, bool isReady)
 
 void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
+    if( players.end() == players.find(dp))
+    {
+        printf("sendbuffer ignorato \n");
+        return;
+    }
     char* p = net_server_write;
     BufferIO::WriteInt16(p, 1 + len);
     BufferIO::WriteInt8(p, proto);
@@ -50,6 +60,11 @@ void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char prot
 }
 void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
 {
+    if(players.find(dp) == players.end())
+    {
+        printf("resend ignorato\n");
+        return;
+    }
     if(dp)
         bufferevent_write(dp->bev, net_server_write, last_sent);
 }

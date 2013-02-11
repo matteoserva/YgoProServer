@@ -33,6 +33,8 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
         it->second.secondsWaiting++;
         char nome[30];
         BufferIO::CopyWStr(it->first->name,nome,30);
+        if(!that->players[it->first].isReady)
+                    continue;
         //printf("%s aspetta da %d secondi\n",nome,it->second.secondsWaiting);
         if(it->second.secondsWaiting>= maxSecondsWaiting)
             players_bored.push_back(it->first);
@@ -45,8 +47,7 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
         {
             if(that->players.find(*it) != that->players.end())
             {
-                if(!that->players[*it].isReady)
-                    continue;
+
                 that->ExtractPlayer(*it);
                 that->roomManager->InsertPlayer(*it);
             }
@@ -99,12 +100,15 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     }
     if(hash == 1)
         info.lflist = deckManager._lfList[0].hash;
+
+    dp->type = NETPLAYER_TYPE_PLAYER1;
+
     STOC_JoinGame scjg;
     scjg.info=info;
     SendPacketToPlayer(dp, STOC_JOIN_GAME, scjg);
 
     STOC_TypeChange sctc;
-    sctc.type = NETPLAYER_TYPE_OBSERVER;
+    sctc.type = dp->type;
     SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
 
     STOC_HS_PlayerEnter scpe;
@@ -117,7 +121,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     scpe.pos = 1;
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
-    dp->type=NETPLAYER_TYPE_PLAYER1;
+    usleep(50000);
     SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
     SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel or !match");
 
@@ -125,6 +129,9 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
     playerReadinessChange(dp,true);
 
+    STOC_HS_PlayerChange scpc;
+    scpc.status = (dp->type << 4) | PLAYERCHANGE_READY;
+    SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
 
 }
 void WaitingRoom::LeaveGame(DuelPlayer* dp)
@@ -146,7 +153,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer*)
         {
             DuelPlayer* dp = it->first;
             if(!players[dp].isReady)
-                    continue;
+                continue;
             ExtractPlayer(dp);
             return dp;
         }

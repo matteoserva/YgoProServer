@@ -17,8 +17,8 @@ OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 INCLUDES = -I ./server/ -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I ./ygopro/ocgcore/ -I ./ygopro/gframe/  -I /usr/include/irrlicht/
 
 # C compiler flags (-g -O2 -Wall)
-CCFLAGS =  -O0 -g 
-CPPFLAGS = -std=c++0x -O0 -g
+CCFLAGS =   -O0 -g 
+CPPFLAGS =  -std=c++0x -O0 -g
 
 # compiler
 CC = gcc
@@ -36,7 +36,7 @@ server: $(OUT)
 all: client server
 
 $(OUT): $(OBJ)                                                                                                                                                                               
-	$(CPP) -o $(OUT) $(OBJ) $(LDFLAGS)
+	$(CPP) $(CPPFLAGS) -o $(OUT) $(OBJ) $(LDFLAGS)
 
 .c.o:
 	$(CC) $(INCLUDES) $(CCFLAGS) -c $< -o $@
