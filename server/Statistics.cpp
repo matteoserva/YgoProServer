@@ -2,7 +2,10 @@
 #include <stdio.h>
 namespace ygo
 {
+    Statistics::Statistics():numPlayers(0),numRooms(0)
+    {
 
+    }
     Statistics* Statistics::getInstance()
     {
         static Statistics statistics;
@@ -12,12 +15,14 @@ namespace ygo
     void Statistics::setNumPlayers(int numP)
     {
         printf("there are %d players\n",numP);
-
+        numPlayers=numP;
 
     }
     void Statistics::setNumRooms(int numR)
     {
-        printf("there are %d rooms\n",numR);
+        if(numRooms != numR)
+            printf("there are %d rooms\n",numR);
+        numRooms=numR;
 
 
     }
