@@ -92,11 +92,7 @@ int CMNetServer::getMaxDuelPlayers()
     return maxplayers;
 }
 
-void CMNetServer::playerReadinessChange(DuelPlayer *dp, bool isReady)
-{
-    players[dp].isReady = isReady;
-    printf("readiness change %d\n",isReady);
-}
+
 
 void CMNetServer::playerConnected(DuelPlayer *dp)
 {

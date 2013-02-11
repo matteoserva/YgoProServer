@@ -32,7 +32,11 @@ void CMNetServerInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char prot
     bufferevent_write(dp->bev, net_server_write, last_sent);
 }
 
-
+void CMNetServerInterface::playerReadinessChange(DuelPlayer *dp, bool isReady)
+{
+    players[dp].isReady = isReady;
+    printf("readiness change %d\n",isReady);
+}
 
 void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {

@@ -35,7 +35,6 @@ private:
     event* auto_idle;
     static void auto_idle_cb(evutil_socket_t fd, short events, void* arg);
 
-    void playerReadinessChange(DuelPlayer *dp, bool isReady);
     DuelMode* duel_mode;
 
 

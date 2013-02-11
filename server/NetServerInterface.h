@@ -30,6 +30,7 @@ protected:
     char net_server_write[0x2000];
     std::map<DuelPlayer*, DuelPlayerInfo> players;
     GameServer* gameServer;
+    void playerReadinessChange(DuelPlayer *dp, bool isReady);
 public:
     CMNetServerInterface(RoomManager* roomManager,GameServer*gameServer);
     virtual ~CMNetServerInterface() {};

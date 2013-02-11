@@ -45,6 +45,8 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
         {
             if(that->players.find(*it) != that->players.end())
             {
+                if(!that->players[*it].isReady)
+                    continue;
                 that->ExtractPlayer(*it);
                 that->roomManager->InsertPlayer(*it);
             }
@@ -121,6 +123,9 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
     updateObserversNum();
 
+    playerReadinessChange(dp,true);
+
+
 }
 void WaitingRoom::LeaveGame(DuelPlayer* dp)
 {
@@ -140,6 +145,8 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer*)
         if(it->second.secondsWaiting >= minSecondsWaiting)
         {
             DuelPlayer* dp = it->first;
+            if(!players[dp].isReady)
+                    continue;
             ExtractPlayer(dp);
             return dp;
         }
@@ -202,7 +209,13 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         InsertPlayer(dp);
         break;
     }
+    case CTOS_HS_READY:
+    case CTOS_HS_NOTREADY:
+    {
 
+        playerReadinessChange(dp,CTOS_HS_NOTREADY - pktType);
+        break;
+    }
 
     }
 }
