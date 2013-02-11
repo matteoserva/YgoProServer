@@ -10,6 +10,7 @@
 #include "RoomManager.h"
 
 #include "netserver.h"
+
 namespace ygo {
 
 class GameServer {

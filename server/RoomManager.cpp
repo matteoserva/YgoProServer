@@ -1,6 +1,7 @@
 
 #include "GameServer.h"
 #include "RoomManager.h"
+#include "Statistics.h"
 namespace ygo
 {
 
@@ -176,6 +177,9 @@ CMNetServer* RoomManager::createServer(unsigned char mode)
     CMNetServer *netServer = new CMNetServer(this,gameServer,mode);
 
     elencoServer.push_back(netServer);
+
+    Statistics::getInstance()->setNumRooms(elencoServer.size());
+
     return netServer;
 }
 
@@ -201,6 +205,7 @@ void RoomManager::removeDeadRooms()
 
         i++;
     }
+    Statistics::getInstance()->setNumRooms(elencoServer.size());
 }
 
 

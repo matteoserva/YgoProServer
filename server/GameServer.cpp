@@ -1,8 +1,7 @@
 #include "GameServer.h"
-#include "single_duel.h"
-#include "tag_duel.h"
-#include "RoomManager.h"
 
+#include "RoomManager.h"
+#include "Statistics.h"
 namespace ygo
 {
 GameServer::GameServer()
@@ -65,6 +64,7 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
     that->users[bev] = dp;
     bufferevent_setcb(bev, ServerEchoRead, NULL, ServerEchoEvent, ctx);
     bufferevent_enable(bev, EV_READ);
+    Statistics::getInstance()->setNumPlayers(that->users.size());
 }
 void GameServer::ServerAcceptError(evconnlistener* listener, void* ctx)
 {
@@ -130,6 +130,8 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
         bufferevent_free(dp->bev);
         users.erase(bit);
     }
+
+    Statistics::getInstance()->setNumPlayers(users.size());
 }
 
 
