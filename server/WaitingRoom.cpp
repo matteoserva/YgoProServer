@@ -180,6 +180,16 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     switch(pktType)
     {
 
+    case CTOS_PLAYER_INFO:
+    {
+        CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
+        BufferIO::CopyWStr(pkt->name, dp->name, 20);
+        char name[20];
+        BufferIO::CopyWStr(pkt->name,name,20);
+
+        printf("WaitingRoom:Player joined %s \n",name);
+        break;
+    }
     case CTOS_CHAT:
     {
         handleChatCommand(dp,(unsigned short*)pdata);

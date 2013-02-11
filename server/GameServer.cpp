@@ -139,16 +139,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
 
-    if(pktType ==CTOS_PLAYER_INFO)
-    {
-        CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
-        BufferIO::CopyWStr(pkt->name, dp->name, 20);
-        char name[20];
-        BufferIO::CopyWStr(pkt->name,name,20);
 
-        printf("GameServer:Player joined %s \n",name);
-        return;
-    }
 
 
     if(dp->netServer == NULL)
