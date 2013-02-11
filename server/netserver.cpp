@@ -223,6 +223,7 @@ void CMNetServer::ExtractPlayer(DuelPlayer* dp)
     printf("ExtractPlayer called\n");
     playerDisconnected(dp);
     LeaveGame(dp);
+    updateServerState();
 }
 void CMNetServer::InsertPlayer(DuelPlayer* dp)
 {
