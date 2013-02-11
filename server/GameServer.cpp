@@ -9,7 +9,6 @@ GameServer::GameServer()
     server_port = 0;
     net_evbase = 0;
     listener = 0;
-    duel_mode = 0;
     last_sent = 0;
     roomManager.setGameServer(const_cast<ygo::GameServer *>(this));
 }
@@ -43,9 +42,24 @@ void GameServer::StopServer()
 {
     if(!net_evbase)
         return;
-    if(duel_mode)
-        duel_mode->EndDuel();
+
+
+    evconnlistener_free(listener);
+    listener = 0;
+
+    while(users.size() > 0)
+    {
+        printf("waiting for reboot, users connected: %lu\n",users.size());
+        sleep(1);
+    }
+
     event_base_loopexit(net_evbase, 0);
+    while(net_evbase)
+    {
+        printf("waiting for server thread\n");
+        sleep(1);
+    }
+
 }
 
 void GameServer::StopListen()
@@ -102,21 +116,23 @@ void GameServer::ServerEchoEvent(bufferevent* bev, short events, void* ctx)
         else that->DisconnectPlayer(dp);
     }
 }
+
+
 int GameServer::ServerThread(void* parama)
 {
     GameServer*that = (GameServer*)parama;
     event_base_dispatch(that->net_evbase);
-
+    /*
     for(auto bit = that->users.begin(); bit != that->users.end(); ++bit)
     {
         bufferevent_disable(bit->first, EV_READ);
         bufferevent_free(bit->first);
     }
-    that->users.clear();
-    evconnlistener_free(that->listener);
-    that->listener = 0;
+    that->users.clear();*/
+
     event_base_free(that->net_evbase);
     that->net_evbase = 0;
+
     return 0;
 }
 void GameServer::DisconnectPlayer(DuelPlayer* dp)

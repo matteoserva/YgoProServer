@@ -17,9 +17,9 @@ class GameServer {
 private:
 	std::unordered_map<bufferevent*, DuelPlayer> users;
 	 unsigned short server_port;
-	 event_base* net_evbase;
+	 event_base* volatile net_evbase;
 	 evconnlistener* listener;
-	 DuelMode* duel_mode;
+
 	 char net_server_read[0x2000];
 	 char net_server_write[0x2000];
 	 unsigned short last_sent;

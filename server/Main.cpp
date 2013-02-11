@@ -1,7 +1,9 @@
 #include "GameServer.h"
 #include "Config.h"
+#include <string>
 
 using namespace ygo;
+using namespace std;
 const unsigned short PRO_VERSION = 0x12f0;
 int enable_log = 0;
 int main(int argc, char**argv)
@@ -28,7 +30,15 @@ int main(int argc, char**argv)
     {
         while(1)
         {
-            sleep(1);
+            //sleep(1);
+            std::string command;
+            cin >>command;
+            if (command == "reboot")
+                {
+                    cout<<"rebooting";
+                    gameServer->StopServer();
+                    exit(0);
+                }
 
         }
     }
