@@ -149,16 +149,15 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 CMNetServer* RoomManager::getFirstAvailableServer()
 {
     int i = 0;
+    printf("analizzo la lista server\n");
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
         CMNetServer *p = *it;
-        printf("analizzo la lista server\n");
         if(p->state == CMNetServer::State::WAITING)
         {
             printf("ho scelto il server %d\n",i);
             return *it;
         }
-
         i++;
     }
 
