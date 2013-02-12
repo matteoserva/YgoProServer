@@ -143,7 +143,8 @@ void CMNetServer::updateServerState()
 
 void CMNetServer::playerDisconnected(DuelPlayer* dp )
 {
-    players.erase(dp);
+    if(players.find(dp)!=players.end())
+        players.erase(dp);
     numPlayers=players.size();
 
     printf("giocatori connessi:%d\n",numPlayers);
