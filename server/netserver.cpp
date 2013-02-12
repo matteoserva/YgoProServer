@@ -7,7 +7,7 @@ namespace ygo
 {
 
 CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
-:CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0)
+    :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0)
 {
     createGame();
 }
@@ -40,14 +40,14 @@ void CMNetServer::auto_idle_cb(evutil_socket_t fd, short events, void* arg)
     printf("auto idle_cb\n");
     if(that->state != FULL)
         return;
-    for(auto it = that->players.cbegin();it!=that->players.cend();++it)
+    for(auto it = that->players.cbegin(); it!=that->players.cend(); ++it)
     {
         if(it->first->type != NETPLAYER_TYPE_OBSERVER && !(it->second.isReady))
-            {
-                that->SendMessageToPlayer(it->first,"You are moved to spectators for not being ready");
-                that->toObserver(it->first);
+        {
+            that->SendMessageToPlayer(it->first,"You are moved to spectators for not being ready");
+            that->toObserver(it->first);
 
-            }
+        }
     }
 }
 
@@ -254,11 +254,18 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
     std::lock_guard<std::recursive_mutex> uguard(userActionsMutex);
     std::lock_guard<std::mutex> guard(playersMutex);
 
-    unsigned char type = dp->type;
+    unsigned char oldstate = dp->state;
+
+
+    if(state != ZOMBIE && dp->game == duel_mode)
+        duel_mode->LeaveGame(dp);
+    else
+        DisconnectPlayer(dp);
+
     if(dp->state == CTOS_HAND_RESULT && state == PLAYING)
     {
         printf("BUG: single duel doesn't call stop if leaving before hand result\n");
-        for(auto it=players.cbegin();it!= players.cend();++it)
+        for(auto it=players.cbegin(); it!= players.cend(); ++it)
         {
             if(it->first != dp)
             {
@@ -267,17 +274,7 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
 
 
         }
-            setState(ZOMBIE);
-    }
-
-    if(state != ZOMBIE && dp->game == duel_mode)
-        duel_mode->LeaveGame(dp);
-    //else
-        DisconnectPlayer(dp);
-
-    if(state == PLAYING && type != NETPLAYER_TYPE_OBSERVER)
-    {
-
+        setState(ZOMBIE);
     }
 }
 
@@ -291,20 +288,20 @@ void CMNetServer::StopListen()
 
 void CMNetServer::Victory(unsigned char winner)
 {
-        DuelPlayer* _players[4];
-        for(auto it = players.cbegin();it!= players.cend();++it)
-        {
-            if(it->first->type <= NETPLAYER_TYPE_PLAYER4)
-                _players[it->first->type] = it->first;
-        }
-        if(mode == MODE_SINGLE || mode == MODE_MATCH)
-        {
-            char win[20], lose[20];
-            BufferIO::CopyWStr(_players[winner]->name,win,20);
-            BufferIO::CopyWStr(_players[1-winner]->name,lose,20);
-            printf("and the winner is...%s, loser: %s\n",win,lose);
+    DuelPlayer* _players[4];
+    for(auto it = players.cbegin(); it!= players.cend(); ++it)
+    {
+        if(it->first->type <= NETPLAYER_TYPE_PLAYER4)
+            _players[it->first->type] = it->first;
+    }
+    if(mode == MODE_SINGLE || mode == MODE_MATCH)
+    {
+        char win[20], lose[20];
+        BufferIO::CopyWStr(_players[winner]->name,win,20);
+        BufferIO::CopyWStr(_players[1-winner]->name,lose,20);
+        printf("and the winner is...%s, loser: %s\n",win,lose);
 
-        }
+    }
 
 
 }
@@ -326,11 +323,11 @@ void CMNetServer::StopServer()
 
 void CMNetServer::toObserver(DuelPlayer* dp)
 {
-        std::lock_guard<std::recursive_mutex> guard(userActionsMutex);
-        printf("to observer\n");
-        duel_mode->ToObserver(dp);
-        playerReadinessChange(dp,false);
-        updateServerState();
+    std::lock_guard<std::recursive_mutex> guard(userActionsMutex);
+    printf("to observer\n");
+    duel_mode->ToObserver(dp);
+    playerReadinessChange(dp,false);
+    updateServerState();
 }
 
 
@@ -481,16 +478,16 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             when a user clicks on "toduelist" his information
             about other user's readiness is not updated
         */
-        for(auto it = players.cbegin();it!=players.cend();++it)
+        for(auto it = players.cbegin(); it!=players.cend(); ++it)
         {
             if(it->first != dp && it->first->type != NETPLAYER_TYPE_OBSERVER && it->second.isReady)
-                {
-                   STOC_HS_PlayerChange scpc;
-                    scpc.status = (it->first->type << 4) |PLAYERCHANGE_READY;
+            {
+                STOC_HS_PlayerChange scpc;
+                scpc.status = (it->first->type << 4) |PLAYERCHANGE_READY;
 
-                    SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
-                    printf("sent player change to p\n");
-                }
+                SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+                printf("sent player change to p\n");
+            }
         }
 
 
