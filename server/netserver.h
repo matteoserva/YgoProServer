@@ -10,6 +10,7 @@
 #include <map>
 #include "NetServerInterface.h"
 #include "field.h"
+#include <mutex>
 namespace ygo
 {
 class GameServer;
@@ -27,6 +28,7 @@ class CMNetServer:public CMNetServerInterface
     enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};
     State state;
 private:
+    std::mutex userActionsMutex;
     void Victory(unsigned char winner);
     unsigned char last_winner;
     int getNumDuelPlayers();

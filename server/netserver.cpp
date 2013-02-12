@@ -303,7 +303,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
     char* pdata = data;
 
-
+    std::lock_guard<std::mutex> guard(userActionsMutex);
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
     if(state==ZOMBIE)
     {
@@ -417,8 +417,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!duel_mode)
             break;
-        playerDisconnected(dp);
-        duel_mode->LeaveGame(dp);
+        LeaveGame(dp);
         break;
     }
     case CTOS_SURRENDER:
