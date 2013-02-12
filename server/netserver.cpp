@@ -124,7 +124,7 @@ void CMNetServer::updateServerState()
         setState(WAITING);
         printf("server not full\n");
     }
-    if(numPlayers==0 && (state==ZOMBIE || state == WAITING))
+    if(numPlayers==0 )//&& (state==ZOMBIE || state == WAITING))
     {
         printf("server vuoto. addio, morto\n");
 
@@ -211,9 +211,8 @@ void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
     {
         dp->netServer=nullptr;
         gameServer->DisconnectPlayer(dp);
-        playerDisconnected(dp);
     }
-
+    playerDisconnected(dp);
 }
 
 void CMNetServer::ExtractPlayer(DuelPlayer* dp)
