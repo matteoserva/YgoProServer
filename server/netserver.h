@@ -28,7 +28,8 @@ class CMNetServer:public CMNetServerInterface
     enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};
     State state;
 private:
-    std::mutex userActionsMutex;
+    std::recursive_mutex userActionsMutex;
+    std::mutex playersMutex;
     void Victory(unsigned char winner);
     unsigned char last_winner;
     int getNumDuelPlayers();

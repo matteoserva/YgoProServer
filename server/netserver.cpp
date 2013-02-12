@@ -65,6 +65,7 @@ void CMNetServer::setState(State state)
 
 void CMNetServer::destroyGame()
 {
+    std::lock_guard<std::recursive_mutex> guard(userActionsMutex);
     if(duel_mode)
     {
         if(state != DEAD)
@@ -81,7 +82,12 @@ void CMNetServer::destroyGame()
         delete duel_mode;
         duel_mode=0;
     }
-    event_free(auto_idle);
+    if(auto_idle)
+    {
+        event_free(auto_idle);
+        auto_idle=0;
+    }
+
 }
 
 int CMNetServer::getMaxDuelPlayers()
@@ -117,7 +123,8 @@ int CMNetServer::getNumDuelPlayers()
 
 void CMNetServer::updateServerState()
 {
-    event_del(auto_idle);
+    if(auto_idle)
+        event_del(auto_idle);
 
     if(getNumDuelPlayers() < getMaxDuelPlayers() &&state==FULL)
     {
@@ -224,6 +231,8 @@ void CMNetServer::ExtractPlayer(DuelPlayer* dp)
 }
 void CMNetServer::InsertPlayer(DuelPlayer* dp)
 {
+    std::lock_guard<std::recursive_mutex> uguard(userActionsMutex);
+    std::lock_guard<std::mutex> guard(playersMutex);
     //it inserts forcefully the player into the server
     printf("InsertPlayer called\n");
     playerConnected(dp);
@@ -242,10 +251,34 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
 
 void CMNetServer::LeaveGame(DuelPlayer* dp)
 {
+    std::lock_guard<std::recursive_mutex> uguard(userActionsMutex);
+    std::lock_guard<std::mutex> guard(playersMutex);
+
+    unsigned char type = dp->type;
+    if(dp->state == CTOS_HAND_RESULT && state == PLAYING)
+    {
+        printf("BUG: single duel doesn't call stop if leaving before hand result\n");
+        for(auto it=players.cbegin();it!= players.cend();++it)
+        {
+            if(it->first != dp)
+            {
+                SendPacketToPlayer(it->first, STOC_DUEL_END);
+            }
+
+
+        }
+            setState(ZOMBIE);
+    }
+
     if(state != ZOMBIE && dp->game == duel_mode)
         duel_mode->LeaveGame(dp);
     //else
         DisconnectPlayer(dp);
+
+    if(state == PLAYING && type != NETPLAYER_TYPE_OBSERVER)
+    {
+
+    }
 }
 
 void CMNetServer::StopBroadcast()
@@ -286,12 +319,14 @@ void CMNetServer::StopServer()
         Victory(last_winner);
     }
     setState(ZOMBIE);
+    updateServerState();
 }
 
 
 
 void CMNetServer::toObserver(DuelPlayer* dp)
 {
+        std::lock_guard<std::recursive_mutex> guard(userActionsMutex);
         printf("to observer\n");
         duel_mode->ToObserver(dp);
         playerReadinessChange(dp,false);
@@ -303,11 +338,11 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
     char* pdata = data;
 
-    std::lock_guard<std::mutex> guard(userActionsMutex);
+    std::lock_guard<std::recursive_mutex> guard(userActionsMutex);
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
     if(state==ZOMBIE)
     {
-        /*if(pktType==CTOS_LEAVE_GAME)
+        /*if(pktType==CTOS_HAND_RESULT)
         {
             //not needed
             playerDisconnected(dp);
@@ -316,6 +351,12 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         }*/
         printf("pacchetto ricevuto per uno zombie, ignorato\n");
 
+        return;
+    }
+
+    if( players.end() == players.find(dp))
+    {
+        printf("BUG: handlectospacket ha ricevuto un pacchetto per un utente inesistente \n");
         return;
     }
 
