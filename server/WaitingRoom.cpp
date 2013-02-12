@@ -58,6 +58,7 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
 void WaitingRoom::ExtractPlayer(DuelPlayer* dp)
 {
     players.erase(dp);
+    dp->netServer=0;
 }
 
 void WaitingRoom::updateObserversNum()
@@ -75,6 +76,7 @@ void WaitingRoom::updateObserversNum()
 }
 void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 {
+    dp->netServer=this;
     players[dp] = DuelPlayerInfo();
 
     HostInfo info;

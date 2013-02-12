@@ -76,6 +76,7 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
     dp.type = 0xff;
     dp.bev = bev;
     that->users[bev] = dp;
+    dp.netServer=0;
     bufferevent_setcb(bev, ServerEchoRead, NULL, ServerEchoEvent, ctx);
     bufferevent_enable(bev, EV_READ);
     Statistics::getInstance()->setNumPlayers(that->users.size());
@@ -159,9 +160,13 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
 
 
-
     if(dp->netServer == NULL)
     {
+        if(pktType!=CTOS_PLAYER_INFO)
+        {
+            printf("BUG: player info is not the first packet\n");
+            return;
+        }
         if(!roomManager.InsertPlayerInWaitingRoom(dp))
             return;
     }
