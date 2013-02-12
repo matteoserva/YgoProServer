@@ -5,6 +5,7 @@
 #include "RoomManager.h"
 namespace ygo
 {
+std::mutex CMNetServer::replayCreateMutex;
 
 CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
     :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0)
@@ -403,7 +404,10 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(!dp->game)
             return;
         CTOS_TPResult* pkt = (CTOS_TPResult*)pdata;
+        replayCreateMutex.lock();
         dp->game->TPResult(dp, pkt->res);
+        unlink("./replay/_LastReplay.yrp");
+        replayCreateMutex.unlock();
         break;
     }
     case CTOS_PLAYER_INFO:

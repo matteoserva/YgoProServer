@@ -28,6 +28,7 @@ class CMNetServer:public CMNetServerInterface
     enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};
     State state;
 private:
+    static std::mutex replayCreateMutex;
     std::recursive_mutex userActionsMutex;
     std::mutex playersMutex;
     void Victory(unsigned char winner);

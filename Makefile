@@ -4,7 +4,7 @@ TARGET = ygopro-server
 
 SRC = $(shell ls server/*.c server/*.cpp 2>/dev/null)
 SRC += $(shell ls ygopro/gframe/lzma/*.c ygopro/gframe/lzma/*.cpp 2>/dev/null)
-SRC += ygopro/gframe/data_manager.cpp ygopro/gframe/deck_manager.cpp ygopro/gframe/replay.cpp
+SRC += ygopro/gframe/data_manager.cpp ygopro/gframe/deck_manager.cpp  ygopro/gframe/replay.cpp
 SRC += $(shell ls ygopro/ocgcore/*.c ygopro/ocgcore/*.cpp 2>/dev/null)
 
 OUT = $(TARGET)
