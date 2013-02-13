@@ -50,9 +50,7 @@ bool GameServer::StartServer(unsigned short port)
         if(!net_evbase)
             return;
 
-
-        evconnlistener_free(listener);
-        listener = 0;
+        StopListen();
 
         while(users.size() > 0)
         {
@@ -66,7 +64,8 @@ bool GameServer::StartServer(unsigned short port)
             printf("waiting for server thread\n");
             sleep(1);
         }
-
+        evconnlistener_free(listener);
+        listener = 0;
     }
 
     void GameServer::StopListen()
