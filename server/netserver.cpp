@@ -66,7 +66,6 @@ void CMNetServer::setState(State state)
 
 void CMNetServer::destroyGame()
 {
-    std::lock_guard<std::recursive_mutex> guard(userActionsMutex);
     if(duel_mode)
     {
         if(state != DEAD)
@@ -103,8 +102,9 @@ int CMNetServer::getMaxDuelPlayers()
 
 void CMNetServer::playerConnected(DuelPlayer *dp)
 {
-    numPlayers++;
-    players[dp] = DuelPlayerInfo();
+    std::lock_guard<std::mutex> guard(playersMutex);
+    if(players.find(dp)==players.end())
+        players[dp] = DuelPlayerInfo();
     numPlayers=players.size();
 
     printf("giocatori connessi:%d\n",numPlayers);
@@ -151,6 +151,7 @@ void CMNetServer::updateServerState()
 
 void CMNetServer::playerDisconnected(DuelPlayer* dp )
 {
+    std::lock_guard<std::mutex> guard(playersMutex);
     if(players.find(dp)!=players.end())
         players.erase(dp);
     numPlayers=players.size();
@@ -234,7 +235,7 @@ void CMNetServer::ExtractPlayer(DuelPlayer* dp)
 void CMNetServer::InsertPlayer(DuelPlayer* dp)
 {
     std::lock_guard<std::recursive_mutex> uguard(userActionsMutex);
-    std::lock_guard<std::mutex> guard(playersMutex);
+
     //it inserts forcefully the player into the server
     printf("InsertPlayer called\n");
     playerConnected(dp);
@@ -254,19 +255,20 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
 void CMNetServer::LeaveGame(DuelPlayer* dp)
 {
     std::lock_guard<std::recursive_mutex> uguard(userActionsMutex);
-    std::lock_guard<std::mutex> guard(playersMutex);
+
 
     unsigned char oldstate = dp->state;
-
+    unsigned char oldtype = dp->type;
 
     if(state != ZOMBIE && dp->game == duel_mode)
         duel_mode->LeaveGame(dp);
     else
         DisconnectPlayer(dp);
 
-    if(dp->state == CTOS_HAND_RESULT && state == PLAYING)
+    /*if(oldstate == CTOS_HAND_RESULT && state == PLAYING)
     {
         printf("BUG: single duel doesn't call stop if leaving before hand result\n");
+        setState(ZOMBIE);
         for(auto it=players.cbegin(); it!= players.cend(); ++it)
         {
             if(it->first != dp)
@@ -276,8 +278,24 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
 
 
         }
-        setState(ZOMBIE);
+
     }
+    else */if(oldtype != NETPLAYER_TYPE_OBSERVER && state == PLAYING)
+    {
+        printf("BUG: player left but the game is still playing\n");
+        setState(ZOMBIE);
+        for(auto it=players.cbegin(); it!= players.cend(); ++it)
+        {
+            if(it->first != dp)
+            {
+                SendPacketToPlayer(it->first, STOC_DUEL_END);
+            }
+
+
+        }
+
+    }
+
 }
 
 void CMNetServer::StopBroadcast()
@@ -339,6 +357,11 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
     std::lock_guard<std::recursive_mutex> guard(userActionsMutex);
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
+
+    char nome[30];
+    BufferIO::CopyWStr(dp->name,nome,30);
+    //printf("utente %s ha inviato il messaggio %2x\n",nome,pktType);
+
     if(state==ZOMBIE)
     {
         /*if(pktType==CTOS_HAND_RESULT)

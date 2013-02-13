@@ -17,8 +17,8 @@ OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 INCLUDES = -I ./server/ -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I ./ygopro/ocgcore/ -I ./ygopro/gframe/  -I /usr/include/irrlicht/
 
 # C compiler flags (-g -O2 -Wall)
-CCFLAGS =   -O0 -g 
-CPPFLAGS =  -std=c++0x -O0 -g
+CCFLAGS =   -O2 -g 
+CPPFLAGS =  -std=c++0x -O2 -g
 
 # compiler
 CC = gcc

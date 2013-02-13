@@ -5,9 +5,7 @@
 #include "network.h"
 #include "data_manager.h"
 #include "deck_manager.h"
-#include <set>
 #include <unordered_map>
-#include <map>
 #include "NetServerInterface.h"
 #include "field.h"
 #include <mutex>

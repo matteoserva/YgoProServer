@@ -38,40 +38,7 @@ public:
 	 static int ServerThread(void* param);
 	 void DisconnectPlayer(DuelPlayer* dp);
 	 void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
-	 void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto) {
-		char* p = net_server_write;
-		BufferIO::WriteInt16(p, 1);
-		BufferIO::WriteInt8(p, proto);
-		last_sent = 3;
-		if(!dp)
-			return;
-		bufferevent_write(dp->bev, net_server_write, last_sent);
-	}
-	bool handleChatCommand(DuelPlayer* dp,unsigned short* msg);
 
-	template<typename ST>
-	 void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st) {
-		char* p = net_server_write;
-		BufferIO::WriteInt16(p, 1 + sizeof(ST));
-		BufferIO::WriteInt8(p, proto);
-		memcpy(p, &st, sizeof(ST));
-		last_sent = sizeof(ST) + 3;
-		if(dp)
-			bufferevent_write(dp->bev, net_server_write, last_sent);
-	}
-	 void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len) {
-		char* p = net_server_write;
-		BufferIO::WriteInt16(p, 1 + len);
-		BufferIO::WriteInt8(p, proto);
-		memcpy(p, buffer, len);
-		last_sent = len + 3;
-		if(dp)
-			bufferevent_write(dp->bev, net_server_write, last_sent);
-	}
-	 void ReSendToPlayer(DuelPlayer* dp) {
-		if(dp)
-			bufferevent_write(dp->bev, net_server_write, last_sent);
-	}
 };
 
 }
