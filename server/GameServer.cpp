@@ -136,15 +136,15 @@ void GameServer::ServerEchoEvent(bufferevent* bev, short events, void* ctx)
         DuelPlayer* dp = &(that->users[bev]);
         DuelMode* dm = dp->game;
         if(dp->netServer)
+        {
+            dp->netServer->LeaveGame(dp);
+            if(that->users.find(bev)!= that->users.end())
             {
-                dp->netServer->LeaveGame(dp);
-                if(that->users.find(bev)!= that->users.end())
-                {
-                    log(BUG,"BUG: tcp terminated but disconnectplayer not called\n");
-                    that->DisconnectPlayer(dp);
-                }
-
+                log(BUG,"BUG: tcp terminated but disconnectplayer not called\n");
+                that->DisconnectPlayer(dp);
             }
+
+        }
         else that->DisconnectPlayer(dp);
     }
 }

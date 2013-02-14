@@ -41,6 +41,7 @@ void CMNetServer::auto_idle_cb(evutil_socket_t fd, short events, void* arg)
     printf("auto idle_cb\n");
     if(that->state != FULL)
         return;
+    std::lock_guard<std::recursive_mutex> guard(that->userActionsMutex);
     for(auto it = that->players.cbegin(); it!=that->players.cend(); ++it)
     {
         if(it->first->type != NETPLAYER_TYPE_OBSERVER && !(it->second.isReady))
@@ -114,6 +115,7 @@ void CMNetServer::playerConnected(DuelPlayer *dp)
 int CMNetServer::getNumDuelPlayers()
 {
     int n=0;
+
     for(auto it = players.cbegin(); it!=players.cend(); ++it)
     {
         if(it->first->type != NETPLAYER_TYPE_OBSERVER)
