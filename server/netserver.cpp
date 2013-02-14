@@ -384,21 +384,10 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     std::lock_guard<std::recursive_mutex> guard(userActionsMutex);
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
 
-    char nome[30];
-    BufferIO::CopyWStr(dp->name,nome,30);
-    //printf("utente %s ha inviato il messaggio %2x\n",nome,pktType);
 
     if(state==ZOMBIE)
     {
-        /*if(pktType==CTOS_HAND_RESULT)
-        {
-            //not needed
-            playerDisconnected(dp);
-
-
-        }*/
         printf("pacchetto ricevuto per uno zombie, ignorato\n");
-
         return;
     }
 

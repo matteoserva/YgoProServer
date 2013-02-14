@@ -3,6 +3,10 @@
 #include "RoomManager.h"
 #include "Statistics.h"
 #include <signal.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <netinet/tcp.h>
 namespace ygo
 {
 GameServer::GameServer()
@@ -76,6 +80,18 @@ void GameServer::StopListen()
 void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx)
 {
     GameServer* that = (GameServer*)ctx;
+
+    int optval=1;
+    int optlen = sizeof(optval);
+    setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen);
+    optval = 120;
+    setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen);
+    optval = 4;
+    setsockopt(fd, SOL_TCP, TCP_KEEPCNT, &optval, optlen);
+    optval = 30;
+    setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
+
+
     bufferevent* bev = bufferevent_socket_new(that->net_evbase, fd, BEV_OPT_CLOSE_ON_FREE);
     DuelPlayer dp;
     dp.name[0] = 0;
