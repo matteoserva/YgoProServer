@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netinet/tcp.h>
+#include "debug.h"
 namespace ygo
 {
 GameServer::GameServer()
@@ -192,7 +193,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(!roomManager.InsertPlayerInWaitingRoom(dp))
             return;
         int wnumplayers=roomManager.getNumPlayers();
-        printf("rommmanager: there are %d players\n",wnumplayers+1);
+        log(INFO,"rommmanager: there are %d players\n",wnumplayers+1);
     }
 
 
