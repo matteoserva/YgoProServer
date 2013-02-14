@@ -258,8 +258,6 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
 
 void CMNetServer::LeaveGame(DuelPlayer* dp)
 {
-
-
     unsigned char oldstate = dp->state;
     unsigned char oldtype = dp->type;
 
@@ -267,6 +265,13 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
         duel_mode->LeaveGame(dp);
     else
         DisconnectPlayer(dp);
+
+    if(players.find(dp)!=players.end())
+    {
+        //this is a bug in tagduel
+        printf("BUG: player left but the duel didn't call DisconnectPlayer\n");
+        DisconnectPlayer(dp);
+    }
 
     if(oldtype != NETPLAYER_TYPE_OBSERVER && state == PLAYING)
     {
@@ -277,7 +282,6 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
             if(it->first != dp)
                 SendPacketToPlayer(it->first, STOC_DUEL_END);
         }
-
     }
 
 }
