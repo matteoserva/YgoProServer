@@ -27,9 +27,7 @@ class CMNetServer:public CMNetServerInterface
     State state;
 private:
     static void DuelTimer(evutil_socket_t fd, short events, void* arg);
-    std::recursive_mutex userActionsMutex; //avoid double free of pduel
-    std::mutex playersMutex;
-    std::mutex serverMutex;
+
     void Victory(unsigned char winner);
     unsigned char last_winner;
     int getNumDuelPlayers();

@@ -209,10 +209,13 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     case CTOS_CHAT:
     {
         handleChatCommand(dp,(unsigned short*)pdata);
-
         break;
     }
-
+    case CTOS_LEAVE_GAME:
+    {
+        LeaveGame(dp);
+        break;
+    }
     case CTOS_JOIN_GAME:
     {
         InsertPlayer(dp);

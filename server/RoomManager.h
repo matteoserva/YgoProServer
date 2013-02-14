@@ -12,13 +12,13 @@ namespace ygo {
     class RoomManager
     {
         private:
-        std::mutex elencoServerMutex;
+        event* keepAliveEvent;
+
         WaitingRoom* waitingRoom;
         void removeDeadRooms();
         bool FillRoom(CMNetServer* room);
         bool FillAllRooms();
         CMNetServer* createServer(unsigned char mode);
-        static int RoomManagerThread(void* );
         static void keepAlive(evutil_socket_t fd, short events, void* arg);
         public:
         event_base* net_evbase;

@@ -41,7 +41,6 @@ void CMNetServer::auto_idle_cb(evutil_socket_t fd, short events, void* arg)
     printf("auto idle_cb\n");
     if(that->state != FULL)
         return;
-    std::lock_guard<std::recursive_mutex> guard(that->userActionsMutex);
     for(auto it = that->players.cbegin(); it!=that->players.cend(); ++it)
     {
         if(it->first->type != NETPLAYER_TYPE_OBSERVER && !(it->second.isReady))
@@ -103,7 +102,6 @@ int CMNetServer::getMaxDuelPlayers()
 
 void CMNetServer::playerConnected(DuelPlayer *dp)
 {
-    std::lock_guard<std::mutex> guard(playersMutex);
     if(players.find(dp)==players.end())
         players[dp] = DuelPlayerInfo();
     numPlayers=players.size();
@@ -126,7 +124,6 @@ int CMNetServer::getNumDuelPlayers()
 
 void CMNetServer::updateServerState()
 {
-    std::lock_guard<std::mutex> guard(serverMutex);
     if(auto_idle)
         event_del(auto_idle);
 
@@ -154,7 +151,6 @@ void CMNetServer::updateServerState()
 
 void CMNetServer::playerDisconnected(DuelPlayer* dp )
 {
-    std::lock_guard<std::mutex> guard(playersMutex);
     if(players.find(dp)!=players.end())
         players.erase(dp);
     numPlayers=players.size();
@@ -166,14 +162,15 @@ void CMNetServer::DuelTimer(evutil_socket_t fd, short events, void* arg)
 {
     CMNetServer* that = (CMNetServer* )arg;
 
-    if(!that->userActionsMutex.try_lock())
+
+    if(that->state != PLAYING)
         return;
 
     if(that->mode == MODE_SINGLE || that->mode == MODE_MATCH)
         SingleDuel::SingleTimer(fd,events,that->duel_mode);
     else if(that->mode == MODE_TAG)
         TagDuel::TagTimer(fd,events,that->duel_mode);
-    that->userActionsMutex.unlock();
+
 }
 void CMNetServer::createGame()
 {
@@ -242,7 +239,6 @@ void CMNetServer::ExtractPlayer(DuelPlayer* dp)
 }
 void CMNetServer::InsertPlayer(DuelPlayer* dp)
 {
-    std::lock_guard<std::recursive_mutex> uguard(userActionsMutex);
 
     //it inserts forcefully the player into the server
     printf("InsertPlayer called\n");
@@ -262,7 +258,6 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
 
 void CMNetServer::LeaveGame(DuelPlayer* dp)
 {
-    std::lock_guard<std::recursive_mutex> uguard(userActionsMutex);
 
 
     unsigned char oldstate = dp->state;
@@ -273,22 +268,6 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
     else
         DisconnectPlayer(dp);
 
-    /*if(oldstate == CTOS_HAND_RESULT && state == PLAYING)
-    {
-        printf("BUG: single duel doesn't call stop if leaving before hand result\n");
-        setState(ZOMBIE);
-        for(auto it=players.cbegin(); it!= players.cend(); ++it)
-        {
-            if(it->first != dp)
-            {
-                SendPacketToPlayer(it->first, STOC_DUEL_END);
-            }
-
-
-        }
-
-    }
-    else */
     if(oldtype != NETPLAYER_TYPE_OBSERVER && state == PLAYING)
     {
         printf("BUG: player left but the game is still playing\n");
@@ -296,11 +275,7 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
         for(auto it=players.cbegin(); it!= players.cend(); ++it)
         {
             if(it->first != dp)
-            {
                 SendPacketToPlayer(it->first, STOC_DUEL_END);
-            }
-
-
         }
 
     }
@@ -371,7 +346,7 @@ void CMNetServer::StopServer()
 
 void CMNetServer::toObserver(DuelPlayer* dp)
 {
-    std::lock_guard<std::recursive_mutex> guard(userActionsMutex);
+
     printf("to observer\n");
     duel_mode->ToObserver(dp);
     playerReadinessChange(dp,false);
@@ -383,7 +358,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
     char* pdata = data;
 
-    std::lock_guard<std::recursive_mutex> guard(userActionsMutex);
+
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
 
 
@@ -447,52 +422,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         dp->game->TPResult(dp, pkt->res);
         break;
     }
-    case CTOS_PLAYER_INFO:
-    {
-        CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
-        BufferIO::CopyWStr(pkt->name, dp->name, 20);
-        char name[20];
-        BufferIO::CopyWStr(pkt->name,name,20);
 
-        printf("Player joined %s \n",name);
-        printf("playerinfo ricevuto da CMNetServer\n");
-        break;
-    }
-    case CTOS_CREATE_GAME:
-    {
-        if(dp->game || duel_mode)
-            return;
-        CTOS_CreateGame* pkt = (CTOS_CreateGame*)pdata;
-
-        duel_mode->setNetServer(this);
-        if(pkt->info.rule > 3)
-            pkt->info.rule = 0;
-        if(pkt->info.mode > 2)
-            pkt->info.mode = 0;
-        unsigned int hash = 1;
-        for(auto lfit = deckManager._lfList.begin(); lfit != deckManager._lfList.end(); ++lfit)
-        {
-            if(pkt->info.lflist == lfit->hash)
-            {
-                hash = pkt->info.lflist;
-                break;
-            }
-        }
-        if(hash == 1)
-            pkt->info.lflist = deckManager._lfList[0].hash;
-        duel_mode->host_info = pkt->info;
-        BufferIO::CopyWStr(pkt->name, duel_mode->name, 20);
-        BufferIO::CopyWStr(pkt->pass, duel_mode->pass, 20);
-        duel_mode->JoinGame(dp, 0, true);
-        break;
-    }
-    case CTOS_JOIN_GAME:
-    {
-        if(!duel_mode)
-            break;
-        InsertPlayer(dp);
-        break;
-    }
     case CTOS_LEAVE_GAME:
     {
         if(!duel_mode)

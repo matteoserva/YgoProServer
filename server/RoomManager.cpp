@@ -10,24 +10,22 @@ namespace ygo
 void RoomManager::setGameServer(GameServer* gs)
 {
     gameServer = gs;
+
+    net_evbase = gs->net_evbase;
+    timeval timeout = {5, 0};
+    keepAliveEvent = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, this);
     waitingRoom = new WaitingRoom(this,gs);
+    event_add(keepAliveEvent, &timeout);
 }
 
 RoomManager::RoomManager()
 {
-    net_evbase = event_base_new();
     waitingRoom=0;
-    Thread::NewThread(RoomManagerThread, this);
-
 }
 RoomManager::~RoomManager()
 {
-    if(net_evbase)
-    {
-        event_base_loopexit(net_evbase, 0);
-    }
+    event_free(keepAliveEvent);
     delete waitingRoom;
-
 }
 
 
@@ -38,22 +36,6 @@ void RoomManager::keepAlive(evutil_socket_t fd, short events, void* arg)
     that->FillAllRooms();
 }
 
-int RoomManager::RoomManagerThread(void* arg)
-{
-    RoomManager*that = (RoomManager*) arg;
-    event_base* net_evbase = that->net_evbase;
-
-    timeval timeout = {5, 0};
-
-    event* ev1 = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, arg);
-    event_add(ev1, &timeout);
-    event_base_dispatch(net_evbase);
-    event_del(ev1);
-    printf("roommanager thread terminato\n");
-
-    event_free(ev1);
-    event_base_free(net_evbase);
-}
 
 int RoomManager::getNumPlayers()
 {
@@ -87,6 +69,7 @@ CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 
 bool RoomManager::InsertPlayer(DuelPlayer*dp)
 {
+
     //tfirst room
     CMNetServer* netServer = getFirstAvailableServer();
     if(netServer == nullptr)
@@ -104,6 +87,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp)
 
 bool RoomManager::FillRoom(CMNetServer* room)
 {
+
     if(room->state!= CMNetServer::State::WAITING)
         return true;
 
@@ -151,6 +135,7 @@ bool RoomManager::InsertPlayerInWaitingRoom(DuelPlayer*dp)
 
 bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 {
+
     //true is success
     CMNetServer* netServer = getFirstAvailableServer(mode);
     if(netServer == nullptr)
@@ -189,7 +174,6 @@ CMNetServer* RoomManager::getFirstAvailableServer()
 }
 CMNetServer* RoomManager::createServer(unsigned char mode)
 {
-    std::lock_guard<std::mutex> guard(elencoServerMutex);
     if(elencoServer.size() >= 500)
     {
         return nullptr;
@@ -205,7 +189,7 @@ CMNetServer* RoomManager::createServer(unsigned char mode)
 
 void RoomManager::removeDeadRooms()
 {
-    std::lock_guard<std::mutex> guard(elencoServerMutex);
+
     int i=0;
     //printf("analizzo la lista server e cerco i morti\n");
     for(auto it =elencoServer.begin(); it!=elencoServer.end();)

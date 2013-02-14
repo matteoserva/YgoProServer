@@ -16,7 +16,7 @@ GameServer::GameServer()
     net_evbase = 0;
     listener = 0;
     last_sent = 0;
-    roomManager.setGameServer(const_cast<ygo::GameServer *>(this));
+
 }
 
 bool GameServer::StartServer(unsigned short port)
@@ -27,6 +27,7 @@ bool GameServer::StartServer(unsigned short port)
     if(!net_evbase)
         return false;
 
+    roomManager.setGameServer(const_cast<ygo::GameServer *>(this));
     //LIBEVENT race condition
     //ignoring sigpipe
     signal(SIGPIPE, SIG_IGN);
