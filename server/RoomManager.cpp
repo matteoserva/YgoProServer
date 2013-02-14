@@ -91,7 +91,9 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp)
     CMNetServer* netServer = getFirstAvailableServer();
     if(netServer == nullptr)
     {
-        gameServer->DisconnectPlayer(dp);
+        waitingRoom->InsertPlayer(dp);
+        waitingRoom->SendMessageToPlayer(dp,"The server is full, please wait.");
+        //gameServer->DisconnectPlayer(dp);
         return false;
     }
     dp->netServer=netServer;
@@ -151,6 +153,13 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 {
     //true is success
     CMNetServer* netServer = getFirstAvailableServer(mode);
+    if(netServer == nullptr)
+    {
+        waitingRoom->InsertPlayer(dp);
+        waitingRoom->SendMessageToPlayer(dp,"The server is full, please wait.");
+        return false;
+    }
+
     dp->netServer=netServer;
     netServer->InsertPlayer(dp);
     FillRoom(netServer);
@@ -183,7 +192,7 @@ CMNetServer* RoomManager::createServer(unsigned char mode)
     std::lock_guard<std::mutex> guard(elencoServerMutex);
     if(elencoServer.size() >= 500)
     {
-        return NULL;
+        return nullptr;
     }
     CMNetServer *netServer = new CMNetServer(this,gameServer,mode);
 
