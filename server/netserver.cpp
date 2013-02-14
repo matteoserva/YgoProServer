@@ -11,6 +11,8 @@ CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned 
     createGame();
 }
 
+
+
 void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
 {
     CMNetServerInterface::SendPacketToPlayer(dp,proto);
@@ -122,6 +124,7 @@ int CMNetServer::getNumDuelPlayers()
 
 void CMNetServer::updateServerState()
 {
+    std::lock_guard<std::mutex> guard(serverMutex);
     if(auto_idle)
         event_del(auto_idle);
 
@@ -157,26 +160,29 @@ void CMNetServer::playerDisconnected(DuelPlayer* dp )
     printf("giocatori connessi:%d\n",numPlayers);
     updateServerState();
 }
+void CMNetServer::DuelTimer(evutil_socket_t fd, short events, void* arg)
+{
+    CMNetServer* that = (CMNetServer* )arg;
+    std::lock_guard<std::recursive_mutex> uguard(that->userActionsMutex);
 
+
+    if(that->mode == MODE_SINGLE || that->mode == MODE_MATCH)
+        SingleDuel::SingleTimer(fd,events,that->duel_mode);
+    else if(that->mode == MODE_TAG)
+        TagDuel::TagTimer(fd,events,that->duel_mode);
+}
 void CMNetServer::createGame()
 {
     event_base* net_evbase=roomManager->net_evbase;
     auto_idle = event_new(net_evbase, 0, EV_TIMEOUT , CMNetServer::auto_idle_cb, this);
     if(mode == MODE_SINGLE)
-    {
         duel_mode = new SingleDuel(false);
-        duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
-    }
     else if(mode == MODE_MATCH)
-    {
         duel_mode = new SingleDuel(true);
-        duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
-    }
     else if(mode == MODE_TAG)
-    {
         duel_mode = new TagDuel();
-        duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, TagDuel::TagTimer, duel_mode);
-    }
+
+    duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, DuelTimer, this);
 
     BufferIO::CopyWStr(L"", duel_mode->name, 20);
     BufferIO::CopyWStr(L"", duel_mode->pass, 20);
@@ -278,7 +284,8 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
         }
 
     }
-    else */if(oldtype != NETPLAYER_TYPE_OBSERVER && state == PLAYING)
+    else */
+    if(oldtype != NETPLAYER_TYPE_OBSERVER && state == PLAYING)
     {
         printf("BUG: player left but the game is still playing\n");
         setState(ZOMBIE);
@@ -317,11 +324,30 @@ void CMNetServer::Victory(unsigned char winner)
         char win[20], lose[20];
         BufferIO::CopyWStr(_players[winner]->name,win,20);
         BufferIO::CopyWStr(_players[1-winner]->name,lose,20);
-        printf("and the winner is...%s, loser: %s\n",win,lose);
+        printf("SingleDuel, winner: %s, loser: %s\n",win,lose);
 
     }
 
+    if(mode == MODE_TAG)
+    {
+        char win1[20], win2[20], lose1[20],lose2[20];
+        if(winner <= NETPLAYER_TYPE_PLAYER2)
+        {
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER1]->name,win1,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,win2,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER3]->name,lose1,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER4]->name,lose2,20);
+        }
+        else
+        {
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER3]->name,win1,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER4]->name,win2,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER1]->name,lose1,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,lose2,20);
 
+        }
+        printf("Tagduel finished: winners %s and %s, losers: %s and %s\n",win1,win2,lose1,lose2);
+    }
 }
 
 

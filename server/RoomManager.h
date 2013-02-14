@@ -34,6 +34,7 @@ namespace ygo {
         bool InsertPlayer(DuelPlayer*dp,unsigned char mode);
         CMNetServer* getFirstAvailableServer();
         CMNetServer* getFirstAvailableServer(unsigned char mode);
+        int getNumPlayers();
     };
 
 

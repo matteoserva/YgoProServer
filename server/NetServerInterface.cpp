@@ -19,8 +19,10 @@ void CMNetServerInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
     int msglen = BufferIO::CopyWStr(msg, scc.msg, 256);
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
 }
-
-
+int CMNetServerInterface::getNumPlayers()
+{
+    return players.size();
+}
 void CMNetServerInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
 {
     if(players.find(dp) == players.end())

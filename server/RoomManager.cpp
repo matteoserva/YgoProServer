@@ -55,6 +55,17 @@ int RoomManager::RoomManagerThread(void* arg)
     event_base_free(net_evbase);
 }
 
+int RoomManager::getNumPlayers()
+{
+    int risultato = 0;
+    risultato += waitingRoom->getNumPlayers();
+    for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
+    {
+        risultato += (*it)->getNumPlayers();
+    }
+    return risultato;
+}
+
 CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 {
     int i = 0;
