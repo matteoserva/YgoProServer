@@ -163,13 +163,15 @@ void CMNetServer::playerDisconnected(DuelPlayer* dp )
 void CMNetServer::DuelTimer(evutil_socket_t fd, short events, void* arg)
 {
     CMNetServer* that = (CMNetServer* )arg;
-    std::lock_guard<std::recursive_mutex> uguard(that->userActionsMutex);
 
+    if(!that->userActionsMutex.try_lock())
+        return;
 
     if(that->mode == MODE_SINGLE || that->mode == MODE_MATCH)
         SingleDuel::SingleTimer(fd,events,that->duel_mode);
     else if(that->mode == MODE_TAG)
         TagDuel::TagTimer(fd,events,that->duel_mode);
+    that->userActionsMutex.unlock();
 }
 void CMNetServer::createGame()
 {
