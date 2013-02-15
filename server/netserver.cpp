@@ -333,6 +333,7 @@ void CMNetServer::Victory(unsigned char winner)
             BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,lose2,20);
 
         }
+        Users::getInstance()->Victory(std::string(win1),std::string(win2),std::string(lose1),std::string(lose2));
         log(INFO,"Tagduel finished: winners %s and %s, losers: %s and %s\n",win1,win2,lose1,lose2);
     }
 }

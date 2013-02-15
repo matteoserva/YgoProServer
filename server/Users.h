@@ -4,6 +4,9 @@
 #include <string>
 #include "debug.h"
 #include <map>
+#include <ctime>
+#include <mutex>
+#include <thread>
 namespace ygo
 {
 
@@ -12,9 +15,10 @@ struct UserData
     std::string username;
     std::string password;
     unsigned int score;
+    time_t  last_login;
     UserData(std::string username,std::string password):username(username),password(password),score(1000){}
     UserData():username("Player"),password(""),score(1000){}
-
+    UserData(std::string username,std::string password,unsigned int score):username(username),password(password),score(score){}
 };
 
 
@@ -22,9 +26,18 @@ struct UserData
 class Users
 {
     private:
+    std::thread t1;
+    std::pair<std::string,std::string> splitLoginString(std::string);
+    bool validLoginString(std::string);
+    static void SaveThread(Users*);
+    std::mutex usersMutex;
+    Users();
     std::map<std::string,UserData*> users;
     std::string getFirstAvailableUsername(std::string base);
+    void LoadDB();
+    void SaveDB();
     public:
+    int getScore(std::string username);
     static Users* getInstance();
     std::string login(std::string);
     std::string login(std::string,std::string);

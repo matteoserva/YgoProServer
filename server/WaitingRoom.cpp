@@ -121,7 +121,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
     //STOC_HS_PlayerEnter scpe;
-    BufferIO::CopyWStr("Wait, please", scpe.name, 20);
+    BufferIO::CopyWStr("read the chat!", scpe.name, 20);
     scpe.pos = 1;
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
@@ -136,6 +136,15 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     STOC_HS_PlayerChange scpc;
     scpc.status = (dp->type << 4) | PLAYERCHANGE_READY;
     SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+
+    char name[20],message[256];
+    BufferIO::CopyWStr(dp->name,name,20);
+    std::string username(name);
+    sprintf(message, "This is a ranked server. You have %d points.",Users::getInstance()->getScore(username));
+    SendMessageToPlayer(dp,message);
+    SendMessageToPlayer(dp,"to register and login, put your password near the username. example username$password");
+
+
 
 }
 void WaitingRoom::LeaveGame(DuelPlayer* dp)
