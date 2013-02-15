@@ -10,6 +10,7 @@
 #include "mythread.h"
 #include <string>
 #include <sstream>
+#include "debug.h"
 namespace ygo
 {
 Statistics::Statistics():numPlayers(0),numRooms(0)
@@ -24,14 +25,14 @@ Statistics* Statistics::getInstance()
 
 void Statistics::setNumPlayers(int numP)
 {
-    printf("there are %d players\n",numP);
+    log(INFO,"there are %d players\n",numP);
     numPlayers=numP;
 
 }
 void Statistics::setNumRooms(int numR)
 {
     if(numRooms != numR)
-        printf("there are %d rooms\n",numR);
+        log(INFO,"there are %d rooms\n",numR);
     numRooms=numR;
 }
 
@@ -43,7 +44,7 @@ int Statistics::StatisticsThread(void* param)
     {
         int result = that->sendStatistics();
         if(result)
-            printf("risultato statistiche: %d\n",result);
+            log(INFO,"risultato statistiche: %d\n",result);
 
         sleep(20);
     }
@@ -66,7 +67,7 @@ int Statistics::sendStatistics()
     server = gethostbyname(hostname.c_str());
     if (server == NULL)
     {
-        fprintf(stderr,"ERROR, no such host\n");
+        log(INFO,"ERROR, no such host\n");
         return -2;
     }
 

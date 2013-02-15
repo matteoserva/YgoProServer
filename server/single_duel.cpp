@@ -388,7 +388,6 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	rh.flag = 0;
 	time_t seed = time(0);
 	rh.seed = seed;
-	printf("inizio a registrare\n");
 	last_replay.BeginRecord();
 	last_replay.WriteHeader(rh);
 	rnd.reset(seed);

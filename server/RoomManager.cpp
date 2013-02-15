@@ -2,6 +2,7 @@
 #include "GameServer.h"
 #include "RoomManager.h"
 #include "Statistics.h"
+#include "debug.h"
 namespace ygo
 {
 
@@ -51,19 +52,19 @@ int RoomManager::getNumPlayers()
 CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 {
     int i = 0;
-    printf("analizzo la lista server\n");
+    log(INFO,"analizzo la lista server\n");
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
         CMNetServer *p = *it;
 
         if(p->state == CMNetServer::State::WAITING && p->mode == mode)
         {
-            printf("ho scelto il server %d\n",i);
+            log(INFO,"ho scelto il server %d\n",i);
             return *it;
         }
         i++;
     }
-    printf("Server non trovato, creo uno nuovo \n");
+    log(INFO,"Server non trovato, creo uno nuovo \n");
     return createServer(mode);
 }
 
@@ -154,20 +155,20 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 CMNetServer* RoomManager::getFirstAvailableServer()
 {
     int i = 0;
-    printf("analizzo la lista server\n");
+    log(INFO,"analizzo la lista server\n");
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
         CMNetServer *p = *it;
         if(p->state == CMNetServer::State::WAITING)
         {
-            printf("ho scelto il server %d\n",i);
+            log(INFO,"ho scelto il server %d\n",i);
             return *it;
         }
         i++;
     }
 
 
-    printf("Server non trovato, creo uno nuovo \n");
+    log(INFO,"Server non trovato, creo uno nuovo \n");
 
     return createServer(MODE_SINGLE);
     //netServer.gameServer=
@@ -191,14 +192,14 @@ void RoomManager::removeDeadRooms()
 {
 
     int i=0;
-    //printf("analizzo la lista server e cerco i morti\n");
+    //log(INFO,"analizzo la lista server e cerco i morti\n");
     for(auto it =elencoServer.begin(); it!=elencoServer.end();)
     {
         CMNetServer *p = *it;
 
         if(p->state == CMNetServer::State::DEAD)
         {
-            printf("elimino il server %d\n",i);
+            log(INFO,"elimino il server %d\n",i);
             delete (*it);
             it=elencoServer.erase(it);
         }

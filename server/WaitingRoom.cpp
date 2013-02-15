@@ -1,5 +1,7 @@
 #include "WaitingRoom.h"
 #include "GameServer.h"
+#include "debug.h"
+#include "Users.h"
 namespace ygo
 {
 int WaitingRoom::minSecondsWaiting=4;
@@ -35,7 +37,7 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
         BufferIO::CopyWStr(it->first->name,nome,30);
         if(!that->players[it->first].isReady)
                     continue;
-        //printf("%s aspetta da %d secondi\n",nome,it->second.secondsWaiting);
+        //log(INFO,"%s aspetta da %d secondi\n",nome,it->second.secondsWaiting);
         if(it->second.secondsWaiting>= maxSecondsWaiting)
             players_bored.push_back(it->first);
         if(it->second.secondsWaiting>= minSecondsWaiting)
@@ -145,7 +147,7 @@ void WaitingRoom::LeaveGame(DuelPlayer* dp)
 
 DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer*)
 {
-    //printf("Utenti in attesa: %d\n",players.size());
+    //log(INFO,"Utenti in attesa: %d\n",players.size());
     if(!players.size())
         return nullptr;
 
@@ -167,7 +169,7 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,unsigned short* msg)
 {
     char messaggio[256];
     int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
-    printf("ricevuto messaggio %s\n",messaggio);
+    log(INFO,"ricevuto messaggio %s\n",messaggio);
 
     if(!strcmp(messaggio,"!tag"))
     {
@@ -199,11 +201,14 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     case CTOS_PLAYER_INFO:
     {
         CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
-        BufferIO::CopyWStr(pkt->name, dp->name, 20);
         char name[20];
         BufferIO::CopyWStr(pkt->name,name,20);
+        Users* u = Users::getInstance();
+        std::string username = u->login(name);
 
-        printf("WaitingRoom:Player joined %s \n",name);
+        BufferIO::CopyWStr(username.c_str(), dp->name, 20);
+
+        log(INFO,"WaitingRoom:Player joined %s \n",name);
         break;
     }
     case CTOS_CHAT:

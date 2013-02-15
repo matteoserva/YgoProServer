@@ -3,6 +3,8 @@
 #include "tag_duel.h"
 #include "GameServer.h"
 #include "RoomManager.h"
+#include "debug.h"
+#include "Users.h"
 namespace ygo
 {
 CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
@@ -28,7 +30,7 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
         unsigned char* wbuf = (unsigned char*)buffer;
         if(wbuf[0] == MSG_WIN)
         {
-            printf("---------vittoria per il giocatore\n");
+            log(INFO,"---------vittoria per il giocatore\n");
             last_winner =wbuf[1];
         }
 
@@ -38,7 +40,7 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
 void CMNetServer::auto_idle_cb(evutil_socket_t fd, short events, void* arg)
 {
     CMNetServer* that = (CMNetServer*)arg;
-    printf("auto idle_cb\n");
+    log(INFO,"auto idle_cb\n");
     if(that->state != FULL)
         return;
     for(auto it = that->players.cbegin(); it!=that->players.cend(); ++it)
@@ -106,7 +108,7 @@ void CMNetServer::playerConnected(DuelPlayer *dp)
         players[dp] = DuelPlayerInfo();
     numPlayers=players.size();
 
-    printf("giocatori connessi:%d\n",numPlayers);
+    log(INFO,"giocatori connessi:%d\n",numPlayers);
     updateServerState();
 }
 
@@ -130,18 +132,18 @@ void CMNetServer::updateServerState()
     if(getNumDuelPlayers() < getMaxDuelPlayers() &&state==FULL)
     {
         setState(WAITING);
-        printf("server not full\n");
+        log(INFO,"server not full\n");
     }
     if(numPlayers==0 &&state != DEAD)//&& (state==ZOMBIE || state == WAITING))
     {
-        printf("server vuoto. addio, morto\n");
+        log(INFO,"server vuoto. addio, morto\n");
 
         destroyGame();
         setState(DEAD);
     }
     if(getNumDuelPlayers()>=getMaxDuelPlayers() && state==WAITING)//
     {
-        printf("server full\n");
+        log(INFO,"server full\n");
         setState(FULL);
         timeval timeout = {10, 0};
         event_add(auto_idle, &timeout);
@@ -155,7 +157,7 @@ void CMNetServer::playerDisconnected(DuelPlayer* dp )
         players.erase(dp);
     numPlayers=players.size();
 
-    printf("giocatori connessi:%d\n",numPlayers);
+    log(INFO,"giocatori connessi:%d\n",numPlayers);
     updateServerState();
 }
 void CMNetServer::DuelTimer(evutil_socket_t fd, short events, void* arg)
@@ -218,7 +220,7 @@ void CMNetServer::createGame()
 }
 void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
 {
-    printf("DisconnectPlayer called\n");
+    log(INFO,"DisconnectPlayer called\n");
 
     auto bit = players.find(dp);
     if(bit != players.end())
@@ -233,7 +235,7 @@ void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
 void CMNetServer::ExtractPlayer(DuelPlayer* dp)
 {
     //it removes the player from the duel without disconnecting its tcp connection
-    printf("ExtractPlayer called\n");
+    log(INFO,"ExtractPlayer called\n");
     playerDisconnected(dp);
     LeaveGame(dp);
 }
@@ -241,7 +243,7 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
 {
 
     //it inserts forcefully the player into the server
-    printf("InsertPlayer called\n");
+    log(INFO,"InsertPlayer called\n");
     playerConnected(dp);
     CTOS_JoinGame csjg;
     csjg.version = PRO_VERSION;
@@ -269,13 +271,13 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
     if(players.find(dp)!=players.end())
     {
         //this is a bug in tagduel
-        printf("BUG: player left but the duel didn't call DisconnectPlayer\n");
+        log(BUG,"player left but the duel didn't call DisconnectPlayer\n");
         DisconnectPlayer(dp);
     }
 
     if(oldtype != NETPLAYER_TYPE_OBSERVER && state == PLAYING)
     {
-        printf("BUG: player left but the game is still playing\n");
+        log(BUG,"player left but the game is still playing\n");
         setState(ZOMBIE);
         for(auto it=players.cbegin(); it!= players.cend(); ++it)
         {
@@ -305,10 +307,12 @@ void CMNetServer::Victory(unsigned char winner)
     if(mode == MODE_SINGLE || mode == MODE_MATCH)
     {
         char win[20], lose[20];
+
         BufferIO::CopyWStr(_players[winner]->name,win,20);
         BufferIO::CopyWStr(_players[1-winner]->name,lose,20);
-        printf("SingleDuel, winner: %s, loser: %s\n",win,lose);
-
+        log(INFO,"SingleDuel, winner: %s, loser: %s\n",win,lose);
+        std::string wins(win), loses(lose);
+        Users::getInstance()->Victory(wins,loses);
     }
 
     if(mode == MODE_TAG)
@@ -329,7 +333,7 @@ void CMNetServer::Victory(unsigned char winner)
             BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,lose2,20);
 
         }
-        printf("Tagduel finished: winners %s and %s, losers: %s and %s\n",win1,win2,lose1,lose2);
+        log(INFO,"Tagduel finished: winners %s and %s, losers: %s and %s\n",win1,win2,lose1,lose2);
     }
 }
 
@@ -337,7 +341,7 @@ void CMNetServer::Victory(unsigned char winner)
 void CMNetServer::StopServer()
 {
     //the duel asked me to stop
-    printf("netserver server diventato zombie\n");
+    log(INFO,"netserver server diventato zombie\n");
     if(state==PLAYING)
     {
         Victory(last_winner);
@@ -351,7 +355,7 @@ void CMNetServer::StopServer()
 void CMNetServer::toObserver(DuelPlayer* dp)
 {
 
-    printf("to observer\n");
+    log(INFO,"to observer\n");
     duel_mode->ToObserver(dp);
     playerReadinessChange(dp,false);
     updateServerState();
@@ -368,13 +372,13 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
     if(state==ZOMBIE)
     {
-        printf("pacchetto ricevuto per uno zombie, ignorato\n");
+        log(INFO,"pacchetto ricevuto per uno zombie, ignorato\n");
         return;
     }
 
     if( players.end() == players.find(dp))
     {
-        printf("BUG: handlectospacket ha ricevuto un pacchetto per un utente inesistente \n");
+        log(INFO,"BUG: handlectospacket ha ricevuto un pacchetto per un utente inesistente \n");
         return;
     }
 
@@ -462,7 +466,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
                 scpc.status = (it->first->type << 4) |PLAYERCHANGE_READY;
 
                 SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
-                printf("sent player change to p\n");
+                log(INFO,"sent player change to p\n");
             }
         }
 

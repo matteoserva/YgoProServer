@@ -1,5 +1,5 @@
 #include "NetServerInterface.h"
-
+#include "debug.h"
 
 namespace ygo
 {
@@ -27,7 +27,7 @@ void CMNetServerInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char prot
 {
     if(players.find(dp) == players.end())
     {
-        printf("sendpacket ignorato\n");
+        log(INFO,"sendpacket ignorato\n");
         return;
     }
     char* p = net_server_write;
@@ -42,14 +42,14 @@ void CMNetServerInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char prot
 void CMNetServerInterface::playerReadinessChange(DuelPlayer *dp, bool isReady)
 {
     players[dp].isReady = isReady;
-    printf("readiness change %d\n",isReady);
+    log(INFO,"readiness change %d\n",isReady);
 }
 
 void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
     if( players.end() == players.find(dp))
     {
-        printf("sendbuffer ignorato \n");
+        log(INFO,"sendbuffer ignorato \n");
         return;
     }
     char* p = net_server_write;
@@ -64,7 +64,7 @@ void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
 {
     if(players.find(dp) == players.end())
     {
-        printf("resend ignorato\n");
+        log(INFO,"resend ignorato\n");
         return;
     }
     if(dp)

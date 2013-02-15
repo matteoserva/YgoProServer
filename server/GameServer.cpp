@@ -61,14 +61,14 @@ void GameServer::StopServer()
     listener = 0;
     while(users.size() > 0)
     {
-        printf("waiting for reboot, users connected: %lu\n",users.size());
+        log(WARN,"waiting for reboot, users connected: %lu\n",users.size());
         sleep(1);
     }
 
     event_base_loopexit(net_evbase, 0);
     while(net_evbase)
     {
-        printf("waiting for server thread\n");
+        log(WARN,"waiting for server thread\n");
         sleep(1);
     }
 
@@ -196,7 +196,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(pktType!=CTOS_PLAYER_INFO)
         {
-            printf("BUG: player info is not the first packet\n");
+            log(WARN,"player info is not the first packet\n");
             return;
         }
         if(!roomManager.InsertPlayerInWaitingRoom(dp))
