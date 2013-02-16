@@ -62,7 +62,7 @@ void GameServer::StopServer()
     while(users.size() > 0)
     {
         log(WARN,"waiting for reboot, users connected: %lu\n",users.size());
-        sleep(1);
+        sleep(5);
     }
 
     event_base_loopexit(net_evbase, 0);

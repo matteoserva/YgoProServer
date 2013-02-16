@@ -25,6 +25,7 @@ int main(int argc, char**argv)
     if(!gameServer->StartServer(config->serverport))
     {
         printf("cannot bind the server to port %d\n",config->serverport);
+        exit(1);
     }
     else
     {
