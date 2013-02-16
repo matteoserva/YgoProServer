@@ -8,7 +8,7 @@
 namespace ygo
 {
 CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
-    :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0)
+    :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0),last_winner(-1)
 {
     createGame();
 }
@@ -308,8 +308,10 @@ void CMNetServer::StopListen()
 {
 }
 
-void CMNetServer::Victory(unsigned char winner)
+void CMNetServer::Victory(char winner)
 {
+    if(winner < 0)
+        return;
     DuelPlayer* _players[4];
     for(auto it = players.cbegin(); it!= players.cend(); ++it)
     {

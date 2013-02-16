@@ -28,8 +28,8 @@ class CMNetServer:public CMNetServerInterface
 private:
     static void DuelTimer(evutil_socket_t fd, short events, void* arg);
 
-    void Victory(unsigned char winner);
-    unsigned char last_winner;
+    void Victory(char winner);
+    char last_winner;
     int getNumDuelPlayers();
     void updateServerState();
     void destroyGame();
