@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <list>
 #include <math.h>
+#include "debug.h"
 namespace ygo
 {
 Users::Users()
@@ -131,7 +132,7 @@ int Users::getScore(std::string username)
 {
     std::transform(username.begin(), username.end(), username.begin(), ::tolower);
     std::lock_guard<std::mutex> guard(usersMutex);
-    printf("%s ha %d punti\n",username.c_str(),users[username]->score);
+    log(VERBOSE,"%s ha %d punti\n",username.c_str(),users[username]->score);
     return users[username]->score;
 }
 
@@ -157,7 +158,7 @@ void Users::Victory(std::string win, std::string los)
     std::lock_guard<std::mutex> guard(usersMutex);
     int winscore = users[win]->score;
     int losescore = users[los]->score;
-    int delta = abs(winscore-losescore);
+    int delta = losescore-winscore;
     float we = 1.0/(exp(-delta/400.0)+1.0);
     float k = 200.0;
 
@@ -180,9 +181,12 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
     float lose1score = users[los1]->score;
     float win2score = users[win2]->score;
     float lose2score = users[los2]->score;
-    int delta = abs(win1score+win2score-lose1score-lose2score)/2; //<-- /2!
+    int delta = -(win1score+win2score-lose1score-lose2score)/2; //<-- /2!
     float we = 1.0/(exp(-delta/400.0)+1.0);
     float k = 400.0; //<--400!
+
+
+
     users[win1]->score += k*(1.0-we) * win1score/(win1score+win2score);
     users[win2]->score += k*(1.0-we) * win2score/(win1score+win2score);
     users[los1]->score += k*(0.0-we) * lose1score/(lose1score+lose2score);
