@@ -5,6 +5,7 @@
 #include <thread>
 #include <exception>
 #include <algorithm>
+#include <list>
 namespace ygo
 {
 Users::Users()
@@ -26,18 +27,18 @@ bool Users::validLoginString(std::string loginString)
         return false;
     }
 }
-void Users::SaveThread(Users* that)
+void Users::SaveThread(Users * that)
 {
     while(1)
     {
         sleep(20);
-        that->usersMutex.lock();
+
         time_t tempo1,tempo2;
         time(&tempo1);
         that->SaveDB();
         time(&tempo2);
         int delta = tempo2-tempo1;
-        that->usersMutex.unlock();
+
         printf("salvato il DB, ha impiegato %d secondi\n",delta);
 
     }
@@ -199,16 +200,26 @@ std::string Users::getFirstAvailableUsername(std::string base)
     }*/
     return "Player";
 }
-
+static bool compareUserData (UserData* u1, UserData* u2) { return (u1->score > u2->score); }
 void Users::SaveDB()
 {
     //return;
     std::ofstream inf("users.txt");
+    std::list<UserData*> userList;
+    usersMutex.lock();
+
     for(auto it = users.cbegin(); it!=users.cend(); ++it)
     {
-        inf<<it->second->username<<"|"<<it->second->password<<"|"<<it->second->score;
-        inf << "|"<<it->second->last_login<<std::endl;
+        userList.push_back(it->second);
     }
+    userList.sort(compareUserData);
+    for(auto it = userList.cbegin(); it!=userList.cend(); ++it)
+    {
+        inf<<(*it)->username<<"|"<<(*it)->password<<"|"<<(*it)->score;
+        inf << "|"<<(*it)->last_login<<std::endl;
+    }
+    usersMutex.unlock();
+
 }
 void Users::LoadDB()
 {

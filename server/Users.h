@@ -36,11 +36,12 @@ class Users
     std::string getFirstAvailableUsername(std::string base);
     void LoadDB();
     void SaveDB();
+    std::string login(std::string,std::string);
     public:
     int getScore(std::string username);
     static Users* getInstance();
     std::string login(std::string);
-    std::string login(std::string,std::string);
+
     void Victory(std::string, std::string);
     void Victory(std::string, std::string,std::string, std::string);
 
