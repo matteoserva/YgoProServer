@@ -42,7 +42,7 @@ void CMNetServerInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char prot
 void CMNetServerInterface::playerReadinessChange(DuelPlayer *dp, bool isReady)
 {
     players[dp].isReady = isReady;
-    log(INFO,"readiness change %d\n",isReady);
+    log(VERBOSE,"readiness change %d\n",isReady);
 }
 
 void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)

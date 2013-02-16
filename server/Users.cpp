@@ -6,6 +6,7 @@
 #include <exception>
 #include <algorithm>
 #include <list>
+#include <math.h>
 namespace ygo
 {
 Users::Users()
@@ -156,11 +157,17 @@ void Users::Victory(std::string win, std::string los)
     std::lock_guard<std::mutex> guard(usersMutex);
     int winscore = users[win]->score;
     int losescore = users[los]->score;
-    users[win]->score = winscore + 100*losescore/winscore;
-    users[los]->score = losescore - 100*losescore/winscore;
-    if(users[los]->score < 1000)
-        users[los]->score = 1000;
-    std::cout << win << "ha: "<<users[win]->score;
+    int delta = abs(winscore-losescore);
+    float we = 1.0/(exp(-delta/400.0)+1.0);
+    float k = 200.0;
+
+    users[win]->score = winscore + k*(1.0-we);
+    users[los]->score = losescore + k*(0.0-we);
+
+    if(users[los]->score < 100)
+        users[los]->score = 100;
+    std::cout << win << " score: "<<winscore<<" --> "<<users[win]->score<<std::endl;
+    std::cout << los << " score: "<<losescore<<" --> "<<users[los]->score<<std::endl;
 }
 void Users::Victory(std::string win1, std::string win2,std::string los1, std::string los2)
 {
@@ -169,23 +176,27 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
     std::transform(win2.begin(), win2.end(), win2.begin(), ::tolower);
     std::transform(los2.begin(), los2.end(), los2.begin(), ::tolower);
     std::lock_guard<std::mutex> guard(usersMutex);
-    int win1score = users[win1]->score;
-    int lose1score = users[los1]->score;
-    int win2score = users[win2]->score;
-    int lose2score = users[los2]->score;
+    float win1score = users[win1]->score;
+    float lose1score = users[los1]->score;
+    float win2score = users[win2]->score;
+    float lose2score = users[los2]->score;
+    int delta = abs(win1score+win2score-lose1score-lose2score)/2; //<-- /2!
+    float we = 1.0/(exp(-delta/400.0)+1.0);
+    float k = 400.0; //<--400!
+    users[win1]->score += k*(1.0-we) * win1score/(win1score+win2score);
+    users[win2]->score += k*(1.0-we) * win2score/(win1score+win2score);
+    users[los1]->score += k*(0.0-we) * lose1score/(lose1score+lose2score);
+    users[los2]->score += k*(0.0-we) * lose2score/(lose1score+lose2score);
 
-    int delta = 200*(lose1score+lose2score)/(win1score+win2score);
+    if(users[los1]->score < 100)
+        users[los1]->score = 100;
+    if(users[los2]->score < 100)
+        users[los2]->score = 100;
 
-    users[win1]->score += delta * win1score/(win1score+win2score);
-    users[win2]->score += delta * win2score/(win1score+win2score);
-    users[los1]->score -= delta * lose1score/(lose1score+lose2score);
-    users[los2]->score -= delta * lose2score/(lose1score+lose2score);
-    if(users[los1]->score < 1000)
-        users[los1]->score = 1000;
-
-    if(users[los2]->score < 1000)
-        users[los2]->score = 1000;
-
+    std::cout << win1 << " score: "<<win1score<<" --> "<<users[win1]->score<<std::endl;
+    std::cout << los1 << " score: "<<lose1score<<" --> "<<users[los1]->score<<std::endl;
+    std::cout << win2 << " score: "<<win2score<<" --> "<<users[win2]->score<<std::endl;
+    std::cout << los2 << " score: "<<lose2score<<" --> "<<users[los2]->score<<std::endl;
 }
 
 

@@ -1,5 +1,5 @@
 #include "debug.h"
-char* log_type_str[]={"INFO","WARN","BUG"};
+char* log_type_str[]={"VERBOSE","INFO","WARN","BUG"};
 void log(log_type lt, const char *format, ...)
 {
 #ifdef DEBUG
