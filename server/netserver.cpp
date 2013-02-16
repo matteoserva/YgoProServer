@@ -310,14 +310,23 @@ void CMNetServer::StopListen()
 
 void CMNetServer::Victory(char winner)
 {
-    if(winner < 0)
-        return;
     DuelPlayer* _players[4];
     for(auto it = players.cbegin(); it!= players.cend(); ++it)
     {
         if(it->first->type <= NETPLAYER_TYPE_PLAYER4)
             _players[it->first->type] = it->first;
     }
+
+    if(winner < 0)
+    {
+        /*TODO
+         * there isn't a winner
+         *duel ended in a draw
+         *handle this
+         */
+        return;
+    }
+
     if(mode == MODE_SINGLE || mode == MODE_MATCH)
     {
         char win[20], lose[20];
@@ -328,8 +337,7 @@ void CMNetServer::Victory(char winner)
         std::string wins(win), loses(lose);
         Users::getInstance()->Victory(wins,loses);
     }
-
-    if(mode == MODE_TAG)
+    else if(mode == MODE_TAG)
     {
         char win1[20], win2[20], lose1[20],lose2[20];
         if(winner <= NETPLAYER_TYPE_PLAYER2)

@@ -16,16 +16,16 @@ struct UserData
     std::string password;
     unsigned int score;
     time_t  last_login;
-    UserData(std::string username,std::string password):username(username),password(password),score(1000){}
-    UserData():username("Player"),password(""),score(1000){}
-    UserData(std::string username,std::string password,unsigned int score):username(username),password(password),score(score){}
+    UserData(std::string username,std::string password):username(username),password(password),score(1000) {}
+    UserData():username("Player"),password(""),score(1000) {}
+    UserData(std::string username,std::string password,unsigned int score):username(username),password(password),score(score) {}
 };
 
 
 
 class Users
 {
-    private:
+private:
     std::thread t1;
     std::pair<std::string,std::string> splitLoginString(std::string);
     bool validLoginString(std::string);
@@ -37,11 +37,12 @@ class Users
     void LoadDB();
     void SaveDB();
     std::string login(std::string,std::string);
-    public:
+public:
     int getScore(std::string username);
     static Users* getInstance();
     std::string login(std::string);
-
+    void Draw(std::string d1, std::string d2);
+    void Draw(std::string d1, std::string d2,std::string d3, std::string d4);
     void Victory(std::string, std::string);
     void Victory(std::string, std::string,std::string, std::string);
 

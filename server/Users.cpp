@@ -135,6 +135,18 @@ int Users::getScore(std::string username)
 }
 
 
+
+void Users::Draw(std::string d1, std::string d2)
+{
+
+}
+
+void Users::Draw(std::string d1, std::string d2,std::string d3, std::string d4)
+{
+
+}
+
+
 void Users::Victory(std::string win, std::string los)
 {
     std::transform(win.begin(), win.end(), win.begin(), ::tolower);
