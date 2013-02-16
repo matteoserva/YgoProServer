@@ -69,7 +69,7 @@ void GameServer::StopServer()
     while(net_evbase)
     {
         log(WARN,"waiting for server thread\n");
-        sleep(1);
+        sleep(5);
     }
 
 }
