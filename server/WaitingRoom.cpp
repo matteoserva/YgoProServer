@@ -36,7 +36,7 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
         char nome[30];
         BufferIO::CopyWStr(it->first->name,nome,30);
         if(!that->players[it->first].isReady)
-                    continue;
+            continue;
         //log(INFO,"%s aspetta da %d secondi\n",nome,it->second.secondsWaiting);
         if(it->second.secondsWaiting>= maxSecondsWaiting)
             players_bored.push_back(it->first);
@@ -154,11 +154,18 @@ void WaitingRoom::LeaveGame(DuelPlayer* dp)
     updateObserversNum();
 }
 
-DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer*)
+DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
 {
     //log(INFO,"Utenti in attesa: %d\n",players.size());
     if(!players.size())
         return nullptr;
+
+    int qdifference = 0;
+    DuelPlayer *chosenOne = nullptr;
+
+    char name[20];
+    BufferIO::CopyWStr(referencePlayer->name,name,20);
+    int score = Users::getInstance()->getScore(std::string(name));
 
     for(auto it=players.cbegin(); it!=players.cend(); ++it)
     {
@@ -167,11 +174,28 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer*)
             DuelPlayer* dp = it->first;
             if(!players[dp].isReady)
                 continue;
-            ExtractPlayer(dp);
-            return dp;
+
+            char opname[20];
+            BufferIO::CopyWStr(dp->name,opname,20);
+            int opscore = Users::getInstance()->getScore(std::string(opname));
+
+            int candidate_qdifference = (score-opscore)*(score-opscore);
+            if(chosenOne == nullptr || candidate_qdifference < qdifference)
+            {
+                qdifference = candidate_qdifference;
+                chosenOne = dp;
+                continue;
+            }
+
         }
     }
-    return nullptr;
+    if(chosenOne != nullptr)
+    {
+        ExtractPlayer(chosenOne);
+        printf("qdifference = %d\n",qdifference);
+    }
+
+    return chosenOne;
 }
 
 bool WaitingRoom::handleChatCommand(DuelPlayer* dp,unsigned short* msg)
