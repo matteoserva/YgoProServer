@@ -72,8 +72,30 @@ void WaitingRoom::updateObserversNum()
     {
         SendPacketToPlayer(it->first, STOC_HS_WATCH_CHANGE, scwc);
     }
+}
 
+void WaitingRoom::ChatWithPlayer(DuelPlayer*dp, std::string sender,std::string message)
+{
+    STOC_HS_PlayerEnter scpe;
+    STOC_HS_PlayerChange scpc1;
+    scpc1.status = (NETPLAYER_TYPE_PLAYER2 << 4) | PLAYERCHANGE_LEAVE;
+    SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc1);
 
+    BufferIO::CopyWStr(sender.c_str(), scpe.name, 20);
+    scpe.pos = 1;
+    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
+
+    STOC_Chat scc;
+    scc.player = NETPLAYER_TYPE_PLAYER2;
+    int msglen = BufferIO::CopyWStr(message.c_str(), scc.msg, 256);
+    SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
+
+    scpc1.status = (NETPLAYER_TYPE_PLAYER2 << 4) | PLAYERCHANGE_LEAVE;
+    SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc1);
+
+    BufferIO::CopyWStr("read the chat!", scpe.name, 20);
+    scpe.pos = 1;
+    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
 }
 void WaitingRoom::InsertPlayer(DuelPlayer* dp)
@@ -124,6 +146,8 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     BufferIO::CopyWStr("read the chat!", scpe.name, 20);
     scpe.pos = 1;
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
+
+    //ChatWithPlayer(dp, "admin","hello");
 
     usleep(50000);
     SendMessageToPlayer(dp,"Welcome to the CheckMate server!");

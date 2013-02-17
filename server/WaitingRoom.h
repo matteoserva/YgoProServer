@@ -19,7 +19,7 @@ public:
     DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*);
     WaitingRoom(RoomManager*roomManager,GameServer*);
     ~WaitingRoom();
-
+    void ChatWithPlayer(DuelPlayer*dp, std::string sender,std::string message);
     void ExtractPlayer(DuelPlayer* dp);
     void InsertPlayer(DuelPlayer* dp);
     void LeaveGame(DuelPlayer* dp);
