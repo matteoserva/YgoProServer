@@ -147,9 +147,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     scpe.pos = 1;
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
-    //ChatWithPlayer(dp, "admin","hello");
-
-    usleep(50000);
+    //usleep(50000);
     SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
     SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel or !match");
 
@@ -234,18 +232,31 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,unsigned short* msg)
         return roomManager->InsertPlayer(dp,MODE_TAG);
 
     }
-    if(!strcmp(messaggio,"!single"))
+    else if(!strcmp(messaggio,"!single"))
     {
         ExtractPlayer(dp);
         return roomManager->InsertPlayer(dp,MODE_SINGLE);
     }
-    if(!strcmp(messaggio,"!match"))
+    else if(!strcmp(messaggio,"!match"))
     {
         ExtractPlayer(dp);
         return roomManager->InsertPlayer(dp,MODE_MATCH);
     }
+    else
+    {
+        char sender[20];
+        BufferIO::CopyWStr(dp->name,sender,20);
+        for(auto it=players.begin(); it!=players.end(); ++it)
+        {
+            if(it->first== dp)
+                continue;
+            ChatWithPlayer(it->first, std::string(sender),messaggio);
+        }
 
-    return false;
+        return false;
+    }
+
+
 }
 void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
