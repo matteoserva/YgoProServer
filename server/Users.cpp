@@ -136,7 +136,13 @@ int Users::getScore(std::string username)
     return users[username]->score;
 }
 
-
+int Users::getRank(std::string username)
+{
+    std::transform(username.begin(), username.end(), username.begin(), ::tolower);
+    std::lock_guard<std::mutex> guard(usersMutex);
+    log(VERBOSE,"%s e' in posizione %d\n",username.c_str(),users[username]->rank);
+    return users[username]->rank;
+}
 
 void Users::Draw(std::string d1, std::string d2)
 {
@@ -154,6 +160,17 @@ static float win_exp(float delta)
     //delta is my_score - opponent score
     return 1.0/(exp((-delta)/400.0)+1.0);
 }
+
+bool Users::check_user_bug(std::string username)
+{
+    if(users.find(username) == users.end())
+    {
+        log(BUG,"partita vinta con utente inesistente: %s\n",username.c_str());
+        return true;
+    }
+    return false;
+}
+
 void Users::Victory(std::string win, std::string los)
 {
     std::transform(win.begin(), win.end(), win.begin(), ::tolower);
@@ -163,8 +180,13 @@ void Users::Victory(std::string win, std::string los)
         return;
     if(los== "player" || los == "duelista")
         return;
-
     std::lock_guard<std::mutex> guard(usersMutex);
+
+    if(check_user_bug(win))
+        return;
+    if(check_user_bug(los))
+        return;
+
     int winscore = users[win]->score;
     int losescore = users[los]->score;
     int delta = winscore-losescore;
@@ -194,8 +216,16 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
         return;
     if(los2== "player" || los2 == "duelista")
         return;
-
     std::lock_guard<std::mutex> guard(usersMutex);
+    if(check_user_bug(win1))
+        return;
+    if(check_user_bug(los1))
+        return;
+    if(check_user_bug(win2))
+        return;
+    if(check_user_bug(los2))
+        return;
+
     float win1score = users[win1]->score;
     float lose1score = users[los1]->score;
     float win2score = users[win2]->score;
@@ -262,10 +292,13 @@ void Users::SaveDB()
         userList.push_back(it->second);
     }
     userList.sort(compareUserData);
+
+    int rank = 0;
     for(auto it = userList.cbegin(); it!=userList.cend(); ++it)
     {
         inf<<(*it)->username<<"|"<<(*it)->password<<"|"<<(*it)->score;
         inf << "|"<<(*it)->last_login<<std::endl;
+        (*it)->rank = ++rank;
     }
     usersMutex.unlock();
 
@@ -275,6 +308,7 @@ void Users::LoadDB()
     std::cout<<"LoadDB"<<std::endl;
     std::ifstream inf("users.txt");
     std::string username;
+    int rank = 0;
     while(!std::getline(inf, username, '|').eof())
     {
         std::string password;
@@ -294,6 +328,7 @@ void Users::LoadDB()
         splitLoginString(username+"$"+password);
         UserData* ud = new UserData(username,password,score);
         ud->last_login = last_login;
+        ud->rank = ++rank;
         std::transform(username.begin(), username.end(), username.begin(), ::tolower);
         users[username] = ud;
     }
@@ -301,4 +336,5 @@ void Users::LoadDB()
 }
 
 }
+
 

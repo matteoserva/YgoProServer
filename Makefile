@@ -31,7 +31,7 @@ LIBS =
 LDFLAGS = -levent  -lsqlite3 -levent_pthreads ygopro/bin/debug/libocgcore.a -llua5.2 ygopro/bin/debug/libclzma.a
 
 
-server: $(OUT) ocgcore libclzma
+server: $(OUT)
 
 ocgcore:
 	make -C ygopro/build/ ocgcore
@@ -41,7 +41,7 @@ libclzma:
 
 all: client server
 
-$(OUT): $(OBJ)                                                                                                                                                                               
+$(OUT): $(OBJ) ocgcore libclzma
 	$(CPP) $(CPPFLAGS) -o $(OUT) $(OBJ) $(LDFLAGS)
 
 .c.o:

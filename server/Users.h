@@ -16,6 +16,7 @@ struct UserData
     std::string password;
     unsigned int score;
     time_t  last_login;
+    unsigned int rank;
     UserData(std::string username,std::string password):username(username),password(password),score(1000) {}
     UserData():username("Player"),password(""),score(1000) {}
     UserData(std::string username,std::string password,unsigned int score):username(username),password(password),score(score) {}
@@ -37,10 +38,11 @@ private:
     void LoadDB();
     void SaveDB();
     std::string login(std::string,std::string);
-
+    bool check_user_bug(std::string username);
 
 public:
     int getScore(std::string username);
+    int getRank(std::string username);
     static Users* getInstance();
     std::string login(std::string);
     void Draw(std::string d1, std::string d2);
