@@ -150,7 +150,8 @@ void Users::Draw(std::string d1, std::string d2,std::string d3, std::string d4)
 
 
 static float win_exp(float delta)
-{//delta is my_score - opponent score
+{
+    //delta is my_score - opponent score
     return 1.0/(exp((-delta)/400.0)+1.0);
 }
 void Users::Victory(std::string win, std::string los)
@@ -158,6 +159,10 @@ void Users::Victory(std::string win, std::string los)
     std::transform(win.begin(), win.end(), win.begin(), ::tolower);
     std::transform(los.begin(), los.end(), los.begin(), ::tolower);
 
+    if(win == "player" || win == "duelista")
+        return;
+    if(los== "player" || los == "duelista")
+        return;
 
     std::lock_guard<std::mutex> guard(usersMutex);
     int winscore = users[win]->score;
@@ -180,6 +185,16 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
     std::transform(los1.begin(), los1.end(), los1.begin(), ::tolower);
     std::transform(win2.begin(), win2.end(), win2.begin(), ::tolower);
     std::transform(los2.begin(), los2.end(), los2.begin(), ::tolower);
+
+    if(win1 == "player" || win1 == "duelista")
+        return;
+    if(los1== "player" || los1 == "duelista")
+        return;
+    if(win2 == "player" || win2 == "duelista")
+        return;
+    if(los2== "player" || los2 == "duelista")
+        return;
+
     std::lock_guard<std::mutex> guard(usersMutex);
     float win1score = users[win1]->score;
     float lose1score = users[los1]->score;
@@ -231,7 +246,10 @@ std::string Users::getFirstAvailableUsername(std::string base)
     }*/
     return "Player";
 }
-static bool compareUserData (UserData* u1, UserData* u2) { return (u1->score > u2->score); }
+static bool compareUserData (UserData* u1, UserData* u2)
+{
+    return (u1->score > u2->score);
+}
 void Users::SaveDB()
 {
     //return;

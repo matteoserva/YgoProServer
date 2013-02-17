@@ -10,7 +10,7 @@ SRC += ygopro/gframe/data_manager.cpp ygopro/gframe/deck_manager.cpp # ygopro/gf
 OUT = $(TARGET)
 OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 
-.PHONY:	client
+.PHONY:	client ocgcore libclzma
 
 
 # include directories
@@ -31,7 +31,13 @@ LIBS =
 LDFLAGS = -levent  -lsqlite3 -levent_pthreads ygopro/bin/debug/libocgcore.a -llua5.2 ygopro/bin/debug/libclzma.a
 
 
-server: $(OUT)
+server: $(OUT) ocgcore libclzma
+
+ocgcore:
+	make -C ygopro/build/ ocgcore
+
+libclzma:
+	make -C ygopro/build/ clzma
 
 all: client server
 
