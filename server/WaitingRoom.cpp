@@ -140,7 +140,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     char name[20],message[256];
     BufferIO::CopyWStr(dp->name,name,20);
     std::string username(name);
-    sprintf(message, "This is a ranked server. You have %d points.",Users::getInstance()->getScore(username));
+    sprintf(message, "This is a ranked server. Your rank is %d with %d points.",Users::getInstance()->getRank(username),Users::getInstance()->getScore(username));
     SendMessageToPlayer(dp,message);
     SendMessageToPlayer(dp,"to register and login, put your password near the username. example username$password");
 

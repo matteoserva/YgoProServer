@@ -17,9 +17,9 @@ struct UserData
     unsigned int score;
     time_t  last_login;
     unsigned int rank;
-    UserData(std::string username,std::string password):username(username),password(password),score(1000) {}
-    UserData():username("Player"),password(""),score(1000) {}
-    UserData(std::string username,std::string password,unsigned int score):username(username),password(password),score(score) {}
+    UserData(std::string username,std::string password):username(username),password(password),score(1000),rank(0) {}
+    UserData():username("Player"),password(""),score(1000),rank(0) {}
+    UserData(std::string username,std::string password,unsigned int score):username(username),password(password),score(score),rank(0) {}
 };
 
 
