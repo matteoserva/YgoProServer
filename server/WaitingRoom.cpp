@@ -5,7 +5,7 @@
 namespace ygo
 {
 int WaitingRoom::minSecondsWaiting=4;
-int WaitingRoom::maxSecondsWaiting=6;
+int WaitingRoom::maxSecondsWaiting=8;
 
 
 WaitingRoom::WaitingRoom(RoomManager*roomManager,GameServer*gameServer):
