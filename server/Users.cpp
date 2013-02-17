@@ -198,8 +198,8 @@ void Users::Victory(std::string win, std::string los)
     if(users[los]->score < 100)
         users[los]->score = 100;
 
-    log(INFO,"%s score: %d --> %d",win.c_str(),winscore,users[win]->score);
-    log(INFO,"%s score: %d --> %d",los.c_str(),losescore,users[los]->score);
+    log(INFO,"%s score: %d --> %d\n",win.c_str(),winscore,users[win]->score);
+    log(INFO,"%s score: %d --> %d\n",los.c_str(),losescore,users[los]->score);
 }
 void Users::Victory(std::string win1, std::string win2,std::string los1, std::string los2)
 {
@@ -244,10 +244,10 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
     if(users[los2]->score < 100)
         users[los2]->score = 100;
 
-    log(INFO,"%s score: %d --> %d",win1.c_str(),win1score,users[win1]->score);
-    log(INFO,"%s score: %d --> %d",win2.c_str(),win2score,users[win2]->score);
-    log(INFO,"%s score: %d --> %d",los1.c_str(),lose1score,users[los1]->score);
-    log(INFO,"%s score: %d --> %d",los2.c_str(),lose2score,users[los2]->score);
+    log(INFO,"%s score: %d --> %d\n",win1.c_str(),win1score,users[win1]->score);
+    log(INFO,"%s score: %d --> %d\n",win2.c_str(),win2score,users[win2]->score);
+    log(INFO,"%s score: %d --> %d\n",los1.c_str(),lose1score,users[los1]->score);
+    log(INFO,"%s score: %d --> %d\n",los2.c_str(),lose2score,users[los2]->score);
 }
 
 
