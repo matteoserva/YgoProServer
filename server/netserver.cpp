@@ -30,7 +30,7 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
         unsigned char* wbuf = (unsigned char*)buffer;
         if(wbuf[0] == MSG_WIN)
         {
-            log(INFO,"---------vittoria per il giocatore\n");
+            log(VERBOSE,"---------vittoria per il giocatore\n");
             last_winner =wbuf[1];
         }
         if(wbuf[0] == MSG_START && dp->type != NETPLAYER_TYPE_OBSERVER)
@@ -144,7 +144,7 @@ void CMNetServer::updateServerState()
     if(getNumDuelPlayers() < getMaxDuelPlayers() &&state==FULL)
     {
         setState(WAITING);
-        log(INFO,"server not full\n");
+        log(VERBOSE,"server not full\n");
     }
     if(numPlayers==0 &&state != DEAD)//&& (state==ZOMBIE || state == WAITING))
     {
@@ -155,7 +155,7 @@ void CMNetServer::updateServerState()
     }
     if(getNumDuelPlayers()>=getMaxDuelPlayers() && state==WAITING)//
     {
-        log(INFO,"server full\n");
+        log(VERBOSE,"server full\n");
         setState(FULL);
         timeval timeout = {10, 0};
         event_add(auto_idle, &timeout);
@@ -232,7 +232,7 @@ void CMNetServer::createGame()
 }
 void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
 {
-    log(INFO,"DisconnectPlayer called\n");
+    log(VERBOSE,"DisconnectPlayer called\n");
 
     auto bit = players.find(dp);
     if(bit != players.end())
@@ -247,7 +247,7 @@ void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
 void CMNetServer::ExtractPlayer(DuelPlayer* dp)
 {
     //it removes the player from the duel without disconnecting its tcp connection
-    log(INFO,"ExtractPlayer called\n");
+    log(VERBOSE,"ExtractPlayer called\n");
     playerDisconnected(dp);
     LeaveGame(dp);
 }
@@ -255,7 +255,7 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
 {
 
     //it inserts forcefully the player into the server
-    log(INFO,"InsertPlayer called\n");
+    log(VERBOSE,"InsertPlayer called\n");
     playerConnected(dp);
     CTOS_JoinGame csjg;
     csjg.version = PRO_VERSION;

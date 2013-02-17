@@ -201,7 +201,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
             BufferIO::CopyWStr(dp->name,opname,20);
             int opscore = Users::getInstance()->getScore(std::string(opname));
 
-            int candidate_qdifference = (score-opscore)*(score-opscore);
+            int candidate_qdifference = abs(score-opscore);
             if(chosenOne == nullptr || candidate_qdifference < qdifference)
             {
                 qdifference = candidate_qdifference;
@@ -214,7 +214,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
     if(chosenOne != nullptr)
     {
         ExtractPlayer(chosenOne);
-        printf("qdifference = %d\n",qdifference);
+        log(INFO,"qdifference = %d\n",qdifference);
     }
 
     return chosenOne;

@@ -41,14 +41,14 @@ void Users::SaveThread(Users * that)
         time(&tempo2);
         int delta = tempo2-tempo1;
 
-        printf("salvato il DB, ha impiegato %d secondi\n",delta);
+        log(INFO,"salvato il DB, ha impiegato %d secondi\n",delta);
 
     }
 }
 
 std::pair<std::string,std::string> Users::splitLoginString(std::string loginString)
 {
-    printf("splitto %s\n",loginString.c_str());
+    log(INFO,"splitto %s\n",loginString.c_str());
     std::string username;
     std::string password="";
 
@@ -102,11 +102,10 @@ std::string Users::login(std::string loginString)
 
 std::string Users::login(std::string username, std::string password)
 {
-    std::cout<<"Tento il login con "<<username<<" e "<<password<<std::endl;
+    log(INFO,"Tento il login con %s e %s\n",username.c_str(),password.c_str());
     std::string usernamel=username;
 
     std::transform(usernamel.begin(), usernamel.end(), usernamel.begin(), ::tolower);
-    std::cout<<"Tento il login con "<<usernamel<<" e "<<password<<std::endl;
     if(users.find(usernamel) == users.end())
     {
         std::cout<<usernamel<<std::endl;
@@ -198,8 +197,9 @@ void Users::Victory(std::string win, std::string los)
 
     if(users[los]->score < 100)
         users[los]->score = 100;
-    std::cout << win << " score: "<<winscore<<" --> "<<users[win]->score<<std::endl;
-    std::cout << los << " score: "<<losescore<<" --> "<<users[los]->score<<std::endl;
+
+    log(INFO,"%s score: %d --> %d",win.c_str(),winscore,users[win]->score);
+    log(INFO,"%s score: %d --> %d",los.c_str(),losescore,users[los]->score);
 }
 void Users::Victory(std::string win1, std::string win2,std::string los1, std::string los2)
 {
@@ -234,8 +234,6 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
     float we = 1.0/(exp(-delta/400.0)+1.0);
     float k = 400.0; //<--400!
 
-
-
     users[win1]->score += k*(1.0-win_exp(delta)) * win1score/(win1score+win2score);
     users[win2]->score += k*(1.0-win_exp(delta)) * win2score/(win1score+win2score);
     users[los1]->score += k*(0.0-win_exp(-delta)) * lose1score/(lose1score+lose2score);
@@ -246,10 +244,10 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
     if(users[los2]->score < 100)
         users[los2]->score = 100;
 
-    std::cout << win1 << " score: "<<win1score<<" --> "<<users[win1]->score<<std::endl;
-    std::cout << los1 << " score: "<<lose1score<<" --> "<<users[los1]->score<<std::endl;
-    std::cout << win2 << " score: "<<win2score<<" --> "<<users[win2]->score<<std::endl;
-    std::cout << los2 << " score: "<<lose2score<<" --> "<<users[los2]->score<<std::endl;
+    log(INFO,"%s score: %d --> %d",win1.c_str(),win1score,users[win1]->score);
+    log(INFO,"%s score: %d --> %d",win2.c_str(),win2score,users[win2]->score);
+    log(INFO,"%s score: %d --> %d",los1.c_str(),lose1score,users[los1]->score);
+    log(INFO,"%s score: %d --> %d",los2.c_str(),lose2score,users[los2]->score);
 }
 
 
