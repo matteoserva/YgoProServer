@@ -37,6 +37,8 @@ private:
     void LoadDB();
     void SaveDB();
     std::string login(std::string,std::string);
+
+
 public:
     int getScore(std::string username);
     static Users* getInstance();

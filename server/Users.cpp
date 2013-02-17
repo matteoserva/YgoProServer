@@ -149,6 +149,10 @@ void Users::Draw(std::string d1, std::string d2,std::string d3, std::string d4)
 }
 
 
+static float win_exp(float delta)
+{//delta is my_score - opponent score
+    return 1.0/(exp((-delta)/400.0)+1.0);
+}
 void Users::Victory(std::string win, std::string los)
 {
     std::transform(win.begin(), win.end(), win.begin(), ::tolower);
@@ -158,12 +162,12 @@ void Users::Victory(std::string win, std::string los)
     std::lock_guard<std::mutex> guard(usersMutex);
     int winscore = users[win]->score;
     int losescore = users[los]->score;
-    int delta = losescore-winscore;
-    float we = 1.0/(exp(-delta/400.0)+1.0);
+    int delta = winscore-losescore;
+
     float k = 200.0;
 
-    users[win]->score = winscore + k*(1.0-we);
-    users[los]->score = losescore + k*(0.0-we);
+    users[win]->score = winscore + k*(1.0-win_exp(delta));
+    users[los]->score = losescore + k*(0.0 - win_exp(-delta));
 
     if(users[los]->score < 100)
         users[los]->score = 100;
@@ -181,16 +185,16 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
     float lose1score = users[los1]->score;
     float win2score = users[win2]->score;
     float lose2score = users[los2]->score;
-    int delta = -(win1score+win2score-lose1score-lose2score)/2; //<-- /2!
+    int delta = (win1score+win2score-lose1score-lose2score)/2; //<-- /2!
     float we = 1.0/(exp(-delta/400.0)+1.0);
     float k = 400.0; //<--400!
 
 
 
-    users[win1]->score += k*(1.0-we) * win1score/(win1score+win2score);
-    users[win2]->score += k*(1.0-we) * win2score/(win1score+win2score);
-    users[los1]->score += k*(0.0-we) * lose1score/(lose1score+lose2score);
-    users[los2]->score += k*(0.0-we) * lose2score/(lose1score+lose2score);
+    users[win1]->score += k*(1.0-win_exp(delta)) * win1score/(win1score+win2score);
+    users[win2]->score += k*(1.0-win_exp(delta)) * win2score/(win1score+win2score);
+    users[los1]->score += k*(0.0-win_exp(-delta)) * lose1score/(lose1score+lose2score);
+    users[los2]->score += k*(0.0-win_exp(-delta)) * lose2score/(lose1score+lose2score);
 
     if(users[los1]->score < 100)
         users[los1]->score = 100;
