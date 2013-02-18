@@ -33,8 +33,13 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
             log(VERBOSE,"---------vittoria per il giocatore\n");
             last_winner =wbuf[1];
         }
+
         if(wbuf[0] == MSG_START && dp->type != NETPLAYER_TYPE_OBSERVER)
         {
+            /*
+             * Bug in ygopro software. players can't receive messages, now!
+             */
+            if(mode != MODE_TAG)
             for(auto it = players.cbegin(); it!=players.cend(); ++it)
             {
                 if(it->first->type == NETPLAYER_TYPE_OBSERVER)
@@ -275,6 +280,7 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
     unsigned char oldstate = dp->state;
     unsigned char oldtype = dp->type;
 
+    printf("leavegame chiamato\n");
     if(state != ZOMBIE && dp->game == duel_mode)
         duel_mode->LeaveGame(dp);
     else
@@ -368,6 +374,19 @@ void CMNetServer::StopServer()
     if(state==PLAYING)
     {
         Victory(last_winner);
+        if(mode == MODE_TAG)
+        {
+            //Bug in tagduel.cpp
+            //only the first two players were notified at the end of the duel
+            for(auto it=players.cbegin(); it!= players.cend(); ++it)
+            {
+                if(it->first->type == NETPLAYER_TYPE_PLAYER3 || it->first->type == NETPLAYER_TYPE_PLAYER4)
+                    SendPacketToPlayer(it->first, STOC_DUEL_END);
+            }
+        }
+
+
+
     }
     setState(ZOMBIE);
     updateServerState();
