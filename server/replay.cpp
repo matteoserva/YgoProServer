@@ -13,8 +13,8 @@ Replay::Replay() {
 	comp_data = new unsigned char[0x2000];
 }
 Replay::~Replay() {
-	delete replay_data;
-	delete comp_data;
+	delete [] replay_data;
+	delete [] comp_data;
 }
 void Replay::BeginRecord() {
 
@@ -73,12 +73,18 @@ void Replay::EndRecord() {
 		return;
 
 
-
 	pheader.datasize = pdata - replay_data;
+	/*
 	pheader.flag |= REPLAY_COMPRESSED;
 	size_t propsize = 5;
 	comp_size = 0x1000;
-	LzmaCompress(comp_data, &comp_size, replay_data, pdata - replay_data, pheader.props, &propsize, 5, 1 << 24, 3, 0, 2, 32, 1);
+	LzmaCompress(comp_data, &comp_size, replay_data, pdata - replay_data, pheader.props, &propsize, 5, 1 << 24, 3, 0, 2, 32, 1);*/
+
+	//**
+	comp_size = pheader.datasize;
+	std::swap(comp_data,replay_data);
+	//**
+
 	is_recording = false;
 }
 

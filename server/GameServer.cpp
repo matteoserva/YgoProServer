@@ -197,6 +197,14 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(pktType!=CTOS_PLAYER_INFO)
         {
             log(WARN,"player info is not the first packet\n");
+            if(!strcmp(data,"ping"))
+            {
+
+                printf("pong\n");
+                bufferevent_write(dp->bev, "pong", 5);
+                bufferevent_flush(dp->bev, EV_WRITE, BEV_FLUSH);
+                //DisconnectPlayer(dp);
+            }
             return;
         }
         if(!roomManager.InsertPlayerInWaitingRoom(dp))
@@ -204,6 +212,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         int wnumplayers=roomManager.getNumPlayers();
         log(INFO,"rommmanager: there are %d players\n",wnumplayers+1);
     }
+
 
 
     dp->netServer->HandleCTOSPacket(dp,data,len);

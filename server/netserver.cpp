@@ -246,7 +246,7 @@ void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
         gameServer->DisconnectPlayer(dp);
     }
     playerDisconnected(dp);
-    dp->netServer=0;
+    //dp->netServer=0;
 }
 
 void CMNetServer::ExtractPlayer(DuelPlayer* dp)
