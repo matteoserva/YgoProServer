@@ -195,6 +195,8 @@ void Users::Victory(std::string win, std::string los)
     users[win]->score = winscore + k*(1.0-win_exp(delta));
     users[los]->score = losescore + k*(0.0 - win_exp(-delta));
 
+    users[win]->wins++;
+    users[los]->loses++;
     if(users[los]->score < 100)
         users[los]->score = 100;
 
@@ -243,6 +245,11 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
         users[los1]->score = 100;
     if(users[los2]->score < 100)
         users[los2]->score = 100;
+
+    users[win1]->wins++;
+    users[los1]->loses++;
+    users[win2]->wins++;
+    users[los2]->loses++;
 
     log(INFO,"%s score: %d --> %d\n",win1.c_str(),win1score,users[win1]->score);
     log(INFO,"%s score: %d --> %d\n",win2.c_str(),win2score,users[win2]->score);
@@ -295,7 +302,7 @@ void Users::SaveDB()
     for(auto it = userList.cbegin(); it!=userList.cend(); ++it)
     {
         inf<<(*it)->username<<"|"<<(*it)->password<<"|"<<(*it)->score;
-        inf << "|"<<(*it)->last_login<<std::endl;
+        inf << "|"<<(*it)->last_login<<"|"<<(*it)->wins<<"|"<<(*it)->loses<<std::endl;
         (*it)->rank = ++rank;
     }
     usersMutex.unlock();
@@ -305,21 +312,30 @@ void Users::LoadDB()
 {
     std::cout<<"LoadDB"<<std::endl;
     std::ifstream inf("users.txt");
-    std::string username;
     int rank = 0;
-    while(!std::getline(inf, username, '|').eof())
+    std::string line;
+    while(!std::getline(inf,line).eof())
     {
-        std::string password;
-        std::string iscore;
-        std::string slast_login;
-        unsigned int score;
+        if (line == "")
+            continue;
+        std::istringstream iss(line);
+        std::string username,password,iscore, _last_login,_wins,_loses;
+
+        unsigned int score,wins,loses;
         time_t last_login;
-        std::getline(inf, password, '|');
-        std::getline(inf, iscore,'|');
-        std::getline(inf,slast_login);
+
+        std::getline(iss, username, '|');
+        std::getline(iss, password, '|');
+        std::getline(iss, iscore,'|');
+        std::getline(iss,_last_login,'|');
+        std::getline(iss,_wins,'|');
+        std::getline(iss,_loses,'|');
         score = stoi(iscore);
-        last_login = stoul(slast_login);
-        std::cout<<"adding user "<<username<<" pass: "<<password<< "score: "<<score<<std::endl;
+
+
+        last_login = stoul(_last_login);
+
+        std::cout<<"adding user "<<username<<" pass: "<<password<< " score: "<<score<<std::endl;
         if(!validLoginString(username+"$"+password))
             continue;
 
@@ -327,6 +343,11 @@ void Users::LoadDB()
         UserData* ud = new UserData(username,password,score);
         ud->last_login = last_login;
         ud->rank = ++rank;
+        if(_wins != "")
+            ud->wins = stoi(_wins);
+        if(_loses != "")
+            ud->loses = stoi(_loses);
+
         std::transform(username.begin(), username.end(), username.begin(), ::tolower);
         users[username] = ud;
     }
