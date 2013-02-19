@@ -4,12 +4,13 @@
 #include <algorithm>
 #include "lzma/LzmaLib.h"
 
+#define REPLAY_DATA_SIZE 0x20000
 namespace ygo {
 
 Replay::Replay() {
 	is_recording = false;
 	is_replaying = false;
-	replay_data = new unsigned char[0x20000];
+	replay_data = new unsigned char[REPLAY_DATA_SIZE];
 	comp_data = new unsigned char[0x2000];
 }
 Replay::~Replay() {
@@ -33,6 +34,8 @@ void Replay::WriteHeader(ReplayHeader& header) {
 void Replay::WriteData(const void* data, unsigned int length, bool flush) {
 	if(!is_recording)
 		return;
+    if((pdata+length-replay_data)>=REPLAY_DATA_SIZE)
+        return;
 	memcpy(pdata, data, length);
 	pdata += length;
 
@@ -41,6 +44,8 @@ void Replay::WriteData(const void* data, unsigned int length, bool flush) {
 void Replay::WriteInt32(int data, bool flush) {
 	if(!is_recording)
 		return;
+		if((pdata+4-replay_data)>=REPLAY_DATA_SIZE)
+        return;
 	*((int*)(pdata)) = data;
 	pdata += 4;
 
@@ -48,6 +53,8 @@ void Replay::WriteInt32(int data, bool flush) {
 void Replay::WriteInt16(short data, bool flush) {
 	if(!is_recording)
 		return;
+    if((pdata+2-replay_data)>=REPLAY_DATA_SIZE)
+        return;
 	*((short*)(pdata)) = data;
 	pdata += 2;
 
@@ -56,9 +63,10 @@ void Replay::WriteInt16(short data, bool flush) {
 void Replay::WriteInt8(char data, bool flush) {
 	if(!is_recording)
 		return;
+    if((pdata+1-replay_data)>=REPLAY_DATA_SIZE)
+        return;
 	*pdata = data;
 	pdata++;
-
 
 }
 void Replay::Flush() {
