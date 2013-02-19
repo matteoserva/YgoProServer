@@ -73,6 +73,11 @@ std::pair<std::string,std::string> Users::splitLoginString(std::string loginStri
     if (username.length()<2 || username.length() > 20)
         throw std::exception();
 
+    std::string usernamel = username;
+    std::transform(usernamel.begin(), usernamel.end(), usernamel.begin(), ::tolower);
+    if(usernamel == "duelista" || usernamel == "player")
+        username = "-" + username;
+
     return std::pair<std::string,std::string> (username,password);
 }
 
@@ -91,7 +96,7 @@ std::string Users::login(std::string loginString)
     }
     catch(std::exception& ex)
     {
-        username ="Player";
+        username ="-Player";
         password = "";
     }
 
@@ -105,7 +110,12 @@ std::string Users::login(std::string username, std::string password)
     log(INFO,"Tento il login con %s e %s\n",username.c_str(),password.c_str());
     std::string usernamel=username;
 
+    if(username[0] == '-')
+        return username;
+
     std::transform(usernamel.begin(), usernamel.end(), usernamel.begin(), ::tolower);
+
+
     if(users.find(usernamel) == users.end())
     {
         std::cout<<usernamel<<std::endl;
@@ -115,7 +125,7 @@ std::string Users::login(std::string username, std::string password)
     }
 
     UserData* d = users[usernamel];
-    if(usernamel == "duelista" || usernamel == "player" || d->password=="" || d->password==password )
+    if(d->password=="" || d->password==password )
     {
         d->password = password;
         time(&users[usernamel]->last_login);
@@ -129,6 +139,8 @@ std::string Users::login(std::string username, std::string password)
 
 int Users::getScore(std::string username)
 {
+    if(username[0] == '-')
+        return 0;
     std::transform(username.begin(), username.end(), username.begin(), ::tolower);
     std::lock_guard<std::mutex> guard(usersMutex);
     log(VERBOSE,"%s ha %d punti\n",username.c_str(),users[username]->score);
@@ -137,6 +149,8 @@ int Users::getScore(std::string username)
 
 int Users::getRank(std::string username)
 {
+    if(username[0] == '-')
+        return 0;
     std::transform(username.begin(), username.end(), username.begin(), ::tolower);
     std::lock_guard<std::mutex> guard(usersMutex);
     log(VERBOSE,"%s e' in posizione %d\n",username.c_str(),users[username]->rank);
@@ -175,10 +189,11 @@ void Users::Victory(std::string win, std::string los)
     std::transform(win.begin(), win.end(), win.begin(), ::tolower);
     std::transform(los.begin(), los.end(), los.begin(), ::tolower);
 
-    if(win == "player" || win == "duelista")
+    if(win[0] == '-')
         return;
-    if(los== "player" || los == "duelista")
+    if(los[0] == '-')
         return;
+
     std::lock_guard<std::mutex> guard(usersMutex);
 
     if(check_user_bug(win))
@@ -210,14 +225,15 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
     std::transform(win2.begin(), win2.end(), win2.begin(), ::tolower);
     std::transform(los2.begin(), los2.end(), los2.begin(), ::tolower);
 
-    if(win1 == "player" || win1 == "duelista")
+    if(win1[0] == '-')
         return;
-    if(los1== "player" || los1 == "duelista")
+    if(los1[0] == '-')
         return;
-    if(win2 == "player" || win2 == "duelista")
+    if(win2[0] == '-')
         return;
-    if(los2== "player" || los2 == "duelista")
+    if(los2[0] == '-')
         return;
+
     std::lock_guard<std::mutex> guard(usersMutex);
     if(check_user_bug(win1))
         return;
@@ -279,7 +295,7 @@ std::string Users::getFirstAvailableUsername(std::string base)
             return possibleUsername;
         }
     }*/
-    return "Player";
+    return "-" + base;
 }
 static bool compareUserData (UserData* u1, UserData* u2)
 {
