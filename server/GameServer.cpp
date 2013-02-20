@@ -209,8 +209,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         }
         if(!roomManager.InsertPlayerInWaitingRoom(dp))
             return;
-        int wnumplayers=roomManager.getNumPlayers();
-        log(INFO,"rommmanager: there are %d players\n",wnumplayers+1);
+
     }
 
 
