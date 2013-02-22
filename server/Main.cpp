@@ -8,18 +8,6 @@ using namespace std;
 const unsigned short PRO_VERSION = 0x12f0;
 int enable_log = 0;
 
-
-void *operator new(size_t size)
-{
-    // if (size > MAX_SIZE) ...
-    return malloc(2*size);
-}
-
-void operator delete(void *p)
-{
-  free(p);
-}
-
 int main(int argc, char**argv)
 {
 #ifdef _WIN32
@@ -33,9 +21,6 @@ int main(int argc, char**argv)
         return EXIT_SUCCESS;
 
     config->LoadConfig();
-    //char* arr = new char[5];
-      // strcpy(arr,"amee is my name");
-
 
     ygo::GameServer* gameServer = new ygo::GameServer();
     if(!gameServer->StartServer(config->serverport))

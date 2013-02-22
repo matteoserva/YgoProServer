@@ -135,7 +135,6 @@ void GameServer::ServerEchoEvent(bufferevent* bev, short events, void* ctx)
     if (events & (BEV_EVENT_EOF | BEV_EVENT_ERROR))
     {
         DuelPlayer* dp = &(that->users[bev]);
-        DuelMode* dm = dp->game;
         if(dp->netServer)
         {
             dp->netServer->LeaveGame(dp);
