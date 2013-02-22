@@ -226,18 +226,18 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,unsigned short* msg)
     int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
     log(INFO,"ricevuto messaggio %s\n",messaggio);
 
-    if(!strcmp(messaggio,"!tag"))
+    if(!strcmp(messaggio,"!tag") || !strcmp(messaggio,"!t"))
     {
         ExtractPlayer(dp);
         return roomManager->InsertPlayer(dp,MODE_TAG);
 
     }
-    else if(!strcmp(messaggio,"!single"))
+    else if(!strcmp(messaggio,"!single") || !strcmp(messaggio,"!s"))
     {
         ExtractPlayer(dp);
         return roomManager->InsertPlayer(dp,MODE_SINGLE);
     }
-    else if(!strcmp(messaggio,"!match"))
+    else if(!strcmp(messaggio,"!match") || !strcmp(messaggio,"!m"))
     {
         ExtractPlayer(dp);
         return roomManager->InsertPlayer(dp,MODE_MATCH);

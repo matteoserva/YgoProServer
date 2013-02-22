@@ -17,7 +17,7 @@ OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 INCLUDES = -I ./server/ -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I ./ygopro/ocgcore/ -I ./ygopro/gframe/  -I /usr/include/irrlicht/
 
 # C compiler flags (-g -O2 -Wall)
-CCFLAGS =   -O0 -g 
+CCFLAGS =   -O0 -g -fstack-protector-all
 CPPFLAGS =  -std=c++0x $(CCFLAGS)
 
 # compiler
@@ -28,7 +28,7 @@ CPP = g++
 LIBS = 
 
 # compile flags
-LDFLAGS = -levent  -lsqlite3 -levent_pthreads ygopro/bin/debug/libocgcore.a -llua5.2 #ygopro/bin/debug/libclzma.a
+LDFLAGS = -levent  -lsqlite3 -levent_pthreads ygopro/bin/debug/libocgcore.a -llua5.2 #-lduma  #ygopro/bin/debug/libclzma.a 
 
 
 server: $(OUT)
