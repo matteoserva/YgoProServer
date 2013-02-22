@@ -304,7 +304,7 @@ static bool compareUserData (UserData* u1, UserData* u2)
 void Users::SaveDB()
 {
     //return;
-    std::ofstream inf("users.txt");
+    std::ofstream inf("users.txt~");
     std::list<UserData*> userList;
     usersMutex.lock();
 
@@ -321,8 +321,9 @@ void Users::SaveDB()
         inf << "|"<<(*it)->last_login<<"|"<<(*it)->wins<<"|"<<(*it)->loses<<std::endl;
         (*it)->rank = ++rank;
     }
+    inf.close();
     usersMutex.unlock();
-
+    rename("users.txt~","users.txt");
 }
 void Users::LoadDB()
 {
