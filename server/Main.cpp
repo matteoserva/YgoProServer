@@ -5,7 +5,7 @@
 
 using namespace ygo;
 using namespace std;
-const unsigned short PRO_VERSION = 0x12f0;
+const unsigned short PRO_VERSION = 0x1300;
 int enable_log = 0;
 
 int main(int argc, char**argv)
