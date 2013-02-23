@@ -19,8 +19,8 @@ struct UserData
     unsigned int rank;
     unsigned int wins;
     unsigned int loses;
-    UserData(std::string username,std::string password):wins(0),loses(0),username(username),password(password),score(1000),rank(0) {}
-    UserData():wins(0),loses(0),username("Player"),password(""),score(1000),rank(0) {}
+    UserData(std::string username,std::string password):wins(0),loses(0),username(username),password(password),score(500),rank(0) {}
+    UserData():wins(0),loses(0),username("Player"),password(""),score(500),rank(0) {}
     UserData(std::string username,std::string password,unsigned int score):wins(0),loses(0),username(username),password(password),score(score),rank(0) {}
 };
 

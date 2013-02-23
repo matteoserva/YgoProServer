@@ -125,7 +125,7 @@ void CMNetServer::playerConnected(DuelPlayer *dp)
         players[dp] = DuelPlayerInfo();
     numPlayers=players.size();
 
-    log(INFO,"giocatori connessi:%d\n",numPlayers);
+    log(INFO,"netserver: giocatori connessi:%d\n",numPlayers);
     updateServerState();
 }
 
@@ -174,7 +174,7 @@ void CMNetServer::playerDisconnected(DuelPlayer* dp )
         players.erase(dp);
     numPlayers=players.size();
 
-    log(INFO,"giocatori connessi:%d\n",numPlayers);
+    log(INFO,"netserver: giocatori connessi:%d\n",numPlayers);
     updateServerState();
 }
 void CMNetServer::DuelTimer(evutil_socket_t fd, short events, void* arg)

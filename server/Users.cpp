@@ -174,6 +174,13 @@ static float win_exp(float delta)
     return 1.0/(exp((-delta)/400.0)+1.0);
 }
 
+static int k(int score)
+{
+    if(score <= 1000 && score >= 200)
+        return 200;
+    return 100;
+}
+
 bool Users::check_user_bug(std::string username)
 {
     if(users.find(username) == users.end())
@@ -205,10 +212,10 @@ void Users::Victory(std::string win, std::string los)
     int losescore = users[los]->score;
     int delta = winscore-losescore;
 
-    float k = 200.0;
+    //float k = 200.0;
 
-    users[win]->score = winscore + k*(1.0-win_exp(delta));
-    users[los]->score = losescore + k*(0.0 - win_exp(-delta));
+    users[win]->score = winscore + k(winscore)*(1.0-win_exp(delta));
+    users[los]->score = losescore + k(losescore)*(0.0 - win_exp(-delta));
 
     users[win]->wins++;
     users[los]->loses++;
@@ -249,13 +256,13 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
     float win2score = users[win2]->score;
     float lose2score = users[los2]->score;
     int delta = (win1score+win2score-lose1score-lose2score)/2; //<-- /2!
-    float we = 1.0/(exp(-delta/400.0)+1.0);
-    float k = 400.0; //<--400!
+    //float we = 1.0/(exp(-delta/400.0)+1.0);
+    //float k = 400.0; //<--400!
 
-    users[win1]->score += k*(1.0-win_exp(delta)) * win1score/(win1score+win2score);
-    users[win2]->score += k*(1.0-win_exp(delta)) * win2score/(win1score+win2score);
-    users[los1]->score += k*(0.0-win_exp(-delta)) * lose1score/(lose1score+lose2score);
-    users[los2]->score += k*(0.0-win_exp(-delta)) * lose2score/(lose1score+lose2score);
+    users[win1]->score += k(win1score)  * (1.0-win_exp(delta))  * 2*win1score/(win1score+win2score);
+    users[win2]->score += k(win2score)  * (1.0-win_exp(delta))  * 2*win2score/(win1score+win2score);
+    users[los1]->score += k(lose1score) * (0.0-win_exp(-delta)) * 2*lose1score/(lose1score+lose2score);
+    users[los2]->score += k(lose2score) * (0.0-win_exp(-delta)) * 2*lose2score/(lose1score+lose2score);
 
     if(users[los1]->score < 100)
         users[los1]->score = 100;
