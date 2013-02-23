@@ -18,12 +18,12 @@ INCLUDES = -I ./server/ -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I ./
 
 # C compiler flags (-g -O2 -Wall)
 CCFLAGS =   -O0 -g -fstack-protector-all
-CPPFLAGS =  -std=c++0x $(CCFLAGS)
+CPPFLAGS =  -std=c++0x $(CCFLAGS) -D_GLIBCXX_DEBUG
 
 # compiler
-CC = gcc
-CPP = g++
-
+CC = icc
+CPP = icpc
+CXX=icpc
 # library paths
 LIBS = 
 
