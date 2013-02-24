@@ -40,16 +40,16 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
              * Bug in ygopro software. players can't receive messages, now!
              */
             if(mode != MODE_TAG)
-            for(auto it = players.cbegin(); it!=players.cend(); ++it)
-            {
-                if(it->first->type == NETPLAYER_TYPE_OBSERVER)
-                    continue;
-                char buffer[256],name[20];
-                BufferIO::CopyWStr(it->first->name, name,20);
-                int score = Users::getInstance()->getScore(std::string(name));
-                sprintf(buffer, "%s has %d points",name,score);
-                SendMessageToPlayer(dp,buffer);
-            }
+                for(auto it = players.cbegin(); it!=players.cend(); ++it)
+                {
+                    if(it->first->type == NETPLAYER_TYPE_OBSERVER)
+                        continue;
+                    char buffer[256],name[20];
+                    BufferIO::CopyWStr(it->first->name, name,20);
+                    int score = Users::getInstance()->getScore(std::string(name));
+                    sprintf(buffer, "%s has %d points",name,score);
+                    SendMessageToPlayer(dp,buffer);
+                }
         }
     }
 }
@@ -426,6 +426,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
     if((pktType != CTOS_SURRENDER) && (pktType != CTOS_CHAT) && (dp->state == 0xff || (dp->state && dp->state != pktType)))
         return;
+
     switch(pktType)
     {
     case CTOS_RESPONSE:
