@@ -34,7 +34,7 @@ LDFLAGS = -levent  -lsqlite3 -levent_pthreads ygopro/bin/debug/libocgcore.a -llu
 server: $(OUT)
 
 ocgcore:
-	make -C ygopro/build/ ocgcore
+	$(MAKE) -C ygopro/build/ ocgcore
 
 libclzma:
 	make -C ygopro/build/ clzma

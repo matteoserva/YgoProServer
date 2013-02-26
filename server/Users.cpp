@@ -41,8 +41,7 @@ void Users::SaveThread(Users * that)
         time(&tempo2);
         int delta = tempo2-tempo1;
 
-        log(INFO,"salvato il DB, ha impiegato %d secondi\n",delta);
-
+        log(VERBOSE,"salvato il DB, ha impiegato %d secondi\n",delta);
     }
 }
 

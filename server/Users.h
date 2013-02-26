@@ -42,6 +42,7 @@ private:
     std::string login(std::string,std::string);
     bool check_user_bug(std::string username);
 
+
 public:
     int getScore(std::string username);
     int getRank(std::string username);

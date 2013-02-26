@@ -204,8 +204,8 @@ void CMNetServer::createGame()
 
     duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, DuelTimer, this);
 
-    BufferIO::CopyWStr(L"", duel_mode->name, 20);
-    BufferIO::CopyWStr(L"", duel_mode->pass, 20);
+    BufferIO::CopyWStr("", duel_mode->name, 20);
+    BufferIO::CopyWStr("", duel_mode->pass, 20);
 
     HostInfo info;
     info.rule=2;
@@ -317,11 +317,26 @@ void CMNetServer::StopListen()
 void CMNetServer::Victory(char winner)
 {
     DuelPlayer* _players[4];
+    for(int i = 0;i<4; i++)
+        _players[i]=0;
+
     for(auto it = players.cbegin(); it!= players.cend(); ++it)
     {
-        if(it->first->type <= NETPLAYER_TYPE_PLAYER4)
+        if(it->first->type <= NETPLAYER_TYPE_PLAYER4 && it->first->type >= NETPLAYER_TYPE_PLAYER1)
             _players[it->first->type] = it->first;
     }
+    if(!_players[0])
+        return;
+    if(!_players[1])
+        return;
+    if(mode == MODE_TAG && !_players[2])
+        return;
+    if(mode == MODE_TAG && !_players[3])
+        return;
+    if((mode == MODE_SINGLE || mode == MODE_MATCH) && winner > 1)
+        return;
+    if(mode == MODE_TAG && winner > 3)
+        return;
 
     if(winner < 0)
     {
