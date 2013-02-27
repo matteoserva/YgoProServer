@@ -1,4 +1,5 @@
 #include "Users.h"
+#include "UsersDatabase.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -14,9 +15,15 @@ Users::Users()
 {
     LoadDB();
 
-
+    database = new UsersDatabase();
     t1 = std::thread(SaveThread,this);
 }
+
+Users::~Users()
+{
+    delete database;
+}
+
 bool Users::validLoginString(std::string loginString)
 {
     try

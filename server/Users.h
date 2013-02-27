@@ -7,6 +7,7 @@
 #include <ctime>
 #include <mutex>
 #include <thread>
+
 namespace ygo
 {
 
@@ -25,6 +26,7 @@ struct UserData
 };
 
 
+class UsersDatabase;
 
 class Users
 {
@@ -35,13 +37,14 @@ private:
     static void SaveThread(Users*);
     std::mutex usersMutex;
     Users();
+    ~Users();
     std::map<std::string,UserData*> users;
     std::string getFirstAvailableUsername(std::string base);
     void LoadDB();
     void SaveDB();
     std::string login(std::string,std::string);
     bool check_user_bug(std::string username);
-
+    UsersDatabase* database;
 
 public:
     int getScore(std::string username);

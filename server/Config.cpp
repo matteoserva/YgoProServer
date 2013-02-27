@@ -100,6 +100,24 @@ void Config::LoadConfig()
                 }
                 //istringstream ss(valbuf)>>
             }
+            else if(!strcmp(strbuf,"mysql_database"))
+            {
+                mysql_database = valbuf;
+            }
+            else if(!strcmp(strbuf,"mysql_username"))
+            {
+                mysql_username = valbuf;
+            }
+            else if(!strcmp(strbuf,"mysql_password"))
+            {
+                mysql_password = valbuf;
+            }
+            else if(!strcmp(strbuf,"mysql_host"))
+            {
+
+                mysql_host = valbuf;
+                std::cout<<"mysql host settato a "<<mysql_host<<std::endl;
+            }
             else
                 cerr<<"Could not understand the keyword at line"<<linenum<<": "<<strbuf<<endl;
         }

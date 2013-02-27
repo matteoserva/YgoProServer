@@ -9,8 +9,14 @@ namespace ygo
         public:
         static Config* getInstance();
         void LoadConfig();
-        int serverport;
         bool parseCommandLine(int argc, char**argv);
+
+        /*config data*/
+        int serverport;
+        std::string mysql_username;
+        std::string mysql_password;
+        std::string mysql_host;
+        std::string mysql_database;
 
         private:
         Config();
