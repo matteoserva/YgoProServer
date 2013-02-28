@@ -139,16 +139,6 @@ int Users::getRank(std::string username)
     return database->getRank(username);
 }
 
-void Users::Draw(std::string d1, std::string d2)
-{
-
-}
-
-void Users::Draw(std::string d1, std::string d2,std::string d3, std::string d4)
-{
-
-}
-
 
 static float win_exp(float delta)
 {
@@ -161,6 +151,95 @@ static int k(int score)
     if(score <= 1000 && score >= 200)
         return 200;
     return 100;
+}
+
+void Users::Draw(std::string win, std::string los)
+{
+    if(win[0] == '-')
+        return;
+    if(los[0] == '-')
+        return;
+
+    try
+    {
+        UserStats us_win = database->getUserStats(win);
+        UserStats us_los = database->getUserStats(los);
+        int winscore = us_win.score;
+        int losescore = us_los.score;
+        int delta = winscore-losescore;
+        us_win.score = winscore + k(winscore)*(0.5-win_exp(delta));
+        us_los.score = losescore + k(losescore)*(0.5 - win_exp(-delta));
+
+        us_win.draws++;
+        us_los.draws++;
+        if(us_los.score < 100)
+            us_los.score = 100;
+        if(us_win.score < 100)
+            us_win.score = 100;
+        database->setUserStats(us_win);
+        database->setUserStats(us_los);
+
+        log(INFO,"%s score: %d --> %d\n",us_win.username.c_str(),winscore,us_win.score);
+        log(INFO,"%s score: %d --> %d\n",us_los.username.c_str(),losescore,us_los.score);
+    }
+    catch (std::exception e)
+    {
+
+    }
+}
+
+void Users::Draw(std::string win1, std::string win2,std::string los1, std::string los2)
+{
+    if(win1[0] == '-')
+        return;
+    if(los1[0] == '-')
+        return;
+    if(win2[0] == '-')
+        return;
+    if(los2[0] == '-')
+        return;
+
+    try
+    {
+        UserStats us_win1 = database->getUserStats(win1);
+        UserStats us_win2 = database->getUserStats(win2);
+        UserStats us_los1 = database->getUserStats(los1);
+        UserStats us_los2 = database->getUserStats(los2);
+
+        float win1score = us_win1.score;
+        float lose1score = us_los1.score;
+        float win2score = us_win2.score;
+        float lose2score = us_los2.score;
+        int delta = (win1score+win2score-lose1score-lose2score)/2; //<-- /2!
+
+        us_win1.score += k(win1score)  * (0.5-win_exp(delta))  * 2*win1score/(win1score+win2score);
+        us_win2.score += k(win2score)  * (0.5-win_exp(delta))  * 2*win2score/(win1score+win2score);
+        us_los1.score += k(lose1score) * (0.5-win_exp(-delta)) * 2*lose1score/(lose1score+lose2score);
+        us_los2.score += k(lose2score) * (0.5-win_exp(-delta)) * 2*lose2score/(lose1score+lose2score);
+
+        if(us_los1.score < 100)
+            us_los1.score = 100;
+        if(us_los2.score < 100)
+            us_los2.score = 100;
+         if(us_win1.score < 100)
+            us_win1.score = 100;
+        if(us_win2.score < 100)
+            us_win2.score = 100;
+
+        us_win1.draws++;
+        us_los1.draws++;
+        us_win2.draws++;
+        us_los2.draws++;
+
+        log(INFO,"%s score: %d --> %d\n",win1.c_str(),win1score,us_win1.score);
+        log(INFO,"%s score: %d --> %d\n",win2.c_str(),win2score,us_win2.score);
+        log(INFO,"%s score: %d --> %d\n",los1.c_str(),lose1score,us_los1.score);
+        log(INFO,"%s score: %d --> %d\n",los2.c_str(),lose2score,us_los2.score);
+    }
+    catch (std::exception e)
+    {
+
+    }
 }
 
 void Users::Victory(std::string win, std::string los)

@@ -317,7 +317,7 @@ void CMNetServer::StopListen()
 void CMNetServer::Victory(char winner)
 {
     DuelPlayer* _players[4];
-    for(int i = 0;i<4; i++)
+    for(int i = 0; i<4; i++)
         _players[i]=0;
 
     for(auto it = players.cbegin(); it!= players.cend(); ++it)
@@ -340,11 +340,28 @@ void CMNetServer::Victory(char winner)
 
     if(winner < 0)
     {
-        /*TODO
-         * there isn't a winner
-         *duel ended in a draw
-         *handle this
-         */
+        if(mode != MODE_TAG)
+        {
+            char win[20], lose[20];
+
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER1]->name,win,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,lose,20);
+            log(INFO,"SingleDuel, winner: %s, loser: %s\n",win,lose);
+            std::string wins(win), loses(lose);
+            Users::getInstance()->Draw(wins,loses);
+        }
+        else
+        {
+            char win1[20], win2[20], lose1[20],lose2[20];
+
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER1]->name,win1,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,win2,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER3]->name,lose1,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER4]->name,lose2,20);
+
+            Users::getInstance()->Draw(std::string(win1),std::string(win2),std::string(lose1),std::string(lose2));
+            log(INFO,"Tagduel finished: winners %s and %s, losers: %s and %s\n",win1,win2,lose1,lose2);
+        }
         return;
     }
 
@@ -571,4 +588,5 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 }
 
 }
+
 
