@@ -281,6 +281,16 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
     unsigned char oldtype = dp->type;
 
     printf("leavegame chiamato\n");
+
+    /*bug in match duel,
+     * if the player leaves during side decking
+     * the player MUST become a loser
+     */
+    if(state == PLAYING && mode == MODE_MATCH && last_winner > 0 && last_winner == dp->type)
+    {
+       last_winner = 1-dp->type;
+    }
+
     if(state != ZOMBIE && dp->game == duel_mode)
         duel_mode->LeaveGame(dp);
     else
