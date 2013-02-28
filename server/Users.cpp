@@ -128,8 +128,15 @@ int Users::getScore(std::string username)
     if(username[0] == '-')
         return 0;
 
-    UserStats us = database->getUserStats(username);
-    return us.score;
+    try
+    {
+        UserStats us = database->getUserStats(username);
+        return us.score;
+    }
+    catch(std::exception)
+    {
+        return 0;
+    }
 }
 
 int Users::getRank(std::string username)
@@ -221,7 +228,7 @@ void Users::Draw(std::string win1, std::string win2,std::string los1, std::strin
             us_los1.score = 100;
         if(us_los2.score < 100)
             us_los2.score = 100;
-         if(us_win1.score < 100)
+        if(us_win1.score < 100)
             us_win1.score = 100;
         if(us_win2.score < 100)
             us_win2.score = 100;
