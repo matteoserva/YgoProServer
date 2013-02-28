@@ -34,16 +34,13 @@ private:
     std::thread t1;
     std::pair<std::string,std::string> splitLoginString(std::string);
     bool validLoginString(std::string);
-    static void SaveThread(Users*);
-    std::mutex usersMutex;
     Users();
     ~Users();
-    std::map<std::string,UserData*> users;
+
     std::string getFirstAvailableUsername(std::string base);
     void LoadDB();
     void SaveDB();
     std::string login(std::string,std::string);
-    bool check_user_bug(std::string username);
     UsersDatabase* database;
 
 public:
