@@ -168,7 +168,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     int score = Users::getInstance()->getScore(username);
 
     if(rank > 0)
-        sprintf(message, "rank:  %d",rank);
+        sprintf(message, "Rank:  %d",rank);
     else
         sprintf(message, "unregistered user");
     BufferIO::CopyWStr(message, scpe.name, 20);
@@ -176,7 +176,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
     if(score > 0)
-        sprintf(message, "score: %d",score);
+        sprintf(message, "Score: %d",score);
     else
         sprintf(message, "read the chat!");
     BufferIO::CopyWStr(message, scpe.name, 20);
@@ -184,7 +184,9 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
     if(score == 0)
-        SendMessageToPlayer(dp,"to register and login, go back and enter this room with your username set to yourusername$yourpassword");
+    {
+        SendMessageToPlayer(dp,"to register and login, go back and change the username to yourusername$yourpassword");
+    }
 
 
 
