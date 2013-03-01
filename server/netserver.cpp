@@ -420,11 +420,11 @@ void CMNetServer::StopServer()
         {
             //Bug in tagduel.cpp
             //only the first two players were notified at the end of the duel
-            for(auto it=players.cbegin(); it!= players.cend(); ++it)
+            /*for(auto it=players.cbegin(); it!= players.cend(); ++it)
             {
                 if(it->first->type == NETPLAYER_TYPE_PLAYER3 || it->first->type == NETPLAYER_TYPE_PLAYER4)
                     SendPacketToPlayer(it->first, STOC_DUEL_END);
-            }
+            }*/
         }
 
 

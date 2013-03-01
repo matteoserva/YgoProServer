@@ -6,7 +6,7 @@
 using namespace ygo;
 using namespace std;
 const unsigned short PRO_VERSION = 0x1300;
-int enable_log = 0;
+int enable_log = 2;
 
 int main(int argc, char**argv)
 {
