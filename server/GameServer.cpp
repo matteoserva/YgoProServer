@@ -189,34 +189,39 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
 
-
-
     if(dp->netServer == NULL)
     {
-        if(pktType!=CTOS_PLAYER_INFO)
+        if(pktType==CTOS_PLAYER_INFO)
         {
-            log(WARN,"player info is not the first packet\n");
-            if(!strcmp(data,"ping"))
-            {
-
-                printf("pong\n");
-                bufferevent_write(dp->bev, "pong", 5);
-                bufferevent_flush(dp->bev, EV_WRITE, BEV_FLUSH);
-                //DisconnectPlayer(dp);
-            }
+            CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
+            BufferIO::CopyWStr(pkt->name,dp->name,20);
             return;
         }
-        if(!roomManager.InsertPlayerInWaitingRoom(dp))
+        else if(pktType == CTOS_JOIN_GAME)
+        {
+            if(!roomManager.InsertPlayerInWaitingRoom(dp))
+                return;
+        }
+        else if(!strcmp(data,"ping"))
+        {
+
+            printf("pong\n");
+            bufferevent_write(dp->bev, "pong", 5);
+            bufferevent_flush(dp->bev, EV_WRITE, BEV_FLUSH);
+            //DisconnectPlayer(dp);
             return;
-
+        }
+        else
+        {
+            log(WARN,"player info is not the first packet\n");
+            return;
+        }
     }
-
-
 
     dp->netServer->HandleCTOSPacket(dp,data,len);
 
     return;
-
 }
 
 }
+

@@ -138,6 +138,26 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     sctc.type = dp->type;
     SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
 
+    Users* u = Users::getInstance();
+    std::string username;
+    char name[20];
+    BufferIO::CopyWStr(dp->name,name,20);
+    try
+    {
+        username = u->login(name);
+    }
+    catch(LoginException &l)
+    {
+        STOC_HS_PlayerEnter scpe;
+        char message[20];
+        sprintf(message, "%s",l.what());
+        BufferIO::CopyWStr(message, scpe.name, 20);
+        scpe.pos = 3;
+        SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
+        username = l.altUsername();
+    }
+    BufferIO::CopyWStr(username.c_str(), dp->name, 20);
+
     STOC_HS_PlayerEnter scpe;
     BufferIO::CopyWStr(dp->name, scpe.name, 20);
     scpe.pos = 0;
@@ -160,10 +180,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     scpc.status = (dp->type << 4) | PLAYERCHANGE_READY;
     SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
 
-    char name[20],message[256];
-    BufferIO::CopyWStr(dp->name,name,20);
-    std::string username(name);
-
+    char message[256];
     int rank = Users::getInstance()->getRank(username);
     int score = Users::getInstance()->getScore(username);
 
@@ -176,12 +193,12 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
     if(score > 0)
+    {
         sprintf(message, "Score: %d",score);
-    else
-        sprintf(message, "read the chat!");
-    BufferIO::CopyWStr(message, scpe.name, 20);
-    scpe.pos = 3;
-    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
+        BufferIO::CopyWStr(message, scpe.name, 20);
+        scpe.pos = 3;
+        SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
+    }
 
     if(score == 0)
     {
@@ -289,15 +306,8 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
     case CTOS_PLAYER_INFO:
     {
-        CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
-        char name[20];
-        BufferIO::CopyWStr(pkt->name,name,20);
-        Users* u = Users::getInstance();
-        std::string username = u->login(name);
 
-        BufferIO::CopyWStr(username.c_str(), dp->name, 20);
-
-        log(INFO,"WaitingRoom:Player joined %s \n",name);
+        //log(INFO,"WaitingRoom:Player joined %s \n",name);
         break;
     }
     case CTOS_CHAT:

@@ -11,6 +11,21 @@
 namespace ygo
 {
 
+class LoginException: public std::exception
+{
+    std::string username;
+    std::string whatString;
+
+public:
+    virtual const char* what() const throw()
+    {
+        return whatString.c_str();
+    }
+    std::string altUsername(){return username;}
+    ~LoginException() throw(){};
+    LoginException(std::string username, std::string what):username(username),whatString(what) {}
+};
+
 struct UserData
 {
     std::string username;

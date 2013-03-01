@@ -70,9 +70,6 @@ std::pair<std::string,std::string> Users::splitLoginString(std::string loginStri
     return std::pair<std::string,std::string> (username,password);
 }
 
-
-
-
 std::string Users::login(std::string loginString)
 {
     std::string username;
@@ -85,6 +82,7 @@ std::string Users::login(std::string loginString)
     }
     catch(std::exception& ex)
     {
+        throw LoginException("-Player","invalid characters");
         username ="-Player";
         password = "";
     }
@@ -111,16 +109,19 @@ std::string Users::login(std::string username, std::string password)
         if(database->login(username,password))
             return username;
         else
-            return "-" + username;
+        {
+            throw LoginException("-"+username,"invalid password");
+        }
+
+    }
+    catch(LoginException &e)
+    {
+        throw;
     }
     catch(std::exception e)
     {
         return "-" + username;
     }
-
-    username = getFirstAvailableUsername(username);
-    return login(username,password);
-
 }
 
 int Users::getScore(std::string username)
