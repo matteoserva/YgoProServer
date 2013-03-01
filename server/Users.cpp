@@ -322,6 +322,11 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
         us_win2.wins++;
         us_los2.losses++;
 
+        database->setUserStats(us_win1);
+        database->setUserStats(us_los1);
+        database->setUserStats(us_win2);
+        database->setUserStats(us_los2);
+
         log(INFO,"%s score: %d --> %d\n",win1.c_str(),win1score,us_win1.score);
         log(INFO,"%s score: %d --> %d\n",win2.c_str(),win2score,us_win2.score);
         log(INFO,"%s score: %d --> %d\n",los1.c_str(),lose1score,us_los1.score);
