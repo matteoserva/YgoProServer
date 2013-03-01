@@ -184,7 +184,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
     if(score == 0)
-        SendMessageToPlayer(dp,"to register and login, put your password near the username. example username$password");
+        SendMessageToPlayer(dp,"to register and login, go back and enter this room with your username set to yourusername$yourpassword");
 
 
 
