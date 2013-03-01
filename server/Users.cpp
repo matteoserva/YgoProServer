@@ -220,10 +220,10 @@ void Users::Draw(std::string win1, std::string win2,std::string los1, std::strin
         float lose2score = us_los2.score;
         int delta = (win1score+win2score-lose1score-lose2score)/2; //<-- /2!
 
-        us_win1.score += k(win1score)  * (0.5-win_exp(delta))  * 2*win1score/(win1score+win2score);
-        us_win2.score += k(win2score)  * (0.5-win_exp(delta))  * 2*win2score/(win1score+win2score);
-        us_los1.score += k(lose1score) * (0.5-win_exp(-delta)) * 2*lose1score/(lose1score+lose2score);
-        us_los2.score += k(lose2score) * (0.5-win_exp(-delta)) * 2*lose2score/(lose1score+lose2score);
+        us_win1.score += k(win1score)  * (0.5-win_exp(delta))  * 2.0*win1score/(win1score+win2score);
+        us_win2.score += k(win2score)  * (0.5-win_exp(delta))  * 2.0*win2score/(win1score+win2score);
+        us_los1.score += k(lose1score) * (0.5-win_exp(-delta)) * 2.0*lose1score/(lose1score+lose2score);
+        us_los2.score += k(lose2score) * (0.5-win_exp(-delta)) * 2.0*lose2score/(lose1score+lose2score);
 
         if(us_los1.score < 100)
             us_los1.score = 100;
@@ -238,6 +238,11 @@ void Users::Draw(std::string win1, std::string win2,std::string los1, std::strin
         us_los1.draws++;
         us_win2.draws++;
         us_los2.draws++;
+
+        database->setUserStats(us_win1);
+        database->setUserStats(us_los1);
+        database->setUserStats(us_win2);
+        database->setUserStats(us_los2);
 
         log(INFO,"%s score: %d --> %d\n",win1.c_str(),win1score,us_win1.score);
         log(INFO,"%s score: %d --> %d\n",win2.c_str(),win2score,us_win2.score);
