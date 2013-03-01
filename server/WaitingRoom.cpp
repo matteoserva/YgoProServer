@@ -61,6 +61,7 @@ void WaitingRoom::ExtractPlayer(DuelPlayer* dp)
 {
     players.erase(dp);
     dp->netServer=0;
+    updateObserversNum();
 }
 
 void WaitingRoom::updateObserversNum()
@@ -192,7 +193,6 @@ void WaitingRoom::LeaveGame(DuelPlayer* dp)
 {
     ExtractPlayer(dp);
     gameServer->DisconnectPlayer(dp);
-    updateObserversNum();
 }
 
 DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
