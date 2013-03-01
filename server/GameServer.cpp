@@ -26,14 +26,9 @@ bool GameServer::StartServer()
         return false;
 
     roomManager.setGameServer(const_cast<ygo::GameServer *>(this));
-    //LIBEVENT race condition
-    //ignoring sigpipe
-
 
     listener =evconnlistener_new(net_evbase,ServerAccept, this, LEV_OPT_REUSEABLE,-1,server_fd);
 
-
-    //listener = evconnlistener_new_bind(net_evbase, ServerAccept, this, LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, -1, (sockaddr*)&sin, sizeof(sin));
     if(!listener)
     {
         event_base_free(net_evbase);
@@ -147,13 +142,6 @@ int GameServer::ServerThread(void* parama)
 {
     GameServer*that = (GameServer*)parama;
     event_base_dispatch(that->net_evbase);
-    /*
-    for(auto bit = that->users.begin(); bit != that->users.end(); ++bit)
-    {
-        bufferevent_disable(bit->first, EV_READ);
-        bufferevent_free(bit->first);
-    }
-    that->users.clear();*/
 
     event_base_free(that->net_evbase);
     that->net_evbase = 0;
