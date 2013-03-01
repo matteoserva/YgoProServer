@@ -214,10 +214,10 @@ void Users::Draw(std::string win1, std::string win2,std::string los1, std::strin
         UserStats us_los1 = database->getUserStats(los1);
         UserStats us_los2 = database->getUserStats(los2);
 
-        float win1score = us_win1.score;
-        float lose1score = us_los1.score;
-        float win2score = us_win2.score;
-        float lose2score = us_los2.score;
+        int win1score = us_win1.score;
+        int lose1score = us_los1.score;
+        int win2score = us_win2.score;
+        int lose2score = us_los2.score;
         int delta = (win1score+win2score-lose1score-lose2score)/2; //<-- /2!
 
         us_win1.score += k(win1score)  * (0.5-win_exp(delta))  * 2.0*win1score/(win1score+win2score);

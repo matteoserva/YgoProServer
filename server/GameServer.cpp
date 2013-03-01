@@ -2,15 +2,13 @@
 
 #include "RoomManager.h"
 #include "Statistics.h"
-#include <signal.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <errno.h>
-#include <netinet/tcp.h>
 #include "debug.h"
+#include <time.h>
+#include <netinet/tcp.h>
+
 namespace ygo
 {
-GameServer::GameServer()
+GameServer::GameServer(int server_fd):server_fd(server_fd)
 {
     server_port = 0;
     net_evbase = 0;
@@ -19,7 +17,7 @@ GameServer::GameServer()
 
 }
 
-bool GameServer::StartServer(unsigned short port)
+bool GameServer::StartServer()
 {
     if(net_evbase)
         return false;
@@ -30,17 +28,12 @@ bool GameServer::StartServer(unsigned short port)
     roomManager.setGameServer(const_cast<ygo::GameServer *>(this));
     //LIBEVENT race condition
     //ignoring sigpipe
-    signal(SIGPIPE, SIG_IGN);
 
 
-    sockaddr_in sin;
-    memset(&sin, 0, sizeof(sin));
-    server_port = port;
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = htonl(INADDR_ANY);
-    sin.sin_port = htons(port);
-    listener = evconnlistener_new_bind(net_evbase, ServerAccept, this,
-                                       LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, -1, (sockaddr*)&sin, sizeof(sin));
+    listener =evconnlistener_new(net_evbase,ServerAccept, this, LEV_OPT_REUSEABLE,-1,server_fd);
+
+
+    //listener = evconnlistener_new_bind(net_evbase, ServerAccept, this, LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, -1, (sockaddr*)&sin, sizeof(sin));
     if(!listener)
     {
         event_base_free(net_evbase);
@@ -218,8 +211,12 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         }
     }
 
+    int time1 = clock();
     dp->netServer->HandleCTOSPacket(dp,data,len);
-
+    int time2 = clock();
+    int diffms=1000*(time2-time1)/(CLOCKS_PER_SEC);
+    if(diffms > 500)
+        printf("millisecs: %d\n",diffms);
     return;
 }
 

@@ -280,7 +280,7 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
     unsigned char oldstate = dp->state;
     unsigned char oldtype = dp->type;
 
-    printf("leavegame chiamato\n");
+    log(INFO,"leavegame chiamato\n");
 
     /*bug in match duel,
      * if the player leaves during side decking

@@ -2,6 +2,12 @@
 #include "data_manager.h"
 #include "deck_manager.h"
 #include <getopt.h>
+#include <signal.h>
+#include <event2/thread.h>
+
+const unsigned short PRO_VERSION = 0x1300;
+int enable_log = 2;
+
 namespace ygo
 {
 using namespace std;
@@ -19,30 +25,30 @@ bool Config::parseCommandLine(int argc, char**argv)
 
         switch (c)
         {
-            case 'c':
-                configFile=optarg;
-                cout <<"ss "<<configFile<<endl;
-                break;
-            case 'h':
-                cout<<"-c configfile    for the config file"<<endl;
-                cout<<"-h               help "<<endl;
-                cout<<"-p num           port "<<endl;
-                return true;
-            case 'p':
-                serverport = stoi(optarg);
-                cout<<"command line, port set to: "<<serverport<<endl;
-                break;
-            case '?':
-                if (isprint (optopt))
-                    fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-                else
-                    fprintf (stderr,"Unknown option character `\\x%x'.\n",optopt);
-                return true;
-            case ':':
-                fprintf (stderr, "Option -%c requires an argument.\n", optopt);
-                return true;
-            default:
-                return true;
+        case 'c':
+            configFile=optarg;
+            cout <<"ss "<<configFile<<endl;
+            break;
+        case 'h':
+            cout<<"-c configfile    for the config file"<<endl;
+            cout<<"-h               help "<<endl;
+            cout<<"-p num           port "<<endl;
+            return true;
+        case 'p':
+            serverport = stoi(optarg);
+            cout<<"command line, port set to: "<<serverport<<endl;
+            break;
+        case '?':
+            if (isprint (optopt))
+                fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+            else
+                fprintf (stderr,"Unknown option character `\\x%x'.\n",optopt);
+            return true;
+        case ':':
+            fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+            return true;
+        default:
+            return true;
         }
     }
 
@@ -56,6 +62,14 @@ bool Config::parseCommandLine(int argc, char**argv)
 }
 void Config::LoadConfig()
 {
+#ifdef _WIN32
+    evthread_use_windows_threads();
+#else
+    evthread_use_pthreads();
+#endif //_WIN32
+
+    signal(SIGPIPE, SIG_IGN);
+
     deckManager.LoadLFList();
     if(!dataManager.LoadDB("cards.cdb"))
         return;

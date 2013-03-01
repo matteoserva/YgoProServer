@@ -2,28 +2,38 @@
 #include "Config.h"
 #include <string>
 
+#include <sys/socket.h>
 
 using namespace ygo;
 using namespace std;
-const unsigned short PRO_VERSION = 0x1300;
-int enable_log = 2;
+
 
 int main(int argc, char**argv)
 {
-#ifdef _WIN32
-    evthread_use_windows_threads();
-#else
-    evthread_use_pthreads();
-#endif //_WIN32
-
     Config* config = Config::getInstance();
     if(config->parseCommandLine(argc,argv))
         return EXIT_SUCCESS;
 
     config->LoadConfig();
 
-    ygo::GameServer* gameServer = new ygo::GameServer();
-    if(!gameServer->StartServer(config->serverport))
+    sockaddr_in sin;
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = htonl(INADDR_ANY);
+    sin.sin_port = htons(config->serverport);
+
+    int sfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (::bind(sfd, (struct sockaddr *) &sin, sizeof(struct sockaddr_in)) == -1)
+    {
+        printf("errore bind\n");
+        return false;
+    }
+    evutil_make_socket_nonblocking(sfd);
+
+    ygo::GameServer* gameServer = new ygo::GameServer(sfd);
+    //ygo::GameServer* gameServer2 = new ygo::GameServer();
+    //gameServer2->StartServer(sfd);
+    if(!gameServer->StartServer())
     {
         printf("cannot bind the server to port %d\n",config->serverport);
         exit(1);
