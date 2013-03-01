@@ -105,7 +105,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
     HostInfo info;
     info.rule=2;
-    info.mode=MODE_SINGLE;
+    info.mode=MODE_TAG;
     info.draw_count=1;
     info.no_check_deck=false;
     info.start_hand=5;
@@ -143,7 +143,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
     //STOC_HS_PlayerEnter scpe;
-    BufferIO::CopyWStr("read the chat!", scpe.name, 20);
+    BufferIO::CopyWStr("CheckMate server!", scpe.name, 20);
     scpe.pos = 1;
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
@@ -162,9 +162,28 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     char name[20],message[256];
     BufferIO::CopyWStr(dp->name,name,20);
     std::string username(name);
-    sprintf(message, "This is a ranked server. Your rank is %d with %d points.",Users::getInstance()->getRank(username),Users::getInstance()->getScore(username));
-    SendMessageToPlayer(dp,message);
-    SendMessageToPlayer(dp,"to register and login, put your password near the username. example username$password");
+
+    int rank = Users::getInstance()->getRank(username);
+    int score = Users::getInstance()->getScore(username);
+
+    if(rank > 0)
+        sprintf(message, "rank:  %d",rank);
+    else
+        sprintf(message, "unregistered user");
+    BufferIO::CopyWStr(message, scpe.name, 20);
+    scpe.pos = 2;
+    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
+
+    if(score > 0)
+        sprintf(message, "score: %d",score);
+    else
+        sprintf(message, "read the chat!");
+    BufferIO::CopyWStr(message, scpe.name, 20);
+    scpe.pos = 3;
+    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
+
+    if(score == 0)
+        SendMessageToPlayer(dp,"to register and login, put your password near the username. example username$password");
 
 
 
