@@ -59,7 +59,7 @@ void GameserversManager::child_loop(int parent_fd)
             gss.rooms = Statistics::getInstance()->getNumRooms();
             gss.players = Statistics::getInstance()->getNumPlayers();
             write(parent_fd,&gss,sizeof(GameServerStats));
-
+            GameServer::CheckAliveThread(gameServer);
             if (needsReboot)
             {
                 if(!isRebooting)

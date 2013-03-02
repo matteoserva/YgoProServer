@@ -37,7 +37,7 @@ private:
     //event* keepAliveEvent;
     volatile bool isAlive;
     static void keepAlive(evutil_socket_t fd, short events, void* arg);
-    static int CheckAliveThread(void* parama);
+    //static int CheckAliveThread(void* parama);
     void RestartListen();
     bool isListening;
 
@@ -58,6 +58,7 @@ public:
     static int ServerThread(void* param);
     void DisconnectPlayer(DuelPlayer* dp);
     void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
+    static int CheckAliveThread(void* parama);
 };
 
 }

@@ -165,7 +165,7 @@ void GameServer::RestartListen()
 {
     if(!isListening)
     {
-            evconnlistener_enable(listener);
+        evconnlistener_enable(listener);
         isListening = true;
     }
 }
@@ -173,17 +173,21 @@ void GameServer::RestartListen()
 int GameServer::CheckAliveThread(void* parama)
 {
     GameServer*that = (GameServer*)parama;
-    int sleepSeconds = 30;
-    while(that->net_evbase)
-    {
-        that->isAlive=false;
-        for(int i = 0;i<sleepSeconds;i++)
-            sleep(1);
-        if(!that->isAlive)
-            exit(EXIT_FAILURE);
-        //printf("gameserver checkalive\n");
 
-    }
+    if(!that->net_evbase)
+        return 0;
+
+    static time_t last_check = time(NULL);
+    int sleepSeconds = 30;
+
+    if(time(NULL)- last_check < sleepSeconds)
+        return 0;
+
+    if(!that->isAlive)
+        exit(EXIT_FAILURE);
+    that->isAlive=false;
+    last_check = time(NULL);
+
     return 0;
 }
 void GameServer::keepAlive(evutil_socket_t fd, short events, void* arg)
@@ -196,7 +200,7 @@ int GameServer::ServerThread(void* parama)
 {
     GameServer*that = (GameServer*)parama;
 
-    std::thread checkAlive(CheckAliveThread, that);
+    //std::thread checkAlive(CheckAliveThread, that);
     event* keepAliveEvent = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, that);
     timeval timeout = {10, 0};
     event_add(keepAliveEvent, &timeout);
@@ -205,7 +209,7 @@ int GameServer::ServerThread(void* parama)
     event_free(keepAliveEvent);
     event_base_free(that->net_evbase);
     that->net_evbase = 0;
-    checkAlive.join();
+    //checkAlive.join();
     return 0;
 }
 void GameServer::DisconnectPlayer(DuelPlayer* dp)
