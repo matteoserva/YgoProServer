@@ -47,6 +47,7 @@ public:
     event_base* volatile net_evbase;
     RoomManager roomManager;
     GameServer(int server_fd);
+    ~GameServer();
     bool StartServer();
     void StopServer();
     void StopListen();

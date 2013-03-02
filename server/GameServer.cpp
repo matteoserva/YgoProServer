@@ -43,14 +43,14 @@ bool GameServer::StartServer()
 
     return true;
 }
-void GameServer::StopServer()
-{
-    if(!net_evbase)
-        return;
 
-    StopListen();
-    evconnlistener_free(listener);
-    listener = 0;
+GameServer::~GameServer()
+{
+    if(listener)
+    {
+        StopServer();
+    }
+
     while(users.size() > 0)
     {
         log(WARN,"waiting for reboot, users connected: %lu\n",users.size());
@@ -61,8 +61,20 @@ void GameServer::StopServer()
     while(net_evbase)
     {
         log(WARN,"waiting for server thread\n");
-        sleep(5);
+        sleep(1);
     }
+}
+void GameServer::StopServer()
+{
+    if(!net_evbase)
+        return;
+
+    if(listener == 0)
+        return;
+    StopListen();
+    evconnlistener_free(listener);
+    listener = 0;
+
 
 }
 

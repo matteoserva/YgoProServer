@@ -27,7 +27,7 @@ void GameserversManager::ShowStats()
             GameServerStats gss = it->second;
             printf("pid: %d, rooms: %d, users %d\n",gss.pid,gss.rooms,gss.players);
         }
-        printf("total rooms: %d, total players: %d\n",getNumRooms(),getNumPlayers());
+        printf("children: %d, total rooms: %d, total players: %d\n",children.size(),getNumRooms(),getNumPlayers());
         last_update = time(NULL);
     }
 }
@@ -50,23 +50,31 @@ void GameserversManager::child_loop(int parent_fd)
     }
     else
     {
+        bool isRebooting = false;
         while(1)
         {
-
             sleep(1);
-
-            if (needsReboot)
-            {
-                cout<<"rebooting";
-                gameServer->StopServer();
-                exit(0);
-            }
             //printf("spedisco il messaggiofiglio\n");
             GameServerStats gss;
             gss.rooms = Statistics::getInstance()->getNumRooms();
             gss.players = Statistics::getInstance()->getNumPlayers();
             write(parent_fd,&gss,sizeof(GameServerStats));
 
+            if (needsReboot)
+            {
+                if(!isRebooting)
+                {
+                    cout<<"rebooting\n";
+                    gameServer->StopServer();
+                    isRebooting = true;
+                }
+
+                if(gss.players == 0)
+                {
+                    delete gameServer;
+                    exit(0);
+                }
+            }
         }
     }
     exit(EXIT_SUCCESS);
