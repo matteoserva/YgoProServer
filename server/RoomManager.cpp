@@ -1,11 +1,14 @@
 #include "GameServer.h"
 #include "RoomManager.h"
-#include "Statistics.h"
 #include "debug.h"
+#include "Statistics.h"
 namespace ygo
 {
 
-
+int RoomManager::getNumRooms()
+{
+    return elencoServer.size();
+}
 
 void RoomManager::setGameServer(GameServer* gs)
 {

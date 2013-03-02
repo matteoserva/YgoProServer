@@ -15,8 +15,41 @@ namespace ygo
 {
 Statistics::Statistics():numPlayers(0),numRooms(0)
 {
-    Thread::NewThread(StatisticsThread, this);
+    isRunning = false;
 }
+
+int Statistics::getNumRooms()
+{
+    return numRooms;
+}
+int Statistics::getNumPlayers()
+{
+    return numPlayers;
+}
+
+void Statistics::StartThread()
+{
+    if(!isRunning)
+    {
+        isRunning = true;
+        updateThread = std::thread(StatisticsThread, this);
+
+    }
+}
+
+void Statistics::StopThread()
+{
+    if(isRunning)
+    {
+        isRunning = false;
+        printf("stoppo il thread statistiche\n");
+        updateThread.join();
+        printf("thread fermato\n");
+
+    }
+}
+
+
 Statistics* Statistics::getInstance()
 {
     static Statistics statistics;
@@ -25,34 +58,40 @@ Statistics* Statistics::getInstance()
 
 void Statistics::setNumPlayers(int numP)
 {
-    log(INFO,"there are %d players\n",numP);
+    log(VERBOSE,"there are %d players\n",numP);
     numPlayers=numP;
 
 }
 void Statistics::setNumRooms(int numR)
 {
     if(numRooms != numR)
-        log(INFO,"there are %d rooms\n",numR);
+        log(VERBOSE,"there are %d rooms\n",numR);
     numRooms=numR;
 }
 
 int Statistics::StatisticsThread(void* param)
 {
     Statistics*that = (Statistics*) param;
-
+    int sleepfor = 20;
+    printf("avvio il thread statistiche\n");
     for(;;)
     {
         int result = that->sendStatistics();
         if(result)
             log(INFO,"risultato statistiche: %d\n",result);
-
-        sleep(20);
+        for(int i = 0; i<sleepfor;i++)
+        {
+            if(!that->isRunning)
+                return 0;
+            sleep(1);
+        }
     }
-
+    return 0;
 }
 
 int Statistics::sendStatistics()
 {
+
     int portno = 80;
     int sockfd, n;
     struct sockaddr_in serv_addr;

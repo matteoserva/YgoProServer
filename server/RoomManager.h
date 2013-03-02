@@ -35,6 +35,7 @@ namespace ygo {
         CMNetServer* getFirstAvailableServer();
         CMNetServer* getFirstAvailableServer(unsigned char mode);
         int getNumPlayers();
+        int getNumRooms();
     };
 
 

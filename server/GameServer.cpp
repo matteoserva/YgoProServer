@@ -1,11 +1,11 @@
 #include "GameServer.h"
 
 #include "RoomManager.h"
-#include "Statistics.h"
 #include "debug.h"
 #include <time.h>
 #include <netinet/tcp.h>
-
+#include <thread>
+#include "Statistics.h"
 namespace ygo
 {
 GameServer::GameServer(int server_fd):server_fd(server_fd)
@@ -25,9 +25,7 @@ bool GameServer::StartServer()
     if(!net_evbase)
         return false;
 
-    roomManager.setGameServer(const_cast<ygo::GameServer *>(this));
-
-    listener =evconnlistener_new(net_evbase,ServerAccept, this, LEV_OPT_REUSEABLE,-1,server_fd);
+    listener =evconnlistener_new(net_evbase,ServerAccept, this, LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE ,-1,server_fd);
 
     if(!listener)
     {
@@ -35,8 +33,14 @@ bool GameServer::StartServer()
         net_evbase = 0;
         return false;
     }
+    isListening=true;
     evconnlistener_set_error_cb(listener, ServerAcceptError);
+    roomManager.setGameServer(const_cast<ygo::GameServer *>(this));
+
     Thread::NewThread(ServerThread, this);
+
+
+
     return true;
 }
 void GameServer::StopServer()
@@ -91,6 +95,12 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
     dp.netServer=0;
     bufferevent_setcb(bev, ServerEchoRead, NULL, ServerEchoEvent, ctx);
     bufferevent_enable(bev, EV_READ);
+    if(that->users.size()>= MAXPLAYERS)
+    {
+        that->StopListen();
+        that->isListening = false;
+    }
+
     Statistics::getInstance()->setNumPlayers(that->users.size());
 }
 void GameServer::ServerAcceptError(evconnlistener* listener, void* ctx)
@@ -137,15 +147,51 @@ void GameServer::ServerEchoEvent(bufferevent* bev, short events, void* ctx)
     }
 }
 
+void GameServer::RestartListen()
+{
+    if(!isListening)
+    {
+            evconnlistener_enable(listener);
+        isListening = true;
+    }
+}
 
+int GameServer::CheckAliveThread(void* parama)
+{
+    GameServer*that = (GameServer*)parama;
+    int sleepSeconds = 30;
+    while(that->net_evbase)
+    {
+        that->isAlive=false;
+        for(int i = 0;i<sleepSeconds;i++)
+            sleep(1);
+        if(!that->isAlive)
+            exit(EXIT_FAILURE);
+        //printf("gameserver checkalive\n");
+
+    }
+    return 0;
+}
+void GameServer::keepAlive(evutil_socket_t fd, short events, void* arg)
+{
+    GameServer*that = (GameServer*) arg;
+    that->isAlive = true;
+
+}
 int GameServer::ServerThread(void* parama)
 {
     GameServer*that = (GameServer*)parama;
-    event_base_dispatch(that->net_evbase);
 
+    std::thread checkAlive(CheckAliveThread, that);
+    event* keepAliveEvent = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, that);
+    timeval timeout = {10, 0};
+    event_add(keepAliveEvent, &timeout);
+
+    event_base_dispatch(that->net_evbase);
+    event_free(keepAliveEvent);
     event_base_free(that->net_evbase);
     that->net_evbase = 0;
-
+    checkAlive.join();
     return 0;
 }
 void GameServer::DisconnectPlayer(DuelPlayer* dp)
@@ -160,6 +206,7 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
         users.erase(bit);
     }
 
+    RestartListen();
     Statistics::getInstance()->setNumPlayers(users.size());
 }
 
@@ -208,5 +255,11 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     return;
 }
 
+
+GameServerStats::GameServerStats(): rooms(0),players(0)
+{
+    pid = getpid();
+
+}
 }
 

@@ -291,6 +291,15 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
        last_winner = 1-dp->type;
     }
 
+    /*bug in duels, sometimes a leaver doesn't become a loser*/
+    if(oldtype != NETPLAYER_TYPE_OBSERVER && state == PLAYING && last_winner < 0)
+    {
+        if(mode == MODE_SINGLE || mode == MODE_MATCH)
+            last_winner = 1-dp->type;
+        else
+            last_winner = 3-dp->type;
+    }
+
     if(state != ZOMBIE && dp->game == duel_mode)
         duel_mode->LeaveGame(dp);
     else
@@ -306,7 +315,7 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
     if(oldtype != NETPLAYER_TYPE_OBSERVER && state == PLAYING)
     {
         log(BUG,"player left but the game is still playing\n");
-        setState(ZOMBIE);
+        StopServer();
         for(auto it=players.cbegin(); it!= players.cend(); ++it)
         {
             if(it->first != dp)

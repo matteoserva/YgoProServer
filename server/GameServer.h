@@ -11,33 +11,52 @@
 
 #include "netserver.h"
 
-namespace ygo {
+namespace ygo
+{
 
-class GameServer {
+struct GameServerStats
+{
+    int pid;
+    int rooms;
+    int players;
+    GameServerStats();
+};
+
+
+class GameServer
+{
 private:
-	std::unordered_map<bufferevent*, DuelPlayer> users;
-	 unsigned short server_port;
-	 evconnlistener* listener;
-     int server_fd;
-	 char net_server_read[0x2000];
-	 char net_server_write[0x2000];
-	 unsigned short last_sent;
+    const static int MAXPLAYERS = 100;
+    std::unordered_map<bufferevent*, DuelPlayer> users;
+    unsigned short server_port;
+    evconnlistener* listener;
+    int server_fd;
+    char net_server_read[0x2000];
+    char net_server_write[0x2000];
+    unsigned short last_sent;
+    //event* keepAliveEvent;
+    volatile bool isAlive;
+    static void keepAlive(evutil_socket_t fd, short events, void* arg);
+    static int CheckAliveThread(void* parama);
+    void RestartListen();
+    bool isListening;
+
+
 
 public:
     event_base* volatile net_evbase;
     RoomManager roomManager;
     GameServer(int server_fd);
-	 bool StartServer();
-	 void StopServer();
-	 void StopListen();
-	 static void ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx);
-	 static void ServerAcceptError(evconnlistener *listener, void* ctx);
-	 static void ServerEchoRead(bufferevent* bev, void* ctx);
-	 static void ServerEchoEvent(bufferevent* bev, short events, void* ctx);
-	 static int ServerThread(void* param);
-	 void DisconnectPlayer(DuelPlayer* dp);
-	 void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
-
+    bool StartServer();
+    void StopServer();
+    void StopListen();
+    static void ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx);
+    static void ServerAcceptError(evconnlistener *listener, void* ctx);
+    static void ServerEchoRead(bufferevent* bev, void* ctx);
+    static void ServerEchoEvent(bufferevent* bev, short events, void* ctx);
+    static int ServerThread(void* param);
+    void DisconnectPlayer(DuelPlayer* dp);
+    void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
 };
 
 }

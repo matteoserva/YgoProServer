@@ -15,7 +15,7 @@ int UsersDatabase::getRank(std::string username)
 
         std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
         if(!res->next())
-           return 0;
+            return 0;
         int rank = res->getInt(1);
         return rank;
     }
@@ -30,26 +30,31 @@ int UsersDatabase::getRank(std::string username)
 bool UsersDatabase::setUserStats(UserStats &us)
 {
     //true is success
-    try
+    int retries = 3;
+    do
     {
-        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("UPDATE stats SET score = ?, wins = ?, losses = ?, draws = ? WHERE username = ?"));
-        stmt->setString(5, us.username);
-        stmt->setInt(1, us.score);
-        stmt->setInt(2, us.wins);
-        stmt->setInt(3, us.losses);
-        stmt->setInt(4, us.draws);
-        int updateCount = stmt->executeUpdate();
-        return updateCount > 0;
+        try
+        {
+            std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("UPDATE stats SET score = ?, wins = ?, losses = ?, draws = ? WHERE username = ?"));
+            stmt->setString(5, us.username);
+            stmt->setInt(1, us.score);
+            stmt->setInt(2, us.wins);
+            stmt->setInt(3, us.losses);
+            stmt->setInt(4, us.draws);
+            int updateCount = stmt->executeUpdate();
+            return updateCount > 0;
+        }
+        catch (sql::SQLException &e)
+        {
+            std::cout << "# ERR: SQLException in " << __FILE__;
+            std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
+            std::cout << "# ERR: " << e.what();
+            std::cout << " (MySQL error code: " << e.getErrorCode();
+            std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+        }
     }
-    catch (sql::SQLException &e)
-    {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-        return false;
-    }
+    while (--retries > 0);
+    return false;
 }
 
 UserStats UsersDatabase::getUserStats(std::string username)
