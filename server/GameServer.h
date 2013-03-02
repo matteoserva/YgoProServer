@@ -1,7 +1,7 @@
 #ifndef GAMESERVER_H
 #define GAMESERVER_H
 
-#include "config.h"
+#include "Config.h"
 #include "network.h"
 #include "data_manager.h"
 #include "deck_manager.h"
@@ -26,7 +26,7 @@ struct GameServerStats
 class GameServer
 {
 private:
-    const static int MAXPLAYERS = 100;
+    int MAXPLAYERS;
     std::unordered_map<bufferevent*, DuelPlayer> users;
     unsigned short server_port;
     evconnlistener* listener;

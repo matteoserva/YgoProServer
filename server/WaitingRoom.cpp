@@ -2,10 +2,11 @@
 #include "GameServer.h"
 #include "debug.h"
 #include "Users.h"
+#include "Config.h"
 namespace ygo
 {
-int WaitingRoom::minSecondsWaiting=4;
-int WaitingRoom::maxSecondsWaiting=8;
+int WaitingRoom::minSecondsWaiting=Config::getInstance()->waitingroom_min_waiting;
+int WaitingRoom::maxSecondsWaiting=Config::getInstance()->waitingroom_max_waiting;
 
 
 WaitingRoom::WaitingRoom(RoomManager*roomManager,GameServer*gameServer):

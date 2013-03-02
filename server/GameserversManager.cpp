@@ -27,7 +27,7 @@ void GameserversManager::ShowStats()
             GameServerStats gss = it->second;
             printf("pid: %d, rooms: %d, users %d\n",gss.pid,gss.rooms,gss.players);
         }
-        printf("children: %d, total rooms: %d, total players: %d\n",children.size(),getNumRooms(),getNumPlayers());
+        printf("children: %d, total rooms: %d, total players: %d\n",(int)children.size(),getNumRooms(),getNumPlayers());
         last_update = time(NULL);
     }
 }
@@ -133,7 +133,7 @@ int GameserversManager::getNumPlayers()
 
 void GameserversManager::parent_loop()
 {
-
+    maxchildren = Config::getInstance()->max_processes;
 
     for(int i = 0; i < maxchildren; i++)
         spawn_gameserver();

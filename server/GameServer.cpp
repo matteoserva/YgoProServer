@@ -6,6 +6,8 @@
 #include <netinet/tcp.h>
 #include <thread>
 #include "Statistics.h"
+
+using ygo::Config;
 namespace ygo
 {
 GameServer::GameServer(int server_fd):server_fd(server_fd)
@@ -14,7 +16,7 @@ GameServer::GameServer(int server_fd):server_fd(server_fd)
     net_evbase = 0;
     listener = 0;
     last_sent = 0;
-
+    MAXPLAYERS = Config::getInstance()->max_users_per_process;
 }
 
 bool GameServer::StartServer()
@@ -107,7 +109,7 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
     dp.netServer=0;
     bufferevent_setcb(bev, ServerEchoRead, NULL, ServerEchoEvent, ctx);
     bufferevent_enable(bev, EV_READ);
-    if(that->users.size()>= MAXPLAYERS)
+    if(that->users.size()>= that->MAXPLAYERS)
     {
         that->StopListen();
         that->isListening = false;

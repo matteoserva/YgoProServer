@@ -91,6 +91,9 @@ void Config::LoadConfig()
         size_t fsize = ftell(fp);
         fseek(fp, 0, SEEK_SET);
         int linenum=0;
+        #define CHECK_NUMERIC_VARIABLE(VAR) else if(!strcmp(strbuf,#VAR)) VAR = stoi(valbuf)
+        #define CHECK_STRING_VARIABLE(VAR) else if(!strcmp(strbuf,#VAR)) VAR = valbuf
+
         for(int linenum=0; ftell(fp) < fsize; linenum++)
         {
             fgets(linebuf, 250, fp);
@@ -114,27 +117,21 @@ void Config::LoadConfig()
                 }
                 //istringstream ss(valbuf)>>
             }
-            else if(!strcmp(strbuf,"mysql_database"))
-            {
-                mysql_database = valbuf;
-            }
-            else if(!strcmp(strbuf,"mysql_username"))
-            {
-                mysql_username = valbuf;
-            }
-            else if(!strcmp(strbuf,"mysql_password"))
-            {
-                mysql_password = valbuf;
-            }
-            else if(!strcmp(strbuf,"mysql_host"))
-            {
 
-                mysql_host = valbuf;
-                std::cout<<"mysql host settato a "<<mysql_host<<std::endl;
-            }
+            CHECK_STRING_VARIABLE(mysql_username);
+            CHECK_STRING_VARIABLE(mysql_password);
+            CHECK_STRING_VARIABLE(mysql_database);
+            CHECK_STRING_VARIABLE(mysql_host);
+            CHECK_NUMERIC_VARIABLE(max_users_per_process);
+            CHECK_NUMERIC_VARIABLE(max_processes);
+            CHECK_NUMERIC_VARIABLE(waitingroom_min_waiting);
+            CHECK_NUMERIC_VARIABLE(waitingroom_max_waiting);
+
             else
                 cerr<<"Could not understand the keyword at line"<<linenum<<": "<<strbuf<<endl;
         }
+        #undef CHECK_STRING_VARIABLE
+        #undef CHECK_NUMERIC_VARIABLE
         fclose(fp);
     }
     if(!serverport)
@@ -145,6 +142,10 @@ void Config::LoadConfig()
 }
 Config::Config():configFile("server.conf"),serverport(0)
 {
+    max_users_per_process = 150;
+    max_processes = 3;
+    int waitingroom_min_waiting = 4;
+    int waitingroom_max_waiting = 8;
 }
 
 }

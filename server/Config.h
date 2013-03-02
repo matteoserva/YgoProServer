@@ -17,6 +17,10 @@ namespace ygo
         std::string mysql_password;
         std::string mysql_host;
         std::string mysql_database;
+        int max_processes;
+        int max_users_per_process;
+        int waitingroom_min_waiting;
+        int waitingroom_max_waiting;
 
         private:
         Config();
