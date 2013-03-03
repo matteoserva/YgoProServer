@@ -13,7 +13,10 @@ namespace ygo
 static volatile bool needsReboot;
 void sigterm_handler(int signum)
 {
+    static int timesPressed = 0;
     needsReboot=true;
+    if(++timesPressed >= 5)
+        kill(getpid(),SIGQUIT);
 }
 
 GameServerStats::GameServerStats(): rooms(0),players(0)
@@ -26,7 +29,7 @@ bool GameserversManager::serversAlmostFull()
     int threeshold = Config::getInstance()->max_users_per_process*9/10;
     threeshold = max(threeshold,1);
     threeshold = min(threeshold,10);
-    printf("high threeshold = %d\n",threeshold);
+    log(VERBOSE,"high threeshold = %d\n",threeshold);
     return getNumPlayersInAliveRooms()+threeshold > getNumAliveRooms()*Config::getInstance()->max_users_per_process;
 }
 bool GameserversManager::serversAlmostEmpty()
@@ -34,7 +37,7 @@ bool GameserversManager::serversAlmostEmpty()
     int threeshold = 0.5*Config::getInstance()->max_users_per_process;
     threeshold = min(threeshold,50);
     threeshold = max(threeshold,1);
-    printf("low threeshold = %d\n",threeshold);
+    log(VERBOSE,"low threeshold = %d\n",threeshold);
     return getNumPlayersInAliveRooms() <= (getNumAliveRooms()-1) * Config::getInstance()->max_users_per_process -threeshold;
 }
 
