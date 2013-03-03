@@ -273,11 +273,5 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     return;
 }
 
-
-GameServerStats::GameServerStats(): rooms(0),players(0)
-{
-    pid = getpid();
-
-}
 }
 

@@ -14,13 +14,7 @@
 namespace ygo
 {
 
-struct GameServerStats
-{
-    int pid;
-    int rooms;
-    int players;
-    GameServerStats();
-};
+
 
 
 class GameServer
