@@ -5,13 +5,15 @@
 #include "Config.h"
 namespace ygo
 {
-int WaitingRoom::minSecondsWaiting=Config::getInstance()->waitingroom_min_waiting;
-int WaitingRoom::maxSecondsWaiting=Config::getInstance()->waitingroom_max_waiting;
+int WaitingRoom::minSecondsWaiting;
+int WaitingRoom::maxSecondsWaiting;
 
 
 WaitingRoom::WaitingRoom(RoomManager*roomManager,GameServer*gameServer):
     CMNetServerInterface(roomManager,gameServer),cicle_users(0)
 {
+    WaitingRoom::minSecondsWaiting=Config::getInstance()->waitingroom_min_waiting;
+    WaitingRoom::maxSecondsWaiting=Config::getInstance()->waitingroom_max_waiting;
     event_base* net_evbase=roomManager->net_evbase;
     cicle_users = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, cicle_users_cb, const_cast<WaitingRoom*>(this));
     timeval timeout = {1, 0};

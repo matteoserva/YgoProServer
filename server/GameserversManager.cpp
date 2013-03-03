@@ -30,7 +30,7 @@ bool GameserversManager::serversAlmostFull()
     threeshold = max(threeshold,1);
     threeshold = min(threeshold,10);
     log(VERBOSE,"high threeshold = %d\n",threeshold);
-    return getNumPlayersInAliveRooms()+threeshold > getNumAliveRooms()*Config::getInstance()->max_users_per_process;
+    return getNumPlayersInAliveChildren()+threeshold > getNumAliveChildren()*Config::getInstance()->max_users_per_process;
 }
 bool GameserversManager::serversAlmostEmpty()
 {
@@ -38,14 +38,14 @@ bool GameserversManager::serversAlmostEmpty()
     threeshold = min(threeshold,50);
     threeshold = max(threeshold,1);
     log(VERBOSE,"low threeshold = %d\n",threeshold);
-    return getNumPlayersInAliveRooms() <= (getNumAliveRooms()-1) * Config::getInstance()->max_users_per_process -threeshold;
+    return getNumPlayersInAliveChildren() <= (getNumAliveChildren()-1) * Config::getInstance()->max_users_per_process -threeshold;
 }
 
-int GameserversManager::getNumAliveRooms()
+int GameserversManager::getNumAliveChildren()
 {
     return aliveChildren.size();
 }
-int GameserversManager::getNumPlayersInAliveRooms()
+int GameserversManager::getNumPlayersInAliveChildren()
 {
     int numTotal=0;
     for(auto it = aliveChildren.begin(); it!=aliveChildren.end(); ++it)
@@ -65,7 +65,7 @@ void GameserversManager::ShowStats()
             printf("pid: %d, rooms: %d, users %d\n",gss.pid,gss.rooms,gss.players);
         }
         printf("children: %d, alive %d, rooms: %d, players: %d,in alive room:%d\n",
-               (int)children.size(),getNumAliveRooms(),getNumRooms(),getNumPlayers(),getNumPlayersInAliveRooms());
+               (int)children.size(),getNumAliveChildren(),getNumRooms(),getNumPlayers(),getNumPlayersInAliveChildren());
         last_update = time(NULL);
     }
 }
@@ -270,10 +270,10 @@ void GameserversManager::parent_loop()
         ShowStats();
         if(needsReboot)
             continue;
-        if(!needsReboot && serversAlmostFull() && getNumAliveRooms()<maxchildren)
+        if(!needsReboot && serversAlmostFull() && getNumAliveChildren()<maxchildren)
         {
             spawn_gameserver();
-            printf("figli vivi %d, utenti vivi %d\n",getNumAliveRooms(),getNumPlayersInAliveRooms());
+            printf("figli vivi %d, utenti vivi %d\n",getNumAliveChildren(),getNumPlayersInAliveChildren());
         }
         if(serversAlmostEmpty())
         {
@@ -290,7 +290,7 @@ void GameserversManager::parent_loop()
 
             aliveChildren.erase(chosen_one);
             kill(chosen_pid,SIGTERM);
-            if(children.size()-getNumAliveRooms() > Config::getInstance()->max_processes)
+            if(children.size()-getNumAliveChildren() > Config::getInstance()->max_processes)
                 killOneTerminatingServer();
         }
 

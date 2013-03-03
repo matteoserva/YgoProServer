@@ -27,8 +27,8 @@ private:
 
     int getNumRooms();
     int getNumPlayers();
-    int getNumAliveRooms();
-    int getNumPlayersInAliveRooms();
+    int getNumAliveChildren();
+    int getNumPlayersInAliveChildren();
     bool serversAlmostFull();
     bool serversAlmostEmpty();
     void killOneTerminatingServer();
