@@ -23,13 +23,19 @@ GameServerStats::GameServerStats(): rooms(0),players(0)
 
 bool GameserversManager::serversAlmostFull()
 {
-
-    return getNumPlayersInAliveRooms()+10 > getNumAliveRooms()*Config::getInstance()->max_users_per_process;
+    int threeshold = Config::getInstance()->max_users_per_process*9/10;
+    threeshold = max(threeshold,1);
+    threeshold = min(threeshold,10);
+    printf("high threeshold = %d\n",threeshold);
+    return getNumPlayersInAliveRooms()+threeshold > getNumAliveRooms()*Config::getInstance()->max_users_per_process;
 }
 bool GameserversManager::serversAlmostEmpty()
 {
-
-    return getNumPlayersInAliveRooms() <= (getNumAliveRooms()-1.5) * Config::getInstance()->max_users_per_process;
+    int threeshold = 0.5*Config::getInstance()->max_users_per_process;
+    threeshold = min(threeshold,50);
+    threeshold = max(threeshold,1);
+    printf("low threeshold = %d\n",threeshold);
+    return getNumPlayersInAliveRooms() <= (getNumAliveRooms()-1) * Config::getInstance()->max_users_per_process -threeshold;
 }
 
 int GameserversManager::getNumAliveRooms()
