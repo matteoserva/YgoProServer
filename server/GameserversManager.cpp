@@ -62,9 +62,12 @@ void GameserversManager::ShowStats()
         for(auto it = children.cbegin(); it != children.cend(); ++it)
         {
             GameServerStats gss = it->second;
-            printf("pid: %d, rooms: %d, users %d\n",gss.pid,gss.rooms,gss.players);
+            printf("pid: %5d, rooms: %3d, users %3d",gss.pid,gss.rooms,gss.players);
+            if(aliveChildren.find(it->first) == aliveChildren.end())
+                printf("  *dying*");
+            printf("\n");
         }
-        printf("children: %d, alive %d, rooms: %d, players: %d,in alive room:%d\n",
+        printf("children: %2d, alive %2d, rooms: %3d, players: %3d,in alive servers:%3d\n",
                (int)children.size(),getNumAliveChildren(),getNumRooms(),getNumPlayers(),getNumPlayersInAliveChildren());
         last_update = time(NULL);
     }
