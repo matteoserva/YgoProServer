@@ -15,7 +15,7 @@ void RoomManager::setGameServer(GameServer* gs)
     gameServer = gs;
 
     net_evbase = gs->net_evbase;
-    timeval timeout = {5, 0};
+    timeval timeout = {SecondsBeforeFillAllRooms, 0};
     keepAliveEvent = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, this);
     waitingRoom = new WaitingRoom(this,gs);
     event_add(keepAliveEvent, &timeout);
@@ -35,7 +35,10 @@ RoomManager::~RoomManager()
 void RoomManager::keepAlive(evutil_socket_t fd, short events, void* arg)
 {
     RoomManager*that = (RoomManager*) arg;
-    that->removeDeadRooms();
+    static int needRemove = 0;
+    needRemove = (needRemove+1) % RemoveDeadRoomsRatio;
+    if(needRemove == 0)
+        that->removeDeadRooms();
     that->FillAllRooms();
 }
 

@@ -14,6 +14,9 @@ namespace ygo {
         private:
         event* keepAliveEvent;
 
+        static int SecondsBeforeFillAllRooms = 3;
+        static int RemoveDeadRoomsRatio = 3;
+
         WaitingRoom* waitingRoom;
         void removeDeadRooms();
         bool FillRoom(CMNetServer* room);
