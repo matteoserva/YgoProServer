@@ -9,11 +9,14 @@ namespace ygo
 class WaitingRoom:public CMNetServerInterface
 {
 private:
+    static const std::string banner;
     bool handleChatCommand(DuelPlayer* dp,unsigned short* msg);
     static int minSecondsWaiting;
     static int maxSecondsWaiting;
     event* cicle_users;
+    event* periodic_updates_ev;
     static void cicle_users_cb(evutil_socket_t fd, short events, void* arg);
+    static void periodic_updates(evutil_socket_t fd, short events, void* arg);
     void updateObserversNum();
 public:
     DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*);

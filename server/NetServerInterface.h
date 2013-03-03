@@ -16,7 +16,7 @@ struct DuelPlayerInfo
     {
     };
 bool isReady;
-unsigned int secondsWaiting;
+float secondsWaiting;
 
 };
 

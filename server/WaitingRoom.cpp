@@ -7,7 +7,7 @@ namespace ygo
 {
 int WaitingRoom::minSecondsWaiting;
 int WaitingRoom::maxSecondsWaiting;
-
+const std::string WaitingRoom::banner = "Checkmate Server!   ";
 
 WaitingRoom::WaitingRoom(RoomManager*roomManager,GameServer*gameServer):
     CMNetServerInterface(roomManager,gameServer),cicle_users(0)
@@ -16,14 +16,48 @@ WaitingRoom::WaitingRoom(RoomManager*roomManager,GameServer*gameServer):
     WaitingRoom::maxSecondsWaiting=Config::getInstance()->waitingroom_max_waiting;
     event_base* net_evbase=roomManager->net_evbase;
     cicle_users = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, cicle_users_cb, const_cast<WaitingRoom*>(this));
+    periodic_updates_ev = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, periodic_updates, const_cast<WaitingRoom*>(this));
     timeval timeout = {1, 0};
     event_add(cicle_users, &timeout);
+    timeval timeout2 = {0, 100000};
+    event_add(periodic_updates_ev, &timeout2);
 }
 
 WaitingRoom::~WaitingRoom()
 {
     event_free(cicle_users);
+    event_free(periodic_updates_ev);
 }
+
+void WaitingRoom::periodic_updates(evutil_socket_t fd, short events, void* arg)
+{
+    WaitingRoom*that = (WaitingRoom*)arg;
+    for(auto it=that->players.begin(); it!=that->players.end(); ++it)
+    {
+        it->second.secondsWaiting+= 0.1;
+
+        if(it->second.secondsWaiting< 1.5)
+            continue;
+        int cycle = 10 * (it->second.secondsWaiting-1.5);
+
+        int start = cycle % (banner.length() + 10);
+        if(start >= banner.length())
+            start = 0;
+        std::string newstr = banner.substr(start) + banner.substr(0,start);
+        STOC_HS_PlayerEnter scpe;
+        BufferIO::CopyWStr(newstr.c_str(), scpe.name, 20);
+
+        scpe.pos = 1;
+        that->SendPacketToPlayer(it->first, STOC_HS_PLAYER_ENTER, scpe);
+
+
+    }
+
+
+
+
+}
+
 void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
 {
     WaitingRoom*that = (WaitingRoom*)arg;
@@ -35,7 +69,6 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
     int numPlayersReady=0;
     for(auto it=that->players.begin(); it!=that->players.end(); ++it)
     {
-        it->second.secondsWaiting++;
         char nome[30];
         BufferIO::CopyWStr(it->first->name,nome,30);
         if(!that->players[it->first].isReady)
@@ -167,7 +200,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
     //STOC_HS_PlayerEnter scpe;
-    BufferIO::CopyWStr("CheckMate server!", scpe.name, 20);
+    BufferIO::CopyWStr(banner.c_str(), scpe.name, 20);
     scpe.pos = 1;
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
@@ -207,8 +240,6 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     {
         SendMessageToPlayer(dp,"to register and login, go back and change the username to yourusername$yourpassword");
     }
-
-
 
 }
 void WaitingRoom::LeaveGame(DuelPlayer* dp)
