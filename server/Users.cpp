@@ -161,6 +161,14 @@ static int k(int score)
     return 100;
 }
 
+static int newbieBonus(const UserStats &us)
+{
+    int threeshold = 10;
+    if(us.wins + us.losses+us.draws > threeshold)
+        return 1;
+    return 2;
+}
+
 void Users::Draw(std::string win, std::string los)
 {
     if(win[0] == '-')
@@ -175,8 +183,8 @@ void Users::Draw(std::string win, std::string los)
         int winscore = us_win.score;
         int losescore = us_los.score;
         int delta = winscore-losescore;
-        us_win.score = winscore + k(winscore)*(0.5-win_exp(delta));
-        us_los.score = losescore + k(losescore)*(0.5 - win_exp(-delta));
+        us_win.score = winscore + newbieBonus(us_win) * k(winscore)*(0.5-win_exp(delta));
+        us_los.score = losescore + newbieBonus(us_los) * k(losescore)*(0.5 - win_exp(-delta));
 
         us_win.draws++;
         us_los.draws++;
@@ -220,10 +228,10 @@ void Users::Draw(std::string win1, std::string win2,std::string los1, std::strin
         int lose2score = us_los2.score;
         int delta = (win1score+win2score-lose1score-lose2score)/2; //<-- /2!
 
-        us_win1.score += k(win1score)  * (0.5-win_exp(delta))  * 2.0*win1score/(win1score+win2score);
-        us_win2.score += k(win2score)  * (0.5-win_exp(delta))  * 2.0*win2score/(win1score+win2score);
-        us_los1.score += k(lose1score) * (0.5-win_exp(-delta)) * 2.0*lose1score/(lose1score+lose2score);
-        us_los2.score += k(lose2score) * (0.5-win_exp(-delta)) * 2.0*lose2score/(lose1score+lose2score);
+        us_win1.score += newbieBonus(us_win1) * k(win1score)  * (0.5-win_exp(delta))  * 2.0*win1score/(win1score+win2score);
+        us_win2.score += newbieBonus(us_win2) * k(win2score)  * (0.5-win_exp(delta))  * 2.0*win2score/(win1score+win2score);
+        us_los1.score += newbieBonus(us_los1) * k(lose1score) * (0.5-win_exp(-delta)) * 2.0*lose1score/(lose1score+lose2score);
+        us_los2.score += newbieBonus(us_los2) * k(lose2score) * (0.5-win_exp(-delta)) * 2.0*lose2score/(lose1score+lose2score);
 
         if(us_los1.score < 100)
             us_los1.score = 100;
@@ -269,8 +277,8 @@ void Users::Victory(std::string win, std::string los)
         int winscore = us_win.score;
         int losescore = us_los.score;
         int delta = winscore-losescore;
-        us_win.score = winscore + k(winscore)*(1.0-win_exp(delta));
-        us_los.score = losescore + k(losescore)*(0.0 - win_exp(-delta));
+        us_win.score = winscore + newbieBonus(us_win) * k(winscore)*(1.0-win_exp(delta));
+        us_los.score = losescore + newbieBonus(us_los) * k(losescore)*(0.0 - win_exp(-delta));
 
         us_win.wins++;
         us_los.losses++;
@@ -313,10 +321,10 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
         int lose2score = us_los2.score;
         int delta = (win1score+win2score-lose1score-lose2score)/2; //<-- /2!
 
-        us_win1.score += k(win1score)  * (1.0-win_exp(delta))  * 2.0*win1score/(win1score+win2score);
-        us_win2.score += k(win2score)  * (1.0-win_exp(delta))  * 2.0*win2score/(win1score+win2score);
-        us_los1.score += k(lose1score) * (0.0-win_exp(-delta)) * 2.0*lose1score/(lose1score+lose2score);
-        us_los2.score += k(lose2score) * (0.0-win_exp(-delta)) * 2.0*lose2score/(lose1score+lose2score);
+        us_win1.score += newbieBonus(us_win1) * k(win1score)  * (1.0-win_exp(delta))  * 2.0*win1score/(win1score+win2score);
+        us_win2.score += newbieBonus(us_win2) * k(win2score)  * (1.0-win_exp(delta))  * 2.0*win2score/(win1score+win2score);
+        us_los1.score += newbieBonus(us_los1) * k(lose1score) * (0.0-win_exp(-delta)) * 2.0*lose1score/(lose1score+lose2score);
+        us_los2.score += newbieBonus(us_los2) * k(lose2score) * (0.0-win_exp(-delta)) * 2.0*lose2score/(lose1score+lose2score);
 
         if(us_los1.score < 100)
             us_los1.score = 100;
