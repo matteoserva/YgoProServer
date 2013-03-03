@@ -73,8 +73,8 @@ void Config::LoadConfig()
     deckManager.LoadLFList();
     if(!dataManager.LoadDB("cards.cdb"))
         return;
-    if(!dataManager.LoadStrings("strings.conf"))
-        return;
+    //if(!dataManager.LoadStrings("strings.conf"))
+      //  return;
     FILE* fp = fopen(configFile.c_str(), "r");
     if(!fp)
     {
