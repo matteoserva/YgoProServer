@@ -159,14 +159,12 @@ static float win_exp(float delta)
 static int k(const UserStats &us)
 {
     int tempK = 100;
-    if(us.score <= 700 && us.score >= 300)
-        tempK *=2;
-
-
-    int threeshold = 10;
+        int threeshold = 10;
     if(us.wins + us.losses+us.draws <= threeshold)
     {
         tempK *=2;
+        if(us.score <= 800 && us.score >= 200)
+            tempK *=2;
     }
 
     return tempK;
