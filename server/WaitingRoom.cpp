@@ -369,7 +369,11 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         playerReadinessChange(dp,CTOS_HS_NOTREADY - pktType);
         break;
     }
-
+    case CTOS_HS_TODUELIST: {
+		ExtractPlayer(dp);
+        roomManager->InsertPlayer(dp,MODE_SINGLE);
+		break;
+	}
     }
 }
 
