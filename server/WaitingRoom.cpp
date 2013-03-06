@@ -283,7 +283,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
 
         }
     }
-    if(chosenOne != nullptr)
+    if(chosenOne != nullptr && qdifference <= 400)
     {
         ExtractPlayer(chosenOne);
         log(INFO,"qdifference = %d\n",qdifference);

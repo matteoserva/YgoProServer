@@ -56,7 +56,7 @@ int RoomManager::getNumPlayers()
 
 CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 {
-    int i = 0;
+    /*int i = 0;
     log(INFO,"analizzo la lista server\n");
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
@@ -70,6 +70,7 @@ CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
         i++;
     }
     log(INFO,"Server non trovato, creo uno nuovo \n");
+    */
     return createServer(mode);
 }
 
@@ -159,6 +160,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 
 CMNetServer* RoomManager::getFirstAvailableServer()
 {
+    /*
     int i = 0;
     log(INFO,"analizzo la lista server\n");
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
@@ -174,7 +176,7 @@ CMNetServer* RoomManager::getFirstAvailableServer()
 
 
     log(INFO,"Server non trovato, creo uno nuovo \n");
-
+    */
     return createServer(MODE_SINGLE);
     //netServer.gameServer=
 }
