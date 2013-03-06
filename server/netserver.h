@@ -27,14 +27,16 @@ class CMNetServer:public CMNetServerInterface
     State state;
 private:
     static void DuelTimer(evutil_socket_t fd, short events, void* arg);
-
+    void updateUserTimeout(DuelPlayer* dp);
     void Victory(char winner);
     char last_winner;
     int getNumDuelPlayers();
     void updateServerState();
     void destroyGame();
     event* auto_idle;
+    event* user_timeout;
     static void auto_idle_cb(evutil_socket_t fd, short events, void* arg);
+    static void user_timeout_cb(evutil_socket_t fd, short events, void* arg);
 
     DuelMode* duel_mode;
 

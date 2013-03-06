@@ -8,7 +8,7 @@
 namespace ygo
 {
 CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
-    :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0),last_winner(-1)
+    :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0),last_winner(-1),user_timeout(nullptr)
 {
     createGame();
 }
@@ -74,7 +74,12 @@ void CMNetServer::auto_idle_cb(evutil_socket_t fd, short events, void* arg)
 void CMNetServer::clientStarted()
 {
     if(state==FULL)
+    {
         setState(PLAYING);
+        timeval timeout = {10, 0};
+        event_add(user_timeout, &timeout);
+    }
+
 }
 
 
@@ -100,6 +105,11 @@ void CMNetServer::destroyGame()
         event_free(duel_mode->etimer);
         delete duel_mode;
         duel_mode=0;
+    }
+    if(user_timeout)
+    {
+        event_free(user_timeout);
+        user_timeout=0;
     }
     if(auto_idle)
     {
@@ -195,6 +205,7 @@ void CMNetServer::createGame()
 {
     event_base* net_evbase=roomManager->net_evbase;
     auto_idle = event_new(net_evbase, 0, EV_TIMEOUT , CMNetServer::auto_idle_cb, this);
+    user_timeout = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, CMNetServer::user_timeout_cb, this);
     if(mode == MODE_SINGLE)
         duel_mode = new SingleDuel(false);
     else if(mode == MODE_MATCH)
@@ -288,7 +299,7 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
      */
     if(state == PLAYING && mode == MODE_MATCH && last_winner > 0 && last_winner == dp->type)
     {
-       last_winner = 1-dp->type;
+        last_winner = 1-dp->type;
     }
 
     /*bug in duels, sometimes a leaver doesn't become a loser*/
@@ -454,6 +465,38 @@ void CMNetServer::toObserver(DuelPlayer* dp)
     updateServerState();
 }
 
+void CMNetServer::updateUserTimeout(DuelPlayer* dp)
+{
+    log(VERBOSE,"user timeout update\n");
+    players[dp].secondsWaiting=0;
+
+}
+void CMNetServer::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
+{
+    CMNetServer* that = (CMNetServer*)arg;
+    std::list<DuelPlayer *> deadUsers;
+    log(VERBOSE,"timeout cb\n");
+    for(auto it = that->players.begin(); it!=that->players.end(); ++it)
+    {
+        it->second.secondsWaiting += 10;
+        if(it->second.secondsWaiting >= 300)
+        {
+            deadUsers.push_back(it->first);
+        }
+
+        if(it->second.secondsWaiting >= 120 && that->mode == MODE_MATCH &&
+                it->first->type != NETPLAYER_TYPE_OBSERVER && it->first->state == CTOS_UPDATE_DECK)
+        {
+            deadUsers.push_back(it->first);
+        }
+    }
+    for(auto it = deadUsers.begin(); it!= deadUsers.end(); ++it)
+    {
+        that->LeaveGame(*it);
+    }
+}
+
+
 
 void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
@@ -462,7 +505,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
 
-
+    updateUserTimeout(dp);
     if(state==ZOMBIE)
     {
         log(INFO,"pacchetto ricevuto per uno zombie, ignorato\n");
