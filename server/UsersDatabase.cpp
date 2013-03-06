@@ -25,7 +25,27 @@ int UsersDatabase::getRank(std::string username)
     }
 }
 
+int UsersDatabase::getScore(std::string username)
+{
+    try
+    {
+        //std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from (SELECT username,score, @rownum := @rownum + 1 AS rank FROM stats, (SELECT @rownum := 0) r ORDER BY score DESC) z where username = ?"));
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT score from ranking where username = ?"));
 
+        stmt->setString(1, username);
+
+        std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
+        if(!res->next())
+            return 0;
+        int score = res->getInt(1);
+        return score;
+    }
+    catch (sql::SQLException &e)
+    {
+        return 0;
+
+    }
+}
 
 bool UsersDatabase::setUserStats(UserStats &us)
 {

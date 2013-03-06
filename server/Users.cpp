@@ -131,8 +131,8 @@ int Users::getScore(std::string username)
 
     try
     {
-        UserStats us = database->getUserStats(username);
-        return us.score;
+        int score = database->getScore(username);
+        return score;
     }
     catch(std::exception)
     {

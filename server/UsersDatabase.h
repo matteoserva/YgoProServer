@@ -31,6 +31,7 @@ public:
     UserStats getUserStats(std::string username);
     bool setUserStats(UserStats&);
     int getRank(std::string username);
+    int getScore(std::string username);
 
 private:
     sql::Connection *con;
