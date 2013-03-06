@@ -118,8 +118,8 @@ bool RoomManager::FillAllRooms()
         if(p->state == CMNetServer::State::WAITING )
         {
             bool result = FillRoom(p);
-            if(!result)
-                return false;
+            //if(!result)
+              //  return false;
         }
     }
     return true;
