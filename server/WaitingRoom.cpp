@@ -48,7 +48,7 @@ void WaitingRoom::periodic_updates(evutil_socket_t fd, short events, void* arg)
         BufferIO::CopyWStr(newstr.c_str(), scpe.name, 20);
 
         scpe.pos = 1;
-        that->SendPacketToPlayer(it->first, STOC_HS_PLAYER_ENTER, scpe);
+        //that->SendPacketToPlayer(it->first, STOC_HS_PLAYER_ENTER, scpe);
 
 
     }
