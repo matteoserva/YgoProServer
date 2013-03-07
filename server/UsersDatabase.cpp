@@ -218,7 +218,9 @@ UsersDatabase::UsersDatabase():con(nullptr)
 }
 UsersDatabase::~UsersDatabase()
 {
-    if(con != nullptr)
+    if(con == nullptr)
+    return;
+    con->close();
         delete con;
 }
 
