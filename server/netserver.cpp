@@ -542,6 +542,11 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(!dp->game)
             return;
         duel_mode->Chat(dp, pdata, len - 1);
+
+        char messaggio[256],name[20];
+        BufferIO::CopyWStr((unsigned short*)pdata, messaggio, 256);
+        BufferIO::CopyWStr(dp->name, name, 20);
+        log(INFO,"MESSAGGIO. %s: %s\n",name,messaggio);
         break;
     }
     case CTOS_UPDATE_DECK:
