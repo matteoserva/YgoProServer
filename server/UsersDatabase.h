@@ -15,6 +15,7 @@ struct UserStats
     unsigned int wins;
     unsigned int losses;
     unsigned int draws;
+    unsigned int tags;
 };
 
 

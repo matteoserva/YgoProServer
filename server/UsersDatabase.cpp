@@ -55,12 +55,13 @@ bool UsersDatabase::setUserStats(UserStats &us)
     {
         try
         {
-            std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("UPDATE stats SET score = ?, wins = ?, losses = ?, draws = ? WHERE username = ?"));
-            stmt->setString(5, us.username);
+            std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("UPDATE stats SET score = ?, wins = ?, losses = ?, draws = ?,tags = ? WHERE username = ?"));
+            stmt->setString(6, us.username);
             stmt->setInt(1, us.score);
             stmt->setInt(2, us.wins);
             stmt->setInt(3, us.losses);
             stmt->setInt(4, us.draws);
+            stmt->setInt(5, us.tags);
             int updateCount = stmt->executeUpdate();
             return updateCount > 0;
         }
@@ -82,7 +83,7 @@ UserStats UsersDatabase::getUserStats(std::string username)
     //true is success
     try
     {
-        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT * FROM stats where username = ?"));
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT username,score,wins,losses,draws,tags FROM stats where username = ?"));
         //sql::PreparedStatement *stmt = con->prepareStatement("INSERT INTO users VALUES (?, ?, ?)");
         stmt->setString(1, username);
         std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
@@ -94,6 +95,7 @@ UserStats UsersDatabase::getUserStats(std::string username)
         us.wins = res->getInt(3);
         us.losses = res->getInt(4);
         us.draws =res->getInt(5);
+        us.tags =res->getInt(6);
         return us;
 
     }

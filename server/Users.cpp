@@ -248,6 +248,11 @@ void Users::Draw(std::string win1, std::string win2,std::string los1, std::strin
         us_win2.draws++;
         us_los2.draws++;
 
+        us_win1.tags++;
+        us_los1.tags++;
+        us_win2.tags++;
+        us_los2.tags++;
+
         database->setUserStats(us_win1);
         database->setUserStats(us_los1);
         database->setUserStats(us_win2);
@@ -336,6 +341,11 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
         us_los1.losses++;
         us_win2.wins++;
         us_los2.losses++;
+
+        us_win1.tags++;
+        us_los1.tags++;
+        us_win2.tags++;
+        us_los2.tags++;
 
         database->setUserStats(us_win1);
         database->setUserStats(us_los1);
