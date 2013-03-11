@@ -105,8 +105,11 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
     dp.name[0] = 0;
     dp.type = 0xff;
     dp.bev = bev;
-    that->users[bev] = dp;
     dp.netServer=0;
+    sockaddr_in* sa = (sockaddr_in*)address;
+    inet_ntop(AF_INET, &(sa->sin_addr), dp.ip, INET_ADDRSTRLEN);
+    that->users[bev] = dp;
+
     bufferevent_setcb(bev, ServerEchoRead, NULL, ServerEchoEvent, ctx);
     bufferevent_enable(bev, EV_READ);
     if(that->users.size()>= that->MAXPLAYERS)
@@ -243,7 +246,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             BufferIO::CopyWStr(pkt->name,dp->name,20);
             return;
         }
-        else if(pktType == CTOS_JOIN_GAME)
+        else if(pktType == CTOS_JOIN_GAME && dp->name[0] != 0)
         {
             if(!roomManager.InsertPlayerInWaitingRoom(dp))
                 return;

@@ -56,14 +56,14 @@ private:
     std::string getFirstAvailableUsername(std::string base);
     void LoadDB();
     void SaveDB();
-    std::string login(std::string,std::string);
+    std::string login(std::string,std::string,char* ip);
     UsersDatabase* database;
 
 public:
     int getScore(std::string username);
     int getRank(std::string username);
     static Users* getInstance();
-    std::string login(std::string);
+    std::string login(std::string,char* ip);
     void Draw(std::string d1, std::string d2);
     void Draw(std::string d1, std::string d2,std::string d3, std::string d4);
     void Victory(std::string, std::string);

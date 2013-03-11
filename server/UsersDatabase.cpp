@@ -162,7 +162,7 @@ bool UsersDatabase::userExists(std::string username)
     return true;
 }
 
-bool UsersDatabase::login(std::string username,std::string password)
+bool UsersDatabase::login(std::string username,std::string password,char*ip)
 {
     try
     {
@@ -178,9 +178,11 @@ bool UsersDatabase::login(std::string username,std::string password)
 
         //login success
 
-        std::unique_ptr<sql::PreparedStatement> stmt2(con->prepareStatement("UPDATE users set password = ?, last_login = CURRENT_TIMESTAMP WHERE username = ?"));
+        std::unique_ptr<sql::PreparedStatement> stmt2(con->prepareStatement("UPDATE users set password = ?, last_login = CURRENT_TIMESTAMP,last_ip = ? WHERE username = ?"));
         stmt2->setString(1,password);
-        stmt2->setString(2, username);
+        stmt2->setString(2,ip);
+        stmt2->setString(3, username);
+
         stmt2->execute();
         return true;
     }

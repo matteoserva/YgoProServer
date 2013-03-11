@@ -70,7 +70,7 @@ std::pair<std::string,std::string> Users::splitLoginString(std::string loginStri
     return std::pair<std::string,std::string> (username,password);
 }
 
-std::string Users::login(std::string loginString)
+std::string Users::login(std::string loginString,char* ip)
 {
     std::string username;
     std::string password;
@@ -87,10 +87,10 @@ std::string Users::login(std::string loginString)
         password = "";
     }
 
-    return login(username,password);
+    return login(username,password,ip);
 }
 
-std::string Users::login(std::string username, std::string password)
+std::string Users::login(std::string username, std::string password,char* ip)
 {
     log(INFO,"Tento il login con %s e %s\n",username.c_str(),password.c_str());
     std::string usernamel=username;
@@ -103,10 +103,9 @@ std::string Users::login(std::string username, std::string password)
         if(!database->userExists(username))
         {
             database->createUser(username,password);
-            return username;
         }
 
-        if(database->login(username,password))
+        if(database->login(username,password,ip))
             return username;
         else
         {

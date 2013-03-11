@@ -180,7 +180,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     BufferIO::CopyWStr(dp->name,name,20);
     try
     {
-        username = u->login(name);
+        username = u->login(name,dp->ip);
     }
     catch(LoginException &l)
     {
