@@ -236,7 +236,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
         SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
     }
 
-    if(score == 0)
+    if(1||score == 0)
     {
         SendMessageToPlayer(dp,"to register and login, go back and change the username to yourusername$yourpassword");
     }
