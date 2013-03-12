@@ -14,7 +14,7 @@ GameServer::GameServer(int server_fd):server_fd(server_fd)
 {
     server_port = 0;
     net_evbase = 0;
-    listener = 0;
+    listener = nullptr;
     last_sent = 0;
     MAXPLAYERS = Config::getInstance()->max_users_per_process;
 }
@@ -71,11 +71,11 @@ void GameServer::StopServer()
     if(!net_evbase)
         return;
 
-    if(listener == 0)
+    if(listener == nullptr)
         return;
     StopListen();
     evconnlistener_free(listener);
-    listener = 0;
+    listener = nullptr;
 
 
 }
@@ -227,7 +227,8 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
         users.erase(bit);
     }
 
-    RestartListen();
+    if(listener != nullptr)
+        RestartListen();
     Statistics::getInstance()->setNumPlayers(users.size());
 }
 
