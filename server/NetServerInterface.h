@@ -26,8 +26,8 @@ private:
     unsigned short last_sent;
 protected:
     RoomManager* roomManager;
-    char net_server_read[0x2000];
-    char net_server_write[0x2000];
+    static char net_server_read[0x20000];
+    static char net_server_write[0x20000];
     std::map<DuelPlayer*, DuelPlayerInfo> players;
     GameServer* gameServer;
     void playerReadinessChange(DuelPlayer *dp, bool isReady);

@@ -505,6 +505,12 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
 
+    if( players.end() == players.find(dp))
+    {
+        log(INFO,"BUG: handlectospacket ha ricevuto un pacchetto per un utente inesistente \n");
+        return;
+    }
+
     updateUserTimeout(dp);
     if(state==ZOMBIE)
     {
@@ -512,11 +518,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         return;
     }
 
-    if( players.end() == players.find(dp))
-    {
-        log(INFO,"BUG: handlectospacket ha ricevuto un pacchetto per un utente inesistente \n");
-        return;
-    }
+
 
     if((pktType != CTOS_SURRENDER) && (pktType != CTOS_CHAT) && (dp->state == 0xff || (dp->state && dp->state != pktType)))
         return;

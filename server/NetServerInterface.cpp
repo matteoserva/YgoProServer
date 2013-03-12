@@ -4,10 +4,11 @@
 namespace ygo
 {
 
-
+char CMNetServerInterface::net_server_read[0x20000];
+char CMNetServerInterface::net_server_write[0x20000];
 
 CMNetServerInterface::CMNetServerInterface(RoomManager* roomManager,GameServer*gameServer):
-roomManager(roomManager),gameServer(gameServer),last_sent(0)
+    roomManager(roomManager),gameServer(gameServer),last_sent(0)
 {
 
 }
