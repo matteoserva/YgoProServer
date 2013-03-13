@@ -22,7 +22,7 @@ struct UserStats
 class UsersDatabase
 {
 public:
-    static const int default_score = 500;
+    static const int default_score = 1000;
 
     UsersDatabase();
     ~UsersDatabase();
