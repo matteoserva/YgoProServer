@@ -37,7 +37,7 @@ bool Users::validLoginString(std::string loginString)
 
 std::pair<std::string,std::string> Users::splitLoginString(std::string loginString)
 {
-    log(INFO,"splitto %s\n",loginString.c_str());
+    log(VERBOSE,"splitto %s\n",loginString.c_str());
     std::string username;
     std::string password="";
 

@@ -5,6 +5,7 @@
 #include "RoomManager.h"
 #include "debug.h"
 #include "Users.h"
+#include <algorithm>
 namespace ygo
 {
 CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
@@ -48,7 +49,8 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
                     BufferIO::CopyWStr(it->first->name, name,20);
                     int score = Users::getInstance()->getScore(std::string(name));
                     sprintf(buffer, "%s has %d points",name,score);
-                    SendMessageToPlayer(dp,buffer);
+                    /* people keep complaining about the match maker*/
+                    //SendMessageToPlayer(dp,buffer);
                 }
         }
     }
