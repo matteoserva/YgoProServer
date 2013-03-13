@@ -26,18 +26,7 @@ int CMNetServerInterface::getNumPlayers()
 }
 void CMNetServerInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
 {
-    if(players.find(dp) == players.end())
-    {
-        log(INFO,"sendpacket ignorato\n");
-        return;
-    }
-    char* p = net_server_write;
-    BufferIO::WriteInt16(p, 1);
-    BufferIO::WriteInt8(p, proto);
-    last_sent = 3;
-    if(!dp)
-        return;
-    bufferevent_write(dp->bev, net_server_write, last_sent);
+    SendBufferToPlayer(dp, proto, nullptr, 0);
 }
 
 void CMNetServerInterface::playerReadinessChange(DuelPlayer *dp, bool isReady)
@@ -56,7 +45,8 @@ void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char prot
     char* p = net_server_write;
     BufferIO::WriteInt16(p, 1 + len);
     BufferIO::WriteInt8(p, proto);
-    memcpy(p, buffer, len);
+    if(len > 0)
+        memcpy(p, buffer, len);
     last_sent = len + 3;
     if(dp)
         bufferevent_write(dp->bev, net_server_write, last_sent);
