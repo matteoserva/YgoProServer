@@ -249,18 +249,13 @@ void WaitingRoom::LeaveGame(DuelPlayer* dp)
     gameServer->DisconnectPlayer(dp);
 }
 
-DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
+DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(unsigned int referenceScore)
 {
-    //log(INFO,"Utenti in attesa: %d\n",players.size());
     if(!players.size())
         return nullptr;
 
     int qdifference = 0;
     DuelPlayer *chosenOne = nullptr;
-
-    char name[20];
-    BufferIO::CopyWStr(referencePlayer->name,name,20);
-    int score = referencePlayer->cachedRankScore;
 
     for(auto it=players.cbegin(); it!=players.cend(); ++it)
     {
@@ -274,7 +269,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
             BufferIO::CopyWStr(dp->name,opname,20);
             int opscore = dp->cachedRankScore;
 
-            int candidate_qdifference = abs(score-opscore);
+            int candidate_qdifference = abs(referenceScore-opscore);
             if(chosenOne == nullptr || candidate_qdifference < qdifference)
             {
                 qdifference = candidate_qdifference;
@@ -285,7 +280,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
         }
     }
 
-    int maxqdifference = std::max(400,score/4);
+    int maxqdifference = std::max(400U,referenceScore/4);
     if( qdifference > maxqdifference)
         chosenOne = nullptr;
     if(chosenOne != nullptr)
@@ -293,9 +288,13 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
         ExtractPlayer(chosenOne);
         log(INFO,"qdifference = %d\n",qdifference);
     }
-
-
     return chosenOne;
+}
+
+DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
+{
+    int score = referencePlayer->cachedRankScore;
+    return ExtractBestMatchPlayer(score);
 }
 
 bool WaitingRoom::handleChatCommand(DuelPlayer* dp,unsigned short* msg)

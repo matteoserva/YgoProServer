@@ -20,6 +20,7 @@ private:
     void updateObserversNum();
 public:
     DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*);
+    DuelPlayer* ExtractBestMatchPlayer(unsigned int referenceScore);
     WaitingRoom(RoomManager*roomManager,GameServer*);
     ~WaitingRoom();
     void ChatWithPlayer(DuelPlayer*dp, std::string sender,std::string message);
