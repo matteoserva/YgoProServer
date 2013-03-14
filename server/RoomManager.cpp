@@ -182,7 +182,7 @@ CMNetServer* RoomManager::getFirstAvailableServer()
 }
 CMNetServer* RoomManager::createServer(unsigned char mode)
 {
-    if(elencoServer.size() >= 110)
+    if(elencoServer.size() >= 500)
     {
         return nullptr;
     }
