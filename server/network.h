@@ -8,6 +8,8 @@
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 #include <event2/thread.h>
+#include "Users.h"
+
 
 namespace ygo {
 
@@ -107,6 +109,7 @@ struct DuelPlayer {
 	CMNetServerInterface* netServer;
     char ip[INET_ADDRSTRLEN];
     unsigned int cachedRankScore;
+    Users::LoginResult loginStatus;
 	DuelPlayer() {
 		game = 0;
 		type = 0;

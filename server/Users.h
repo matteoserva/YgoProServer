@@ -21,8 +21,11 @@ public:
     {
         return whatString.c_str();
     }
-    std::string altUsername(){return username;}
-    ~LoginException() throw(){};
+    std::string altUsername()
+    {
+        return username;
+    }
+    ~LoginException() throw() {};
     LoginException(std::string username, std::string what):username(username),whatString(what) {}
 };
 
@@ -42,10 +45,14 @@ struct UserData
 };
 
 
+
 class UsersDatabase;
 
 class Users
 {
+    public:
+    enum LoginResult {NOTENTERED,UNRANKED,INVALIDUSERNAME,INVALIDPASSWORD,NOPASSWORD,AUTHENTICATED};
+
 private:
     std::thread t1;
     std::pair<std::string,std::string> splitLoginString(std::string);
@@ -56,14 +63,15 @@ private:
     std::string getFirstAvailableUsername(std::string base);
     void LoadDB();
     void SaveDB();
-    std::string login(std::string,std::string,char* ip);
+    std::pair<std::string,LoginResult> login(std::string,std::string,char* ip);
     UsersDatabase* database;
 
 public:
+
     int getScore(std::string username);
     int getRank(std::string username);
     static Users* getInstance();
-    std::string login(std::string,char* ip);
+    std::pair<std::string,LoginResult> login(std::string,char* ip);
     void Draw(std::string d1, std::string d2);
     void Draw(std::string d1, std::string d2,std::string d3, std::string d4);
     void Victory(std::string, std::string);

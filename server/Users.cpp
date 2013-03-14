@@ -70,7 +70,7 @@ std::pair<std::string,std::string> Users::splitLoginString(std::string loginStri
     return std::pair<std::string,std::string> (username,password);
 }
 
-std::string Users::login(std::string loginString,char* ip)
+std::pair<std::string,Users::LoginResult> Users::login(std::string loginString,char* ip)
 {
     std::string username;
     std::string password;
@@ -82,46 +82,32 @@ std::string Users::login(std::string loginString,char* ip)
     }
     catch(std::exception& ex)
     {
-        throw LoginException("-Player","invalid characters");
-        username ="-Player";
-        password = "";
+        return std::pair<std::string,Users::LoginResult> ("-Player",Users::LoginResult::INVALIDUSERNAME);
     }
 
     return login(username,password,ip);
 }
 
-std::string Users::login(std::string username, std::string password,char* ip)
+std::pair<std::string,Users::LoginResult> Users::login(std::string username, std::string password,char* ip)
 {
     log(INFO,"Tento il login con %s e %s\n",username.c_str(),password.c_str());
     std::string usernamel=username;
     std::transform(usernamel.begin(), usernamel.end(), usernamel.begin(), ::tolower);
     if(username[0] == '-')
-        return username;
+        return std::pair<std::string,Users::LoginResult> (username,Users::LoginResult::UNRANKED);
 
-    try
+    if(database->login(username,password,ip))
     {
-        /*if(!database->userExists(username))
-        {
-            database->createUser(username,password);
-        }*/
-
-        if(database->login(username,password,ip))
-        {
-            return username;
-        }
+        if(password != "")
+            return std::pair<std::string,Users::LoginResult> (username,Users::LoginResult::AUTHENTICATED);
         else
-        {
-            throw LoginException("-"+username,"invalid password");
-        }
+            return std::pair<std::string,Users::LoginResult> (username,Users::LoginResult::NOPASSWORD);
+    }
+    else
+    {
+        return std::pair<std::string,Users::LoginResult> ("-" + username,Users::LoginResult::INVALIDPASSWORD);
 
-    }
-    catch(LoginException &e)
-    {
-        throw;
-    }
-    catch(std::exception e)
-    {
-        return "-" + username;
+
     }
 }
 
@@ -160,7 +146,7 @@ static float win_exp(float delta)
 static int k(const UserStats &us)
 {
     int tempK = 100;
-        int threeshold = 10;
+    int threeshold = 10;
     if(us.wins + us.losses+us.draws <= threeshold)
     {
         tempK *=2;
@@ -383,5 +369,8 @@ static bool compareUserData (UserData* u1, UserData* u2)
 
 
 }
+
+
+
 
 

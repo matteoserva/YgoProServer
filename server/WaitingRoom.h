@@ -18,6 +18,7 @@ private:
     static void cicle_users_cb(evutil_socket_t fd, short events, void* arg);
     static void periodic_updates(evutil_socket_t fd, short events, void* arg);
     void updateObserversNum();
+    void SendNameToPlayer(DuelPlayer*,uint8_t,std::string);
 public:
     DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*);
     DuelPlayer* ExtractBestMatchPlayer(unsigned int referenceScore);

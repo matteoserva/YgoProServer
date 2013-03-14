@@ -135,6 +135,17 @@ void WaitingRoom::ChatWithPlayer(DuelPlayer*dp, std::string sender,std::string m
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
 }
+
+void WaitingRoom::SendNameToPlayer(DuelPlayer* dp,uint8_t pos,std::string message)
+{
+    STOC_HS_PlayerEnter scpe;
+    BufferIO::CopyWStr(message.c_str(), scpe.name, 20);
+    scpe.pos = pos;
+    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
+
+}
+
+
 void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 {
     dp->netServer=this;
@@ -174,25 +185,6 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     sctc.type = dp->type;
     SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
 
-    Users* u = Users::getInstance();
-    std::string username;
-    char name[20];
-    BufferIO::CopyWStr(dp->name,name,20);
-    try
-    {
-        username = u->login(std::string(name),dp->ip);
-    }
-    catch(LoginException &l)
-    {
-        STOC_HS_PlayerEnter scpe;
-        char message[20];
-        sprintf(message, "%s",l.what());
-        BufferIO::CopyWStr(message, scpe.name, 20);
-        scpe.pos = 3;
-        SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
-        username = l.altUsername();
-    }
-    BufferIO::CopyWStr(username.c_str(), dp->name, 20);
 
     STOC_HS_PlayerEnter scpe;
     BufferIO::CopyWStr(dp->name, scpe.name, 20);
@@ -217,27 +209,43 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
 
     char message[256];
+    char name[20];
+    BufferIO::CopyWStr(dp->name,name,20);
+    std::string username(name);
     int rank = Users::getInstance()->getRank(username);
-    int score = Users::getInstance()->getScore(username);
-    dp->cachedRankScore = score;
+    int score = dp->cachedRankScore;
 
-    if(rank > 0)
-        sprintf(message, "Rank:  %d",rank);
-    else
-        sprintf(message, "unregistered user");
-    BufferIO::CopyWStr(message, scpe.name, 20);
-    scpe.pos = 2;
-    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
-
-    if(score > 0)
+    switch (dp->loginStatus)
     {
+    case Users::LoginResult::AUTHENTICATED:
+        sprintf(message, "Rank:  %d",rank);
+        SendNameToPlayer(dp,2,message);
         sprintf(message, "Score: %d",score);
-        BufferIO::CopyWStr(message, scpe.name, 20);
-        scpe.pos = 3;
-        SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
+        SendNameToPlayer(dp,3,message);
+        break;
+
+    case Users::LoginResult::INVALIDPASSWORD:
+        SendNameToPlayer(dp,2,"Unregistered user");
+        SendNameToPlayer(dp,3,"invalid password");
+        break;
+
+    case Users::LoginResult::INVALIDUSERNAME:
+        SendNameToPlayer(dp,2,"Unregistered user");
+        SendNameToPlayer(dp,3,"invalid username");
+        break;
+
+    case Users::LoginResult::NOPASSWORD:
+        SendNameToPlayer(dp,2,"User created");
+        SendNameToPlayer(dp,3,"I need a password");
+        break;
+
+    case Users::LoginResult::UNRANKED:
+        SendNameToPlayer(dp,2,"Unranked player!");
+        SendNameToPlayer(dp,3,":-)");
+        break;
     }
 
-    if(1||score == 0)
+    if(dp->loginStatus != Users::LoginResult::AUTHENTICATED)
     {
         SendMessageToPlayer(dp,"to register and login, go back and change the username to yourusername$yourpassword");
     }
@@ -371,11 +379,12 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         playerReadinessChange(dp,CTOS_HS_NOTREADY - pktType);
         break;
     }
-    case CTOS_HS_TODUELIST: {
-		ExtractPlayer(dp);
+    case CTOS_HS_TODUELIST:
+    {
+        ExtractPlayer(dp);
         roomManager->InsertPlayer(dp,MODE_SINGLE);
-		break;
-	}
+        break;
+    }
     }
 }
 

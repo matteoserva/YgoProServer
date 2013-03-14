@@ -7,6 +7,8 @@
 #include <thread>
 #include "Statistics.h"
 
+#include "Users.h"
+
 using ygo::Config;
 namespace ygo
 {
@@ -106,6 +108,7 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
     dp.type = 0xff;
     dp.bev = bev;
     dp.netServer=0;
+    dp.loginStatus = Users::LoginResult::NOTENTERED;
     sockaddr_in* sa = (sockaddr_in*)address;
     inet_ntop(AF_INET, &(sa->sin_addr), dp.ip, INET_ADDRSTRLEN);
     that->users[bev] = dp;
@@ -244,7 +247,15 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(pktType==CTOS_PLAYER_INFO)
         {
             CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
-            BufferIO::CopyWStr(pkt->name,dp->name,20);
+            char name[20];
+            BufferIO::CopyWStr(pkt->name,name,20);
+            auto result = Users::getInstance()->login(std::string(name),dp->ip);
+
+            BufferIO::CopyWStr(result.first.c_str(), dp->name, 20);
+            dp->loginStatus = result.second;
+
+            int score = Users::getInstance()->getScore(result.first);
+            dp->cachedRankScore = score;
             return;
         }
         else if(pktType == CTOS_JOIN_GAME && dp->name[0] != 0)
