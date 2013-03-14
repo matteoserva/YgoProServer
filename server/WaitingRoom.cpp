@@ -238,8 +238,9 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
         break;
 
     case Users::LoginResult::NOPASSWORD:
-        SendNameToPlayer(dp,2,"User created");
-        SendNameToPlayer(dp,3,"I need a password");
+        sprintf(message, "Rank:  %d",rank);
+        SendNameToPlayer(dp,2,message);
+        SendNameToPlayer(dp,3,"You need a password");
         break;
 
     case Users::LoginResult::UNRANKED:
