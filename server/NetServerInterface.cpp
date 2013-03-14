@@ -46,7 +46,7 @@ void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char prot
     BufferIO::WriteInt16(p, 1 + len);
     BufferIO::WriteInt8(p, proto);
     if(len > 0)
-        memcpy(p, buffer, len);
+        memcpy(p, buffer, std::min(len,(size_t) 0x20000));
     last_sent = len + 3;
     if(dp)
         bufferevent_write(dp->bev, net_server_write, last_sent);
