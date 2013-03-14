@@ -106,6 +106,7 @@ struct DuelPlayer {
 	bufferevent* bev;
 	CMNetServerInterface* netServer;
     char ip[INET_ADDRSTRLEN];
+    unsigned int cachedRankScore;
 	DuelPlayer() {
 		game = 0;
 		type = 0;

@@ -219,6 +219,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     char message[256];
     int rank = Users::getInstance()->getRank(username);
     int score = Users::getInstance()->getScore(username);
+    dp->cachedRankScore = score;
 
     if(rank > 0)
         sprintf(message, "Rank:  %d",rank);
@@ -259,7 +260,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
 
     char name[20];
     BufferIO::CopyWStr(referencePlayer->name,name,20);
-    int score = Users::getInstance()->getScore(std::string(name));
+    int score = referencePlayer->cachedRankScore;
 
     for(auto it=players.cbegin(); it!=players.cend(); ++it)
     {
@@ -271,7 +272,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
 
             char opname[20];
             BufferIO::CopyWStr(dp->name,opname,20);
-            int opscore = Users::getInstance()->getScore(std::string(opname));
+            int opscore = dp->cachedRankScore;
 
             int candidate_qdifference = abs(score-opscore);
             if(chosenOne == nullptr || candidate_qdifference < qdifference)
