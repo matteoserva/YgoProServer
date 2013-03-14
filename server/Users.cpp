@@ -100,13 +100,15 @@ std::string Users::login(std::string username, std::string password,char* ip)
 
     try
     {
-        if(!database->userExists(username))
+        /*if(!database->userExists(username))
         {
             database->createUser(username,password);
-        }
+        }*/
 
         if(database->login(username,password,ip))
+        {
             return username;
+        }
         else
         {
             throw LoginException("-"+username,"invalid password");

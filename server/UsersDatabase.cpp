@@ -171,7 +171,11 @@ bool UsersDatabase::login(std::string username,std::string password,char*ip)
         //stmt->setString(2, password);
         std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
         if(!res->next())
-            return false;
+        {
+            createUser(username,password);
+            return true;
+        }
+
         std::string realPassword = res->getString(1);
         if(realPassword != "" && password != realPassword)
             return false;
