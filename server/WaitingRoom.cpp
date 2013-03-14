@@ -197,8 +197,11 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
     //usleep(50000);
-    SendMessageToPlayer(dp,"Welcome to the CheckMate server!");
+    /*SendMessageToPlayer(dp,);
     SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel or !match");
+*/
+    ChatWithPlayer(dp, "CheckMate","Welcome to the CheckMate server!");
+    ChatWithPlayer(dp, "CheckMate","Type !tag to enter a tag duel, !single for a single duel or !match");
 
     updateObserversNum();
 
@@ -247,7 +250,8 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
     if(dp->loginStatus != Users::LoginResult::AUTHENTICATED)
     {
-        SendMessageToPlayer(dp,"to register and login, go back and change the username to yourusername$yourpassword");
+        ChatWithPlayer(dp, "CheckMate","to register and login, go back and change the username to yourusername$yourpassword");
+        //SendMessageToPlayer(dp,"to register and login, go back and change the username to yourusername$yourpassword");
     }
 
 }
