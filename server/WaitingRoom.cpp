@@ -7,7 +7,7 @@ namespace ygo
 {
 int WaitingRoom::minSecondsWaiting;
 int WaitingRoom::maxSecondsWaiting;
-const std::string WaitingRoom::banner = "Checkmate Server!   ";
+const std::string WaitingRoom::banner = "Checkmate Server!";
 
 WaitingRoom::WaitingRoom(RoomManager*roomManager,GameServer*gameServer):
     CMNetServerInterface(roomManager,gameServer),cicle_users(0)
@@ -130,7 +130,7 @@ void WaitingRoom::ChatWithPlayer(DuelPlayer*dp, std::string sender,std::string m
     scpc1.status = (NETPLAYER_TYPE_PLAYER2 << 4) | PLAYERCHANGE_LEAVE;
     SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc1);
 
-    BufferIO::CopyWStr("read the chat!", scpe.name, 20);
+    BufferIO::CopyWStr(banner.c_str(), scpe.name, 20);
     scpe.pos = 1;
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
