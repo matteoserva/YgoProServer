@@ -293,7 +293,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(unsigned int referenceScore)
         }
     }
 
-    int maxqdifference = std::max(400U,referenceScore/4);
+    int maxqdifference = std::max(400U,referenceScore/3);
     if( qdifference > maxqdifference)
         chosenOne = nullptr;
     if(chosenOne != nullptr)
