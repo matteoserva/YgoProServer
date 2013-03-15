@@ -153,9 +153,10 @@ static int k(const UserStats &us)
         if(us.score <= 800 && us.score >= 200)
             tempK *=2;
     }
-    else if(us.score > 2000)
+    else if(us.score >= 2000 && us.score < 3000 )
         tempK /=2;
-
+    else if(us.score >= 3000)
+	tempK /=4;
     return tempK;
 }
 
