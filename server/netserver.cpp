@@ -240,7 +240,7 @@ void CMNetServer::createGame()
     info.start_hand=5;
     info.lflist=1;
     info.time_limit=120;
-    info.start_lp=(getNumDayOfWeek() == 6)?12000:8000;
+    info.start_lp=(getNumDayOfWeek() == 6)?8000:8000;
     info.enable_priority=false;
     info.no_shuffle_deck=false;
     unsigned int hash = 1;
