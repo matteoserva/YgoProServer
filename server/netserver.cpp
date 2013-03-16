@@ -203,6 +203,18 @@ void CMNetServer::DuelTimer(evutil_socket_t fd, short events, void* arg)
         TagDuel::TagTimer(fd,events,that->duel_mode);
 
 }
+
+static int getNumDayOfWeek()
+{
+        time_t rawtime;
+        tm * timeinfo;
+        time(&rawtime);
+        timeinfo=localtime(&rawtime);
+    int wday=timeinfo->tm_wday;
+        return wday;
+}
+
+
 void CMNetServer::createGame()
 {
     event_base* net_evbase=roomManager->net_evbase;
@@ -228,7 +240,7 @@ void CMNetServer::createGame()
     info.start_hand=5;
     info.lflist=1;
     info.time_limit=120;
-    info.start_lp=12000;
+    info.start_lp=(getNumDayOfWeek() == 6)?12000:8000;
     info.enable_priority=false;
     info.no_shuffle_deck=false;
     unsigned int hash = 1;
