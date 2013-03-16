@@ -111,7 +111,7 @@ void WaitingRoom::updateObserversNum()
     }
 }
 
-void WaitingRoom::ChatWithPlayer(DuelPlayer*dp, std::string sender,std::string message)
+void WaitingRoom::ChatWithPlayer(DuelPlayer*dp, std::string sender,std::wstring message)
 {
     STOC_HS_PlayerEnter scpe;
     STOC_HS_PlayerChange scpc1;
@@ -145,6 +145,10 @@ void WaitingRoom::SendNameToPlayer(DuelPlayer* dp,uint8_t pos,std::string messag
 
 }
 
+    void WaitingRoom::ChatWithPlayer(DuelPlayer*dp, std::string sender,std::string message)
+    {
+        ChatWithPlayer(dp,sender,std::wstring(message.cbegin(),message.cend()));
+    }
 
 void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 {
@@ -255,6 +259,8 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
         //SendMessageToPlayer(dp,"to register and login, go back and change the username to yourusername$yourpassword");
     }
 
+    ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
+
 }
 void WaitingRoom::LeaveGame(DuelPlayer* dp)
 {
@@ -364,7 +370,7 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_CHAT:
     {
-        handleChatCommand(dp,(unsigned short*)pdata);
+        handleChatCommand(dp,(unsigned short*) pdata);
         break;
     }
     case CTOS_LEAVE_GAME:
