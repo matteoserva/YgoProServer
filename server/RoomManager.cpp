@@ -56,21 +56,7 @@ int RoomManager::getNumPlayers()
 
 CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
 {
-    /*int i = 0;
-    log(INFO,"analizzo la lista server\n");
-    for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
-    {
-        CMNetServer *p = *it;
 
-        if(p->state == CMNetServer::State::WAITING && p->mode == mode)
-        {
-            log(INFO,"ho scelto il server %d\n",i);
-            return *it;
-        }
-        i++;
-    }
-    log(INFO,"Server non trovato, creo uno nuovo \n");
-    */
     return createServer(mode);
 }
 
