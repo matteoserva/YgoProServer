@@ -92,10 +92,10 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
         }
 }
 
-
 void WaitingRoom::ExtractPlayer(DuelPlayer* dp)
 {
     players.erase(dp);
+    player_status.erase(dp);
     dp->netServer=0;
     updateObserversNum();
 }
@@ -154,7 +154,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 {
     dp->netServer=this;
     players[dp] = DuelPlayerInfo();
-
+    player_status[dp] = DuelPlayerStatus();
     HostInfo info;
     info.rule=2;
     info.mode=MODE_TAG;
@@ -195,15 +195,9 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     scpe.pos = 0;
     SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
-    //STOC_HS_PlayerEnter scpe;
-    BufferIO::CopyWStr(banner.c_str(), scpe.name, 20);
-    scpe.pos = 1;
-    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
 
-    //usleep(50000);
-    /*SendMessageToPlayer(dp,);
-    SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel or !match");
-    */
+
+
     ChatWithPlayer(dp, "CheckMate","Welcome to the CheckMate server!");
     ChatWithPlayer(dp, "CheckMate","Type !tag to enter a tag duel, !single for a single duel or !match");
 
@@ -211,55 +205,18 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
     playerReadinessChange(dp,true);
 
-    STOC_HS_PlayerChange scpc;
-    scpc.status = (dp->type << 4) | PLAYERCHANGE_READY;
-    SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
 
-    char message[256];
-    char name[20];
-    BufferIO::CopyWStr(dp->name,name,20);
-    std::string username(name);
-    int rank = Users::getInstance()->getRank(username);
-    int score = dp->cachedRankScore;
 
-    switch (dp->loginStatus)
-    {
-    case Users::LoginResult::AUTHENTICATED:
-        sprintf(message, "Rank:  %d",rank);
-        SendNameToPlayer(dp,2,message);
-        sprintf(message, "Score: %d",score);
-        SendNameToPlayer(dp,3,message);
-        break;
-
-    case Users::LoginResult::INVALIDPASSWORD:
-        SendNameToPlayer(dp,2,"Unregistered user");
-        SendNameToPlayer(dp,3,"invalid password");
-        break;
-
-    case Users::LoginResult::INVALIDUSERNAME:
-        SendNameToPlayer(dp,2,"Unregistered user");
-        SendNameToPlayer(dp,3,"invalid username");
-        break;
-
-    case Users::LoginResult::NOPASSWORD:
-        sprintf(message, "Rank:  %d",rank);
-        SendNameToPlayer(dp,2,message);
-        SendNameToPlayer(dp,3,"You need a password");
-        break;
-
-    case Users::LoginResult::UNRANKED:
-        SendNameToPlayer(dp,2,"Unranked player!");
-        SendNameToPlayer(dp,3,":-)");
-        break;
-    }
+    SendStats(dp);
 
     if(dp->loginStatus != Users::LoginResult::AUTHENTICATED)
     {
         ChatWithPlayer(dp, "CheckMate","to register and login, go back and change the username to yourusername$yourpassword");
-        //SendMessageToPlayer(dp,"to register and login, go back and change the username to yourusername$yourpassword");
     }
 
     ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
+
+
 
 }
 void WaitingRoom::LeaveGame(DuelPlayer* dp)
@@ -354,6 +311,101 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,unsigned short* msg)
 
 
 }
+
+void WaitingRoom::SendStats(DuelPlayer* dp)
+{
+    char name[20],message[256];
+    BufferIO::CopyWStr(dp->name,name,20);
+    std::string username(name);
+    int rank = Users::getInstance()->getRank(username);
+    int score = dp->cachedRankScore;
+
+    switch (dp->loginStatus)
+    {
+    case Users::LoginResult::AUTHENTICATED:
+        sprintf(message, "Rank:  %d",rank);
+        SendNameToPlayer(dp,2,message);
+        sprintf(message, "Score: %d",score);
+        SendNameToPlayer(dp,3,message);
+        break;
+
+    case Users::LoginResult::INVALIDPASSWORD:
+        SendNameToPlayer(dp,2,"Unregistered user");
+        SendNameToPlayer(dp,3,"invalid password");
+        break;
+
+    case Users::LoginResult::INVALIDUSERNAME:
+        SendNameToPlayer(dp,2,"Unregistered user");
+        SendNameToPlayer(dp,3,"invalid username");
+        break;
+
+    case Users::LoginResult::NOPASSWORD:
+        sprintf(message, "Rank:  %d",rank);
+        SendNameToPlayer(dp,2,message);
+        SendNameToPlayer(dp,3,"You need a password");
+        break;
+
+    case Users::LoginResult::UNRANKED:
+        SendNameToPlayer(dp,2,"Unranked player!");
+        SendNameToPlayer(dp,3,":-)");
+        break;
+    }
+
+    SendNameToPlayer(dp,1,banner.c_str());
+
+    STOC_TypeChange sctc;
+    sctc.type =  NETPLAYER_TYPE_PLAYER1;
+    SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
+
+    STOC_HS_PlayerChange scpc;
+    scpc.status = (dp->type << 4) | (players[dp].isReady?PLAYERCHANGE_READY:PLAYERCHANGE_NOTREADY);
+    SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+    player_status[dp].status = DuelPlayerStatus::STATS;
+    //ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
+}
+
+
+void WaitingRoom::EnableCrosses(DuelPlayer* dp)
+{
+    STOC_TypeChange sctc;
+    sctc.type =  0x10 | NETPLAYER_TYPE_PLAYER1;
+    SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
+    playerReadinessChange(dp,false);
+
+}
+void WaitingRoom::ToDuelistPressed(DuelPlayer* dp)
+{
+
+    SendNameToPlayer(dp,1,"single");
+    SendNameToPlayer(dp,2,"match");
+    SendNameToPlayer(dp,3,"tag");
+    EnableCrosses(dp);
+    player_status[dp].status=DuelPlayerStatus::CHOOSEGAMETYPE;
+}
+
+void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
+{
+    if(pos == 0)
+    {
+        SendStats(dp);
+        return;
+    }
+
+    switch(player_status[dp].status)
+    {
+    case DuelPlayerStatus::CHOOSEGAMETYPE:
+        ExtractPlayer(dp);
+        if(pos == 1)
+            roomManager->InsertPlayer(dp,MODE_SINGLE);
+        else if(pos==2)
+            roomManager->InsertPlayer(dp,MODE_MATCH);
+        else if(pos==3)
+            roomManager->InsertPlayer(dp,MODE_TAG);
+        break;
+    }
+
+}
+
 void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
     char*pdata=data;
@@ -392,20 +444,22 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_HS_TODUELIST:
     {
-        ExtractPlayer(dp);
-        roomManager->InsertPlayer(dp,MODE_SINGLE);
+        ToDuelistPressed(dp);
         break;
     }
     case CTOS_HS_TOOBSERVER:
     {
-        STOC_TypeChange sctc;
-        sctc.type =  0x10 | NETPLAYER_TYPE_PLAYER1;
-
-        SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
-
+        EnableCrosses(dp);
         break;
     }
+    case CTOS_HS_KICK:
+    {
 
+        CTOS_Kick* pkt = (CTOS_Kick*)pdata;
+        if(pkt->pos >= 0 && pkt->pos <=3)
+            ButtonKickPressed(dp,pkt->pos);
+        break;
+    }
     }
 }
 

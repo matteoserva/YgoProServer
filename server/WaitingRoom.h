@@ -6,9 +6,17 @@
 namespace ygo
 {
 
+struct DuelPlayerStatus
+{
+    enum Status {STATS,CHOOSEGAMETYPE};
+    Status status;
+    DuelPlayerStatus():status(Status::STATS){};
+};
+
 class WaitingRoom:public CMNetServerInterface
 {
 private:
+    std::map<DuelPlayer*, DuelPlayerStatus> player_status;
     static const std::string banner;
     bool handleChatCommand(DuelPlayer* dp,unsigned short* msg);
     static int minSecondsWaiting;
@@ -30,7 +38,10 @@ public:
     void InsertPlayer(DuelPlayer* dp);
     void LeaveGame(DuelPlayer* dp);
     void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
-
+    void ToDuelistPressed(DuelPlayer* dp);
+    void EnableCrosses(DuelPlayer* dp);
+    void SendStats(DuelPlayer* dp);
+    void ButtonKickPressed(DuelPlayer* dp,int pos);
 
 };
 
