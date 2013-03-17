@@ -68,6 +68,7 @@ public:
 
     using CMNetServerInterface::SendPacketToPlayer;
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
+    void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_TypeChange);
     void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
 
 };

@@ -21,8 +21,15 @@ void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
     CMNetServerInterface::SendPacketToPlayer(dp,proto);
     if(proto == STOC_DUEL_START)
         clientStarted();
-
 }
+
+void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_TypeChange sctc)
+{
+        sctc.type &= ~ 0x10;
+        CMNetServerInterface::SendPacketToPlayer(dp,proto,sctc);
+}
+
+
 void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
     CMNetServerInterface::SendBufferToPlayer(dp,proto,buffer,len);

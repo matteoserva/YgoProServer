@@ -145,10 +145,10 @@ void WaitingRoom::SendNameToPlayer(DuelPlayer* dp,uint8_t pos,std::string messag
 
 }
 
-    void WaitingRoom::ChatWithPlayer(DuelPlayer*dp, std::string sender,std::string message)
-    {
-        ChatWithPlayer(dp,sender,std::wstring(message.cbegin(),message.cend()));
-    }
+void WaitingRoom::ChatWithPlayer(DuelPlayer*dp, std::string sender,std::string message)
+{
+    ChatWithPlayer(dp,sender,std::wstring(message.cbegin(),message.cend()));
+}
 
 void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 {
@@ -203,7 +203,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     //usleep(50000);
     /*SendMessageToPlayer(dp,);
     SendMessageToPlayer(dp,"Type !tag to enter a tag duel, !single for a single duel or !match");
-*/
+    */
     ChatWithPlayer(dp, "CheckMate","Welcome to the CheckMate server!");
     ChatWithPlayer(dp, "CheckMate","Type !tag to enter a tag duel, !single for a single duel or !match");
 
@@ -396,6 +396,16 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         roomManager->InsertPlayer(dp,MODE_SINGLE);
         break;
     }
+    case CTOS_HS_TOOBSERVER:
+    {
+        STOC_TypeChange sctc;
+        sctc.type =  0x10 | NETPLAYER_TYPE_PLAYER1;
+
+        SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
+
+        break;
+    }
+
     }
 }
 
