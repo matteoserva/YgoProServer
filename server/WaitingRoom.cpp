@@ -214,8 +214,9 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
         ChatWithPlayer(dp, "CheckMate","to register and login, go back and change the username to yourusername$yourpassword");
     }
 
-    ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
-
+    //ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
+    ChatWithPlayer(dp, "CheckMate","click the 'to duelist' button to choose the game type");
+    ChatWithPlayer(dp, "CheckMate","click the 'to observer' button for the available rooms list");
 
 
 }
