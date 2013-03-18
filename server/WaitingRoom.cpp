@@ -403,6 +403,9 @@ void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
     }
     player_status[dp].status=DuelPlayerStatus::CHOOSESERVER;
     player_status[dp].listaStanzeCompatibili = lista;
+
+    if(lista.size() == 0)
+        SendNameToPlayer(dp,2,"NO ROOMS AVAILABLE");
 }
 
 void WaitingRoom::ToDuelistPressed(DuelPlayer* dp)
