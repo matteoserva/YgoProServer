@@ -399,7 +399,7 @@ void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
         strncat(testo,nome,20-strlen(testo));
 
         SendNameToPlayer(dp,i+1,testo);
-        printf("waitingroom, trovato server\n");
+        log(VERBOSE,"waitingroom, trovato server\n");
     }
     player_status[dp].status=DuelPlayerStatus::CHOOSESERVER;
     player_status[dp].listaStanzeCompatibili = lista;

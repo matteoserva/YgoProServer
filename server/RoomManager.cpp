@@ -79,7 +79,7 @@ std::vector<CMNetServer *> RoomManager::getCompatibleRoomsList(int referenceScor
         if((*it)->state == CMNetServer::State::WAITING && abs(referenceScore - (*it)->getFirstPlayer()->cachedRankScore) < maxqdifference)
         {
             lista.push_back(*it);
-            printf("roommanager, trovato server\n");
+            log(VERBOSE,"roommanager, trovato server\n");
         }
     }
     return lista;
