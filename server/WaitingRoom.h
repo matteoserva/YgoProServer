@@ -8,7 +8,7 @@ namespace ygo
 
 struct DuelPlayerStatus
 {
-    enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER};
+    enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER,CUSTOMMODE};
     Status status;
     std::vector<CMNetServer *> listaStanzeCompatibili;
     DuelPlayerStatus():status(Status::STATS){};
@@ -42,7 +42,8 @@ public:
     void ToDuelistPressed(DuelPlayer* dp);
     void ToObserverPressed(DuelPlayer* dp);
     void EnableCrosses(DuelPlayer* dp);
-    void SendStats(DuelPlayer* dp);
+    void ShowStats(DuelPlayer* dp);
+    void ShowCustomMode(DuelPlayer* dp);
     void ButtonKickPressed(DuelPlayer* dp,int pos);
 
 };

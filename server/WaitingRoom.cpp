@@ -190,10 +190,10 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
 
 
-    STOC_HS_PlayerEnter scpe;
+    /*STOC_HS_PlayerEnter scpe;
     BufferIO::CopyWStr(dp->name, scpe.name, 20);
     scpe.pos = 0;
-    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
+    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);*/
 
 
 
@@ -207,7 +207,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
 
 
-    SendStats(dp);
+    ShowStats(dp);
 
     if(dp->loginStatus != Users::LoginResult::AUTHENTICATED)
     {
@@ -313,10 +313,11 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,unsigned short* msg)
 
 }
 
-void WaitingRoom::SendStats(DuelPlayer* dp)
+void WaitingRoom::ShowStats(DuelPlayer* dp)
 {
     char name[20],message[256];
     BufferIO::CopyWStr(dp->name,name,20);
+    SendNameToPlayer(dp,0,name);
     std::string username(name);
     int rank = Users::getInstance()->getRank(username);
     int score = dp->cachedRankScore;
@@ -372,15 +373,15 @@ void WaitingRoom::EnableCrosses(DuelPlayer* dp)
     sctc.type =  0x10 | NETPLAYER_TYPE_PLAYER1;
     SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
     playerReadinessChange(dp,false);
-
 }
 
 void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
 {
     std::vector<CMNetServer *> lista = roomManager->getCompatibleRoomsList(dp->cachedRankScore);
     EnableCrosses(dp);
-        for(int i = 3;i>lista.size();i--)
-            SendNameToPlayer(dp,i,"");
+    SendNameToPlayer(dp,0,"-Available rooms-");
+    for(int i = 3; i>lista.size(); i--)
+        SendNameToPlayer(dp,i,"");
     for(int i=0; i<lista.size() && i<3; i++)
     {
         char testo[20];
@@ -408,12 +409,30 @@ void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
         SendNameToPlayer(dp,2,"NO ROOMS AVAILABLE");
 }
 
+void WaitingRoom::ShowCustomMode(DuelPlayer* dp)
+{
+    SendNameToPlayer(dp,0,"-Custom duel mode-");
+    SendNameToPlayer(dp,1,"");
+    SendNameToPlayer(dp,2,"not working yet");
+    SendNameToPlayer(dp,3,"");
+    player_status[dp].status=DuelPlayerStatus::CUSTOMMODE;
+}
 void WaitingRoom::ToDuelistPressed(DuelPlayer* dp)
 {
-
-    SendNameToPlayer(dp,1,"single");
-    SendNameToPlayer(dp,2,"match");
-    SendNameToPlayer(dp,3,"tag");
+    if(player_status[dp].status==DuelPlayerStatus::CHOOSEGAMETYPE)
+    {
+        ShowCustomMode(dp);
+        return;
+    }
+    if(player_status[dp].status==DuelPlayerStatus::CUSTOMMODE)
+    {
+        ShowStats(dp);
+        return;
+    }
+    SendNameToPlayer(dp,0,"-Choose duel mode-");
+    SendNameToPlayer(dp,1,"[SINGLE]");
+    SendNameToPlayer(dp,2,"[MATCH]");
+    SendNameToPlayer(dp,3,"[TAG]");
     EnableCrosses(dp);
     player_status[dp].status=DuelPlayerStatus::CHOOSEGAMETYPE;
 }
@@ -422,7 +441,7 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
 {
     if(pos == 0)
     {
-        SendStats(dp);
+        ShowStats(dp);
         return;
     }
 
@@ -496,12 +515,19 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_HS_KICK:
     {
-
         CTOS_Kick* pkt = (CTOS_Kick*)pdata;
         if(pkt->pos >= 0 && pkt->pos <=3)
             ButtonKickPressed(dp,pkt->pos);
         break;
     }
+    /* not working
+    case CTOS_HS_START:
+    {
+        printf("start premuto\n");
+        ShowStats(dp);
+        break;
+    }
+    */
     }
 }
 
