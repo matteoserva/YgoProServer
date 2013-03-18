@@ -8,8 +8,9 @@ namespace ygo
 
 struct DuelPlayerStatus
 {
-    enum Status {STATS,CHOOSEGAMETYPE};
+    enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER};
     Status status;
+    std::vector<CMNetServer *> listaStanzeCompatibili;
     DuelPlayerStatus():status(Status::STATS){};
 };
 
@@ -29,7 +30,7 @@ private:
     void SendNameToPlayer(DuelPlayer*,uint8_t,std::string);
 public:
     DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*);
-    DuelPlayer* ExtractBestMatchPlayer(unsigned int referenceScore);
+    DuelPlayer* ExtractBestMatchPlayer(int referenceScore);
     WaitingRoom(RoomManager*roomManager,GameServer*);
     ~WaitingRoom();
     void ChatWithPlayer(DuelPlayer*dp, std::string sender,std::wstring message);
@@ -39,6 +40,7 @@ public:
     void LeaveGame(DuelPlayer* dp);
     void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
     void ToDuelistPressed(DuelPlayer* dp);
+    void ToObserverPressed(DuelPlayer* dp);
     void EnableCrosses(DuelPlayer* dp);
     void SendStats(DuelPlayer* dp);
     void ButtonKickPressed(DuelPlayer* dp,int pos);

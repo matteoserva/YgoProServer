@@ -225,7 +225,7 @@ void WaitingRoom::LeaveGame(DuelPlayer* dp)
     gameServer->DisconnectPlayer(dp);
 }
 
-DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(unsigned int referenceScore)
+DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(int referenceScore)
 {
     if(!players.size())
         return nullptr;
@@ -256,7 +256,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(unsigned int referenceScore)
         }
     }
 
-    int maxqdifference = std::max(400U,referenceScore/3);
+    int maxqdifference = std::max(400,referenceScore/3);
     if( qdifference > maxqdifference)
         chosenOne = nullptr;
     if(chosenOne != nullptr)
@@ -373,6 +373,32 @@ void WaitingRoom::EnableCrosses(DuelPlayer* dp)
     playerReadinessChange(dp,false);
 
 }
+
+void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
+{
+    std::vector<CMNetServer *> lista = roomManager->getCompatibleRoomsList(dp->cachedRankScore);
+    EnableCrosses(dp);
+        for(int i = 3;i>lista.size();i--)
+            SendNameToPlayer(dp,i,"");
+    for(int i=0; i<lista.size() && i<3; i++)
+    {
+        char nome[20];
+        char tipo[10];
+        if(lista[i]->mode == MODE_MATCH)
+            sprintf(tipo,"%s","[MATCH]");
+        else if(lista[i]->mode == MODE_TAG)
+            sprintf(tipo,"%s","[TAG]");
+        else
+            sprintf(tipo,"%s","[SINGLE]");
+
+        sprintf(nome,"%s %d",tipo,lista[i]->getFirstPlayer()->cachedRankScore);
+        SendNameToPlayer(dp,i+1,nome);
+        printf("waitingroom, trovato server\n");
+    }
+    player_status[dp].status=DuelPlayerStatus::CHOOSESERVER;
+    player_status[dp].listaStanzeCompatibili = lista;
+}
+
 void WaitingRoom::ToDuelistPressed(DuelPlayer* dp)
 {
 
@@ -401,6 +427,13 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
             roomManager->InsertPlayer(dp,MODE_MATCH);
         else if(pos==3)
             roomManager->InsertPlayer(dp,MODE_TAG);
+        break;
+
+
+    case DuelPlayerStatus::CHOOSESERVER:
+        if(pos > player_status[dp].listaStanzeCompatibili.size() )
+            break;
+        roomManager->tryToInsertPlayerInServer(dp,player_status[dp].listaStanzeCompatibili[pos-1]);
         break;
     }
 
@@ -449,7 +482,7 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_HS_TOOBSERVER:
     {
-        EnableCrosses(dp);
+        ToObserverPressed(dp);
         break;
     }
     case CTOS_HS_KICK:

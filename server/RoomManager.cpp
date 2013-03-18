@@ -42,6 +42,49 @@ void RoomManager::keepAlive(evutil_socket_t fd, short events, void* arg)
     that->FillAllRooms();
 }
 
+void RoomManager::tryToInsertPlayerInServer(DuelPlayer*dp,CMNetServer* serv)
+{
+    if(std::find(elencoServer.begin(), elencoServer.end(), serv) == elencoServer.end())
+    {
+        printf("serv non trovato\n");
+        waitingRoom->ToObserverPressed(dp);
+        return;
+    }
+    if(serv->state != CMNetServer::State::WAITING)
+    {
+        printf("serv pieno\n");
+        waitingRoom->ToObserverPressed(dp);
+        return;
+    }
+    if(abs(dp->cachedRankScore - serv->getFirstPlayer()->cachedRankScore) > maxScoreDifference(dp->cachedRankScore))
+    {
+        printf("serv non piu' compatibile, cached %d, servscore %d\n",dp->cachedRankScore,serv->getFirstPlayer()->cachedRankScore);
+        waitingRoom->ToObserverPressed(dp);
+        return;
+    }
+
+    waitingRoom->ExtractPlayer(dp);
+    dp->netServer=serv;
+    serv->InsertPlayer(dp);
+
+}
+
+std::vector<CMNetServer *> RoomManager::getCompatibleRoomsList(int referenceScore)
+{
+    std::vector<CMNetServer *> lista;
+    int maxqdifference = maxScoreDifference(referenceScore);
+
+    for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
+    {
+        if((*it)->state == CMNetServer::State::WAITING && abs(referenceScore - (*it)->getFirstPlayer()->cachedRankScore) < maxqdifference)
+            {
+                lista.push_back(*it);
+                    printf("roommanager, trovato server\n");
+            }
+    }
+    return lista;
+
+}
 
 int RoomManager::getNumPlayers()
 {
@@ -105,7 +148,7 @@ bool RoomManager::FillAllRooms()
         {
             bool result = FillRoom(p);
             //if(!result)
-              //  return false;
+            //  return false;
         }
     }
     return true;
