@@ -80,7 +80,7 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
             numPlayersReady++;
     }
 
-    if(players_bored.size() && numPlayersReady>=2)
+    if(players_bored.size() )
         for (auto it = players_bored.cbegin(); it != players_bored.cend(); ++it)
         {
             if(that->players.find(*it) != that->players.end())

@@ -77,10 +77,10 @@ std::vector<CMNetServer *> RoomManager::getCompatibleRoomsList(int referenceScor
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
         if((*it)->state == CMNetServer::State::WAITING && abs(referenceScore - (*it)->getFirstPlayer()->cachedRankScore) < maxqdifference)
-            {
-                lista.push_back(*it);
-                    printf("roommanager, trovato server\n");
-            }
+        {
+            lista.push_back(*it);
+            printf("roommanager, trovato server\n");
+        }
     }
     return lista;
 
@@ -97,9 +97,17 @@ int RoomManager::getNumPlayers()
     return risultato;
 }
 
-CMNetServer* RoomManager::getFirstAvailableServer(unsigned char mode)
+CMNetServer* RoomManager::getFirstAvailableServer(int referenceScore, unsigned char mode,bool ignoreMode=false)
 {
+    for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
+    {
+        bool serverOk = (*it)->state == CMNetServer::State::WAITING &&
+                        abs(referenceScore - (*it)->getFirstPlayer()->cachedRankScore) < maxScoreDifference(referenceScore) &&
+                        (ignoreMode || (*it)->mode == mode);
 
+        if(serverOk )
+            return *it;
+    }
     return createServer(mode);
 }
 
@@ -107,7 +115,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp)
 {
 
     //tfirst room
-    CMNetServer* netServer = getFirstAvailableServer();
+    CMNetServer* netServer = getFirstAvailableServer(dp->cachedRankScore);
     if(netServer == nullptr)
     {
         waitingRoom->InsertPlayer(dp);
@@ -173,7 +181,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 {
 
     //true is success
-    CMNetServer* netServer = getFirstAvailableServer(mode);
+    CMNetServer* netServer = getFirstAvailableServer(dp->cachedRankScore,mode);
     if(netServer == nullptr)
     {
         waitingRoom->InsertPlayer(dp);
@@ -187,11 +195,9 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
     return true;
 }
 
-CMNetServer* RoomManager::getFirstAvailableServer()
+CMNetServer* RoomManager::getFirstAvailableServer(int referenceScore)
 {
-
-    return createServer(MODE_SINGLE);
-    //netServer.gameServer=
+    return getFirstAvailableServer(referenceScore, MODE_SINGLE,true);
 }
 CMNetServer* RoomManager::createServer(unsigned char mode)
 {
