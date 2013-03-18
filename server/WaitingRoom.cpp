@@ -113,31 +113,20 @@ void WaitingRoom::updateObserversNum()
 
 void WaitingRoom::ChatWithPlayer(DuelPlayer*dp, std::string sender,std::wstring message)
 {
-    STOC_HS_PlayerEnter scpe;
-    STOC_HS_PlayerChange scpc1;
-    scpc1.status = (NETPLAYER_TYPE_PLAYER2 << 4) | PLAYERCHANGE_LEAVE;
-    SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc1);
+ std::string oldName0 = player_status[dp].lastName0;
 
-    BufferIO::CopyWStr(sender.c_str(), scpe.name, 20);
-    scpe.pos = 1;
-    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
-
-    STOC_Chat scc;
-    scc.player = NETPLAYER_TYPE_PLAYER2;
+SendNameToPlayer(dp,0,sender.c_str());
+STOC_Chat scc;
+    scc.player = NETPLAYER_TYPE_PLAYER1;
     int msglen = BufferIO::CopyWStr(message.c_str(), scc.msg, 256);
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
-
-    scpc1.status = (NETPLAYER_TYPE_PLAYER2 << 4) | PLAYERCHANGE_LEAVE;
-    SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc1);
-
-    BufferIO::CopyWStr(banner.c_str(), scpe.name, 20);
-    scpe.pos = 1;
-    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
-
+    SendNameToPlayer(dp,0,oldName0.c_str());
 }
 
 void WaitingRoom::SendNameToPlayer(DuelPlayer* dp,uint8_t pos,std::string message)
 {
+    if(pos == 0)
+        player_status[dp].lastName0 = message;
     STOC_HS_PlayerEnter scpe;
     BufferIO::CopyWStr(message.c_str(), scpe.name, 20);
     scpe.pos = pos;
@@ -362,6 +351,13 @@ void WaitingRoom::ShowStats(DuelPlayer* dp)
     STOC_HS_PlayerChange scpc;
     scpc.status = (dp->type << 4) | (players[dp].isReady?PLAYERCHANGE_READY:PLAYERCHANGE_NOTREADY);
     SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+    for(int i=1;i<4;i++)
+    {
+        scpc.status = (i << 4) | PLAYERCHANGE_NOTREADY;
+        SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+    }
+
+
     player_status[dp].status = DuelPlayerStatus::STATS;
     //ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
 }
@@ -373,6 +369,13 @@ void WaitingRoom::EnableCrosses(DuelPlayer* dp)
     sctc.type =  0x10 | NETPLAYER_TYPE_PLAYER1;
     SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
     playerReadinessChange(dp,false);
+
+    STOC_HS_PlayerChange scpc;
+    for(int i=0;i<4;i++)
+    {
+        scpc.status = (i << 4) | PLAYERCHANGE_READY;
+        SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+    }
 }
 
 void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
@@ -466,7 +469,18 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
     }
 
 }
+void WaitingRoom::ReadyFlagPressed(DuelPlayer* dp,bool readyFlag)
+{
+    if(player_status[dp].status!=DuelPlayerStatus::STATS)
+        {
+            STOC_HS_PlayerChange scpc;
+            scpc.status = (NETPLAYER_TYPE_PLAYER1 << 4) | PLAYERCHANGE_READY;
+            SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+        }
+        else
+        playerReadinessChange(dp,readyFlag);
 
+}
 void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
     char*pdata=data;
@@ -499,8 +513,7 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     case CTOS_HS_READY:
     case CTOS_HS_NOTREADY:
     {
-
-        playerReadinessChange(dp,CTOS_HS_NOTREADY - pktType);
+        ReadyFlagPressed(dp,CTOS_HS_NOTREADY - pktType);
         break;
     }
     case CTOS_HS_TODUELIST:
@@ -520,14 +533,14 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             ButtonKickPressed(dp,pkt->pos);
         break;
     }
-    /* not working
+
     case CTOS_HS_START:
     {
         printf("start premuto\n");
         ShowStats(dp);
         break;
     }
-    */
+
     }
 }
 

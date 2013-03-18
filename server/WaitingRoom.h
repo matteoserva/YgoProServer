@@ -11,6 +11,7 @@ struct DuelPlayerStatus
     enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER,CUSTOMMODE};
     Status status;
     std::vector<CMNetServer *> listaStanzeCompatibili;
+    std::string lastName0;
     DuelPlayerStatus():status(Status::STATS){};
 };
 
@@ -45,6 +46,7 @@ public:
     void ShowStats(DuelPlayer* dp);
     void ShowCustomMode(DuelPlayer* dp);
     void ButtonKickPressed(DuelPlayer* dp,int pos);
+    void ReadyFlagPressed(DuelPlayer* dp,bool readyFlag);
 
 };
 
