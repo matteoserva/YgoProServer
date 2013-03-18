@@ -382,7 +382,7 @@ void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
             SendNameToPlayer(dp,i,"");
     for(int i=0; i<lista.size() && i<3; i++)
     {
-        char nome[20];
+        char testo[20];
         char tipo[10];
         if(lista[i]->mode == MODE_MATCH)
             sprintf(tipo,"%s","[MATCH]");
@@ -391,8 +391,13 @@ void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
         else
             sprintf(tipo,"%s","[SINGLE]");
 
-        sprintf(nome,"%s %d",tipo,lista[i]->getFirstPlayer()->cachedRankScore);
-        SendNameToPlayer(dp,i+1,nome);
+        sprintf(testo,"%s %d ",tipo,lista[i]->getFirstPlayer()->cachedRankScore);
+
+        char nome[20];
+        BufferIO::CopyWStr(lista[i]->getFirstPlayer()->name,nome,20);
+        strncat(testo,nome,20-strlen(testo));
+
+        SendNameToPlayer(dp,i+1,testo);
         printf("waitingroom, trovato server\n");
     }
     player_status[dp].status=DuelPlayerStatus::CHOOSESERVER;
