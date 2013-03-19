@@ -189,8 +189,12 @@ int GameServer::CheckAliveThread(void* parama)
     if(time(NULL)- last_check < sleepSeconds)
         return 0;
 
-    if(!that->isAlive)
+    if(!that->isAlive) 
+    {
+	volatile int *p = reinterpret_cast<volatile int*>(0);
+    	*p = 0x1337D00D;
         exit(EXIT_FAILURE);
+    }
     that->isAlive=false;
     last_check = time(NULL);
 
