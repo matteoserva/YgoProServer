@@ -11,7 +11,7 @@ struct DuelPlayerStatus
     enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER,CUSTOMMODE};
     Status status;
     std::vector<CMNetServer *> listaStanzeCompatibili;
-    std::string lastName0;
+    std::wstring lastName0;
     DuelPlayerStatus():status(Status::STATS){};
 };
 
@@ -28,7 +28,8 @@ private:
     static void cicle_users_cb(evutil_socket_t fd, short events, void* arg);
     static void periodic_updates(evutil_socket_t fd, short events, void* arg);
     void updateObserversNum();
-    void SendNameToPlayer(DuelPlayer*,uint8_t,std::string);
+    void SendNameToPlayer(DuelPlayer*,uint8_t,std::wstring);
+    void SendNameToPlayer(DuelPlayer*dp,uint8_t pos,std::string s){SendNameToPlayer(dp,pos,std::wstring(s.begin(),s.end()));}
 public:
     DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*);
     DuelPlayer* ExtractBestMatchPlayer(int referenceScore);
