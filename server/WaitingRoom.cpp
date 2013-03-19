@@ -113,17 +113,17 @@ void WaitingRoom::updateObserversNum()
 
 void WaitingRoom::ChatWithPlayer(DuelPlayer*dp, std::string sender,std::wstring message)
 {
- std::string oldName0 = player_status[dp].lastName0;
+ std::wstring oldName0 = player_status[dp].lastName0;
 
-SendNameToPlayer(dp,0,sender.c_str());
+SendNameToPlayer(dp,0,sender);
 STOC_Chat scc;
     scc.player = NETPLAYER_TYPE_PLAYER1;
     int msglen = BufferIO::CopyWStr(message.c_str(), scc.msg, 256);
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
-    SendNameToPlayer(dp,0,oldName0.c_str());
+    SendNameToPlayer(dp,0,oldName0);
 }
 
-void WaitingRoom::SendNameToPlayer(DuelPlayer* dp,uint8_t pos,std::string message)
+void WaitingRoom::SendNameToPlayer(DuelPlayer* dp,uint8_t pos,std::wstring message)
 {
     if(pos == 0)
         player_status[dp].lastName0 = message;
@@ -432,7 +432,7 @@ void WaitingRoom::ToDuelistPressed(DuelPlayer* dp)
         ShowStats(dp);
         return;
     }
-    SendNameToPlayer(dp,0,"-Choose duel mode-");
+    SendNameToPlayer(dp,0,L"-duel mode-");
     SendNameToPlayer(dp,1,"[SINGLE]");
     SendNameToPlayer(dp,2,"[MATCH]");
     SendNameToPlayer(dp,3,"[TAG]");
