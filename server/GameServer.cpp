@@ -191,8 +191,8 @@ int GameServer::CheckAliveThread(void* parama)
 
     if(!that->isAlive) 
     {
-	volatile int *p = reinterpret_cast<volatile int*>(0);
-    	*p = 0x1337D00D;
+	//volatile int *p = reinterpret_cast<volatile int*>(0);
+    	//*p = 0x1337D00D;
         exit(EXIT_FAILURE);
     }
     that->isAlive=false;
