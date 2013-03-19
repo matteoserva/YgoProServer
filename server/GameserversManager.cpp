@@ -28,7 +28,7 @@ bool GameserversManager::serversAlmostFull()
 {
     int threeshold = Config::getInstance()->max_users_per_process*9/10;
     threeshold = max(threeshold,1);
-    threeshold = min(threeshold,10);
+    threeshold = min(threeshold,5);
     log(VERBOSE,"high threeshold = %d\n",threeshold);
     return getNumPlayersInAliveChildren()+threeshold > getNumAliveChildren()*Config::getInstance()->max_users_per_process;
 }
@@ -242,9 +242,13 @@ void GameserversManager::parent_loop()
                 wasAlive=false;
             }
 
+
             if (!needsReboot && wasAlive)
             {
+                /* non ricreo immediatamente il figlio crashato
                 spawn_gameserver();
+                */
+                printf("figlio crashato\n");
             }
 
             if(needsReboot)
