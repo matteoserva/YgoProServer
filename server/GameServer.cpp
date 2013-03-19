@@ -184,12 +184,12 @@ int GameServer::CheckAliveThread(void* parama)
         return 0;
 
     static time_t last_check = time(NULL);
-    int sleepSeconds = 30;
+    int sleepSeconds = 60;
 
     if(time(NULL)- last_check < sleepSeconds)
         return 0;
 
-    if(!that->isAlive) 
+    if(!that->isAlive)
     {
 	//volatile int *p = reinterpret_cast<volatile int*>(0);
     	//*p = 0x1337D00D;
@@ -212,7 +212,7 @@ int GameServer::ServerThread(void* parama)
 
     //std::thread checkAlive(CheckAliveThread, that);
     event* keepAliveEvent = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, that);
-    timeval timeout = {10, 0};
+    timeval timeout = {5, 0};
     event_add(keepAliveEvent, &timeout);
 
     event_base_dispatch(that->net_evbase);
