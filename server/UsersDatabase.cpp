@@ -6,6 +6,8 @@ namespace ygo
 {
 int UsersDatabase::getRank(std::string username)
 {
+    if(!con)
+        return 0;
     try
     {
         //std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from (SELECT username,score, @rownum := @rownum + 1 AS rank FROM stats, (SELECT @rownum := 0) r ORDER BY score DESC) z where username = ?"));
@@ -27,6 +29,8 @@ int UsersDatabase::getRank(std::string username)
 
 int UsersDatabase::getScore(std::string username)
 {
+    if(!con)
+        return 0;
     try
     {
         //std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from (SELECT username,score, @rownum := @rownum + 1 AS rank FROM stats, (SELECT @rownum := 0) r ORDER BY score DESC) z where username = ?"));
@@ -49,6 +53,8 @@ int UsersDatabase::getScore(std::string username)
 
 bool UsersDatabase::setUserStats(UserStats &us)
 {
+    if(!con)
+        return false;
     //true is success
     int retries = 3;
     do
@@ -80,6 +86,8 @@ bool UsersDatabase::setUserStats(UserStats &us)
 
 UserStats UsersDatabase::getUserStats(std::string username)
 {
+    if(!con)
+        throw std::exception();
     //true is success
     try
     {
@@ -114,6 +122,8 @@ UserStats UsersDatabase::getUserStats(std::string username)
 
 bool UsersDatabase::createUser(std::string username, std::string password, int score,int wins,int losses,int draws)
 {
+    if(!con)
+        return false;
     //true is success
     try
     {
@@ -144,6 +154,8 @@ bool UsersDatabase::createUser(std::string username, std::string password, int s
 
 bool UsersDatabase::userExists(std::string username)
 {
+    if(!con)
+        return false;
     try
     {
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select count(*) FROM users WHERE username = ?"));
@@ -164,6 +176,8 @@ bool UsersDatabase::userExists(std::string username)
 
 bool UsersDatabase::login(std::string username,std::string password,char*ip)
 {
+    if(!con)
+        return false;
     try
     {
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select password FROM users WHERE username = ?"));
@@ -227,8 +241,8 @@ UsersDatabase::UsersDatabase():con(nullptr)
 UsersDatabase::~UsersDatabase()
 {
     if(con == nullptr)
-    return;
-    con->close();
+        return;
+    //con->close();
         delete con;
 }
 
