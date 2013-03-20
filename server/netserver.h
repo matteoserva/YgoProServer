@@ -25,6 +25,8 @@ class CMNetServer:public CMNetServerInterface
     unsigned char mode;
     enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};
     State state;
+    static void crash_detected();
+    static bool isCrashed;
 private:
     static void DuelTimer(evutil_socket_t fd, short events, void* arg);
     void updateUserTimeout(DuelPlayer* dp);

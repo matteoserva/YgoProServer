@@ -677,6 +677,13 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
 }
 
+bool CMNetServer::isCrashed = false;
+void CMNetServer::crash_detected()
+{
+    printf("server crashato\n");
+    isCrashed = true;
+}
+
 }
 
 
