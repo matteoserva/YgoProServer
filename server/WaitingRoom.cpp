@@ -113,10 +113,10 @@ void WaitingRoom::updateObserversNum()
 
 void WaitingRoom::ChatWithPlayer(DuelPlayer*dp, std::string sender,std::wstring message)
 {
- std::wstring oldName0 = player_status[dp].lastName0;
+    std::wstring oldName0 = player_status[dp].lastName0;
 
-SendNameToPlayer(dp,0,sender);
-STOC_Chat scc;
+    SendNameToPlayer(dp,0,sender);
+    STOC_Chat scc;
     scc.player = NETPLAYER_TYPE_PLAYER1;
     int msglen = BufferIO::CopyWStr(message.c_str(), scc.msg, 256);
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
@@ -273,13 +273,13 @@ bool WaitingRoom::ChatMessageReceived(DuelPlayer* dp,unsigned short* msg)
         return true;
 
     char sender[20];
-        BufferIO::CopyWStr(dp->name,sender,20);
-        for(auto it=players.begin(); it!=players.end(); ++it)
-        {
-            if(it->first== dp)
-                continue;
-            ChatWithPlayer(it->first, std::string(sender),messaggio);
-        }
+    BufferIO::CopyWStr(dp->name,sender,20);
+    for(auto it=players.begin(); it!=players.end(); ++it)
+    {
+        if(it->first== dp)
+            continue;
+        ChatWithPlayer(it->first, std::string(sender),messaggio);
+    }
     return true;
 
 }

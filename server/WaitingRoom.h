@@ -12,7 +12,7 @@ struct DuelPlayerStatus
     Status status;
     std::vector<CMNetServer *> listaStanzeCompatibili;
     std::wstring lastName0;
-    DuelPlayerStatus():status(Status::STATS){};
+    DuelPlayerStatus():status(Status::STATS) {};
 };
 
 class WaitingRoom:public CMNetServerInterface
@@ -31,7 +31,10 @@ private:
     static void periodic_updates(evutil_socket_t fd, short events, void* arg);
     void updateObserversNum();
     void SendNameToPlayer(DuelPlayer*,uint8_t,std::wstring);
-    void SendNameToPlayer(DuelPlayer*dp,uint8_t pos,std::string s){SendNameToPlayer(dp,pos,std::wstring(s.begin(),s.end()));}
+    void SendNameToPlayer(DuelPlayer*dp,uint8_t pos,std::string s)
+    {
+        SendNameToPlayer(dp,pos,std::wstring(s.begin(),s.end()));
+    }
 public:
     DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*);
     DuelPlayer* ExtractBestMatchPlayer(int referenceScore);
@@ -43,8 +46,13 @@ public:
     void InsertPlayer(DuelPlayer* dp);
     void LeaveGame(DuelPlayer* dp);
     void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
-    void ToDuelistPressed(DuelPlayer* dp);
+
+    /* FRONTEND */
+public:
     void ToObserverPressed(DuelPlayer* dp);
+private:
+    void ToDuelistPressed(DuelPlayer* dp);
+
     void EnableCrosses(DuelPlayer* dp);
     void ShowStats(DuelPlayer* dp);
     void ShowCustomMode(DuelPlayer* dp);

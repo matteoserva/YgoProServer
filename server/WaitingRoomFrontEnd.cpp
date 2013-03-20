@@ -7,12 +7,12 @@ namespace ygo
 void WaitingRoom::ReadyFlagPressed(DuelPlayer* dp,bool readyFlag)
 {
     if(player_status[dp].status!=DuelPlayerStatus::STATS)
-        {
-            STOC_HS_PlayerChange scpc;
-            scpc.status = (NETPLAYER_TYPE_PLAYER1 << 4) | PLAYERCHANGE_READY;
-            SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
-        }
-        else
+    {
+        STOC_HS_PlayerChange scpc;
+        scpc.status = (NETPLAYER_TYPE_PLAYER1 << 4) | PLAYERCHANGE_READY;
+        SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+    }
+    else
         playerReadinessChange(dp,readyFlag);
 
 }
@@ -66,7 +66,7 @@ void WaitingRoom::ShowStats(DuelPlayer* dp)
     STOC_HS_PlayerChange scpc;
     scpc.status = (dp->type << 4) | (players[dp].isReady?PLAYERCHANGE_READY:PLAYERCHANGE_NOTREADY);
     SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
-    for(int i=1;i<4;i++)
+    for(int i=1; i<4; i++)
     {
         scpc.status = (i << 4) | PLAYERCHANGE_NOTREADY;
         SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
@@ -86,7 +86,7 @@ void WaitingRoom::EnableCrosses(DuelPlayer* dp)
     playerReadinessChange(dp,false);
 
     STOC_HS_PlayerChange scpc;
-    for(int i=0;i<4;i++)
+    for(int i=0; i<4; i++)
     {
         scpc.status = (i << 4) | PLAYERCHANGE_READY;
         SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
