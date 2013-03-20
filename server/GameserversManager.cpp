@@ -15,7 +15,10 @@ void sigterm_handler(int signum)
 {
     static int timesPressed = 0;
     needsReboot=true;
-    if(++timesPressed >= 5)
+    ++timesPressed;
+    if(timesPressed ==10)
+        kill(getpid(),SIGKILL);
+    else if(++timesPressed >= 5)
         kill(getpid(),SIGQUIT);
 }
 
