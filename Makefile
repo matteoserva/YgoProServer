@@ -60,3 +60,4 @@ client-clean:
 
 server-clean:
 	rm -f $(OBJ) $(OUT)
+	$(MAKE) -C ygopro/build/ clean
