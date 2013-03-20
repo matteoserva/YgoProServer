@@ -524,6 +524,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     char* pdata = data;
 
 
+
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
 
     if( players.end() == players.find(dp))
@@ -675,13 +676,24 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         break;
     }
     }
+
+    if(isCrashed)
+    {
+        StopServer();
+        isCrashed=false;
+    }
 }
 
 bool CMNetServer::isCrashed = false;
 void CMNetServer::crash_detected()
 {
-    printf("server crashato\n");
     isCrashed = true;
+
+    FILE* fp = fopen("cm-error.log", "at");
+		if(!fp)
+			return;
+    fprintf(fp, "server crashato pid: %d\n", (int) getpid());
+    fclose(fp);
 }
 
 }

@@ -1470,6 +1470,7 @@ int SingleDuel::MessageHandler(long fduel, int type) {
 		fprintf(fp, "[Script error:] %s\n", msgbuf);
 		fclose(fp);
 	}
+	CMNetServer::crash_detected();
 	return 0;
 }
 void SingleDuel::SingleTimer(evutil_socket_t fd, short events, void* arg) {
