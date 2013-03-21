@@ -20,31 +20,35 @@ void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
 {
     CMNetServerInterface::SendPacketToPlayer(dp,proto);
     if(proto == STOC_DUEL_START)
+    {
         clientStarted();
+    }
+
+
 }
 
 void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_TypeChange sctc)
 {
-        sctc.type &= ~ 0x10;
-        CMNetServerInterface::SendPacketToPlayer(dp,proto,sctc);
+    sctc.type &= ~ 0x10;
+    CMNetServerInterface::SendPacketToPlayer(dp,proto,sctc);
 }
 
 void CMNetServer::EverybodyIsPlaying()
 {
     ShowPlayerOdds();
 
-            if(mode != MODE_TAG)
-                for(auto it = players.cbegin(); it!=players.cend(); ++it)
-                {
-                    if(it->first->type == NETPLAYER_TYPE_OBSERVER)
-                        continue;
-                    char buffer[256],name[20];
-                    BufferIO::CopyWStr(it->first->name, name,20);
-                    int score = Users::getInstance()->getScore(std::string(name));
-                    sprintf(buffer, "%s has %d points",name,score);
-                    /* people keep complaining about the match maker*/
-                    //SendMessageToPlayer(dp,buffer);
-                }
+    if(mode != MODE_TAG)
+        for(auto it = players.cbegin(); it!=players.cend(); ++it)
+        {
+            if(it->first->type == NETPLAYER_TYPE_OBSERVER)
+                continue;
+            char buffer[256],name[20];
+            BufferIO::CopyWStr(it->first->name, name,20);
+            int score = Users::getInstance()->getScore(std::string(name));
+            sprintf(buffer, "%s has %d points",name,score);
+            /* people keep complaining about the match maker*/
+            //SendMessageToPlayer(dp,buffer);
+        }
 
 }
 void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
@@ -59,12 +63,24 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
             last_winner =wbuf[1];
         }
 
-        if(wbuf[0] == MSG_START && dp->type != NETPLAYER_TYPE_OBSERVER)
+        if(wbuf[0] == MSG_START)
         {
-            if(++TPmessagesSent == players.size())
+            if(++ReadyMessagesSent == players.size())
+            {
                 EverybodyIsPlaying();
-
+                //printf("chat pronta\n");
+            }
+            chatReady=true;
         }
+    }
+    else if(proto==STOC_REPLAY)
+    {
+        if(chatReady)
+        {
+            //printf("chat disattivata\n");
+        }
+        chatReady=false;
+        ReadyMessagesSent=0;
     }
 }
 
@@ -122,8 +138,10 @@ void CMNetServer::ShowPlayerOdds()
         float odds = 100*Users::getInstance()->win_exp(_players[1]->cachedRankScore - _players[0]->cachedRankScore);
         sprintf(message,"There is a %d%% chance that %s is going to win this duel",(int) odds,name1);
     }
-    SystemChatToPlayer(_players[0],message);
-    SystemChatToPlayer(_players[1],message);
+    //printf("invio statistichen\n");
+    BroadcastSystemChat(std::string(message));
+    //SystemChatToPlayer(_players[0],message);
+    //SystemChatToPlayer(_players[1],message);
 
 
 }
@@ -135,7 +153,7 @@ void CMNetServer::clientStarted()
         setState(PLAYING);
         timeval timeout = {10, 0};
         event_add(user_timeout, &timeout);
-        TPmessagesSent = 0;
+        chatReady=false;
     }
 
 }
@@ -264,12 +282,12 @@ void CMNetServer::DuelTimer(evutil_socket_t fd, short events, void* arg)
 
 static int getNumDayOfWeek()
 {
-        time_t rawtime;
-        tm * timeinfo;
-        time(&rawtime);
-        timeinfo=localtime(&rawtime);
+    time_t rawtime;
+    tm * timeinfo;
+    time(&rawtime);
+    timeinfo=localtime(&rawtime);
     int wday=timeinfo->tm_wday;
-        return wday;
+    return wday;
 }
 
 
@@ -317,6 +335,8 @@ void CMNetServer::createGame()
     setState(WAITING);
     numPlayers=0;
 
+    ReadyMessagesSent = 0;
+    chatReady=true;
 }
 void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
 {
@@ -742,8 +762,8 @@ void CMNetServer::crash_detected()
     isCrashed = true;
 
     FILE* fp = fopen("cm-error.log", "at");
-		if(!fp)
-			return;
+    if(!fp)
+        return;
     fprintf(fp, "server crashato pid: %d\n", (int) getpid());
     fclose(fp);
 }

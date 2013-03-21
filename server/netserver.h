@@ -42,8 +42,9 @@ private:
 
     DuelMode* duel_mode;
     void EverybodyIsPlaying();
-    int TPmessagesSent;
+    int ReadyMessagesSent;
     int numPlayers;
+    bool chatReady;
 
     void playerConnected(DuelPlayer* dp);
     void playerDisconnected(DuelPlayer* dp);
