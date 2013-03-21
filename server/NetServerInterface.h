@@ -44,6 +44,7 @@ public:
     }
 
     void SendMessageToPlayer(DuelPlayer*dp, char*msg);
+    void SystemChatToPlayer(DuelPlayer*dp, char*msg);
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
     template<typename ST>
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st)

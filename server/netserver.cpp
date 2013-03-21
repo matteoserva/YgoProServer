@@ -29,22 +29,11 @@ void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_Ty
         CMNetServerInterface::SendPacketToPlayer(dp,proto,sctc);
 }
 
-
-void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
+void CMNetServer::EverybodyIsPlaying()
 {
-    CMNetServerInterface::SendBufferToPlayer(dp,proto,buffer,len);
-    if(proto == STOC_GAME_MSG)
-    {
-        unsigned char* wbuf = (unsigned char*)buffer;
-        if(wbuf[0] == MSG_WIN)
-        {
-            log(VERBOSE,"---------vittoria per il giocatore\n");
-            last_winner =wbuf[1];
-        }
+    ShowPlayerOdds();
 
-        if(wbuf[0] == MSG_START && dp->type != NETPLAYER_TYPE_OBSERVER)
-        {
-            /*
+    /*
              * Bug in ygopro software. players can't receive messages, now!
              */
             if(mode != MODE_TAG)
@@ -59,6 +48,25 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
                     /* people keep complaining about the match maker*/
                     //SendMessageToPlayer(dp,buffer);
                 }
+
+}
+void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
+{
+    CMNetServerInterface::SendBufferToPlayer(dp,proto,buffer,len);
+    if(proto == STOC_GAME_MSG)
+    {
+        unsigned char* wbuf = (unsigned char*)buffer;
+        if(wbuf[0] == MSG_WIN)
+        {
+            log(VERBOSE,"---------vittoria per il giocatore\n");
+            last_winner =wbuf[1];
+        }
+
+        if(wbuf[0] == MSG_START && dp->type != NETPLAYER_TYPE_OBSERVER)
+        {
+            if(++TPmessagesSent == players.size())
+                EverybodyIsPlaying();
+
         }
     }
 }
@@ -80,6 +88,49 @@ void CMNetServer::auto_idle_cb(evutil_socket_t fd, short events, void* arg)
     }
 }
 
+void CMNetServer::ShowPlayerOdds()
+{
+    if(mode != MODE_SINGLE)
+        return;
+    DuelPlayer* _players[2];
+    for(int i = 0; i<2; i++)
+        _players[i]=0;
+
+    for(auto it = players.cbegin(); it!= players.cend(); ++it)
+    {
+        if(it->first->type <= NETPLAYER_TYPE_PLAYER2 && it->first->type >= NETPLAYER_TYPE_PLAYER1)
+            _players[it->first->type] = it->first;
+    }
+    if(!_players[0] || !_players[0]->cachedRankScore)
+        return;
+    if(!_players[1] || !_players[1]->cachedRankScore)
+        return;
+
+    char name0[20];
+    char name1[20];
+    BufferIO::CopyWStr(_players[0]->name,name0,20);
+    BufferIO::CopyWStr(_players[1]->name,name1,20);
+    char message[256];
+
+
+    if(_players[0]->cachedRankScore > _players[1]->cachedRankScore)
+    {
+        float odds = 100*Users::getInstance()->win_exp(_players[0]->cachedRankScore - _players[1]->cachedRankScore);
+        sprintf(message,"There is a %d%% chance that %s is going to win this duel",(int) odds,name0);
+
+
+    }
+    else
+    {
+        float odds = 100*Users::getInstance()->win_exp(_players[1]->cachedRankScore - _players[0]->cachedRankScore);
+        sprintf(message,"There is a %d%% chance that %s is going to win this duel",(int) odds,name1);
+    }
+    SystemChatToPlayer(_players[0],message);
+    SystemChatToPlayer(_players[1],message);
+
+
+}
+
 void CMNetServer::clientStarted()
 {
     if(state==FULL)
@@ -87,6 +138,7 @@ void CMNetServer::clientStarted()
         setState(PLAYING);
         timeval timeout = {10, 0};
         event_add(user_timeout, &timeout);
+        TPmessagesSent = 0;
     }
 
 }

@@ -41,8 +41,8 @@ private:
     static void user_timeout_cb(evutil_socket_t fd, short events, void* arg);
 
     DuelMode* duel_mode;
-
-
+    void EverybodyIsPlaying();
+    int TPmessagesSent;
     int numPlayers;
 
     void playerConnected(DuelPlayer* dp);
@@ -51,7 +51,7 @@ private:
     void clientStarted();
     void setState(State state);
     void toObserver(DuelPlayer*dp);
-
+    void ShowPlayerOdds();
 public:
 
     CMNetServer(RoomManager*roomManager,GameServer*,unsigned char mode);

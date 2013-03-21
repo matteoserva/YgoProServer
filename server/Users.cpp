@@ -135,7 +135,7 @@ int Users::getRank(std::string username)
 }
 
 
-static float win_exp(float delta)
+float Users::win_exp(float delta)
 {
     //delta is my_score - opponent score
     return 1.0/(exp((-delta)/400.0)+1.0);

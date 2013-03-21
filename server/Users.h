@@ -68,6 +68,7 @@ private:
 
 public:
 
+    static float win_exp(float delta);
     int getScore(std::string username);
     int getRank(std::string username);
     static Users* getInstance();

@@ -20,6 +20,15 @@ void CMNetServerInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
     int msglen = BufferIO::CopyWStr(msg, scc.msg, 256);
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
 }
+
+void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, char*msg)
+{
+    STOC_Chat scc;
+    scc.player = 8;
+    int msglen = BufferIO::CopyWStr(msg, scc.msg, 256);
+    SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
+}
+
 int CMNetServerInterface::getNumPlayers()
 {
     return players.size();
