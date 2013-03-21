@@ -7,7 +7,8 @@ namespace ygo
 
 int RoomManager::getNumRooms()
 {
-    return elencoServer.size();
+    log(VERBOSE,"pronti %d, giocanti %d, zombie %d\n",elencoServer.size(),playingServer.size(),zombieServer.size());
+    return elencoServer.size()+playingServer.size()+zombieServer.size();
 }
 
 void RoomManager::setGameServer(GameServer* gs)
@@ -69,6 +70,23 @@ void RoomManager::tryToInsertPlayerInServer(DuelPlayer*dp,CMNetServer* serv)
 
 }
 
+void RoomManager::notifyStateChange(CMNetServer* room,CMNetServer::State oldstate,CMNetServer::State newstate)
+{
+    if(newstate == CMNetServer::PLAYING)
+    {
+        elencoServer.remove(room);
+        playingServer.insert(room);
+    }
+    else if(newstate == CMNetServer::ZOMBIE || newstate == CMNetServer::DEAD)
+    {
+        if(oldstate == CMNetServer::PLAYING)
+            playingServer.erase(room);
+        else
+            elencoServer.remove(room);
+        zombieServer.insert(room);
+    }
+}
+
 std::vector<CMNetServer *> RoomManager::getCompatibleRoomsList(int referenceScore)
 {
     std::vector<CMNetServer *> lista;
@@ -91,6 +109,10 @@ int RoomManager::getNumPlayers()
     int risultato = 0;
     risultato += waitingRoom->getNumPlayers();
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
+    {
+        risultato += (*it)->getNumPlayers();
+    }
+    for(auto it =playingServer.begin(); it!=playingServer.end(); ++it)
     {
         risultato += (*it)->getNumPlayers();
     }
@@ -201,7 +223,7 @@ CMNetServer* RoomManager::getFirstAvailableServer(int referenceScore)
 }
 CMNetServer* RoomManager::createServer(unsigned char mode)
 {
-    if(elencoServer.size() >= 500)
+    if(getNumRooms() >= 500)
     {
         return nullptr;
     }
@@ -209,7 +231,7 @@ CMNetServer* RoomManager::createServer(unsigned char mode)
 
     elencoServer.push_back(netServer);
 
-    Statistics::getInstance()->setNumRooms(elencoServer.size());
+    Statistics::getInstance()->setNumRooms(getNumRooms());
 
     return netServer;
 }
@@ -219,7 +241,7 @@ void RoomManager::removeDeadRooms()
 
     int i=0;
     //log(INFO,"analizzo la lista server e cerco i morti\n");
-    for(auto it =elencoServer.begin(); it!=elencoServer.end();)
+    for(auto it =zombieServer.begin(); it!=zombieServer.end();)
     {
         CMNetServer *p = *it;
 
@@ -227,7 +249,7 @@ void RoomManager::removeDeadRooms()
         {
             log(INFO,"elimino il server %d\n",i);
             delete (*it);
-            it=elencoServer.erase(it);
+            it=zombieServer.erase(it);
         }
         else
         {
@@ -236,7 +258,7 @@ void RoomManager::removeDeadRooms()
 
         i++;
     }
-    Statistics::getInstance()->setNumRooms(elencoServer.size());
+    Statistics::getInstance()->setNumRooms(getNumRooms());
 }
 
 

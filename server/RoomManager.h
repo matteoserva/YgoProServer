@@ -4,6 +4,7 @@
 #include <list>
 #include <mutex>
 #include "WaitingRoom.h"
+#include "netserver.h"
 namespace ygo {
 
     class GameServer;
@@ -26,12 +27,15 @@ namespace ygo {
         public:
         event_base* net_evbase;
         std::list<CMNetServer *> elencoServer;
+        std::set<CMNetServer *> playingServer;
+        std::set<CMNetServer *> zombieServer;
         GameServer* gameServer;
         void setGameServer(ygo::GameServer*);
 
         public:
         RoomManager();
         ~RoomManager();
+        void notifyStateChange(CMNetServer* room,CMNetServer::State oldstate,CMNetServer::State newstate);
         bool InsertPlayerInWaitingRoom(DuelPlayer*dp);
         bool InsertPlayer(DuelPlayer*dp);
         bool InsertPlayer(DuelPlayer*dp,unsigned char mode);

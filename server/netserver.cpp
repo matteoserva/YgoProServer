@@ -94,6 +94,8 @@ void CMNetServer::clientStarted()
 
 void CMNetServer::setState(State state)
 {
+    if(this->state != state)
+        roomManager->notifyStateChange(this,this->state,state);
     this->state=state;
 }
 
