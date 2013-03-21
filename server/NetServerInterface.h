@@ -44,7 +44,7 @@ public:
     }
 
     void SendMessageToPlayer(DuelPlayer*dp, char*msg);
-    void SystemChatToPlayer(DuelPlayer*dp, char*msg);
+    void SystemChatToPlayer(DuelPlayer*dp, const char*msg);
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
     template<typename ST>
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st)
@@ -58,6 +58,7 @@ public:
             bufferevent_write(dp->bev, net_server_write, last_sent);
 
     }
+    void BroadcastSystemChat(std::string);
     void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
     void ReSendToPlayer(DuelPlayer* dp);
     int getNumPlayers();

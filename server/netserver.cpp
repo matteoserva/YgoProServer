@@ -33,9 +33,6 @@ void CMNetServer::EverybodyIsPlaying()
 {
     ShowPlayerOdds();
 
-    /*
-             * Bug in ygopro software. players can't receive messages, now!
-             */
             if(mode != MODE_TAG)
                 for(auto it = players.cbegin(); it!=players.cend(); ++it)
                 {

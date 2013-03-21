@@ -21,7 +21,16 @@ void CMNetServerInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
 }
 
-void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, char*msg)
+void CMNetServerInterface::BroadcastSystemChat(std::string msg)
+{
+    for(auto it = players.cbegin(); it!=players.cend(); ++it)
+                {
+                    SystemChatToPlayer(it->first,msg.c_str());
+                }
+
+}
+
+void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, const char*msg)
 {
     STOC_Chat scc;
     scc.player = 8;
