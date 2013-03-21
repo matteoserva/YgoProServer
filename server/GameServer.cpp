@@ -84,7 +84,8 @@ void GameServer::StopServer()
 
 void GameServer::StopListen()
 {
-    evconnlistener_disable(listener);
+        evconnlistener_disable(listener);
+        isListening = false;
 }
 
 void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx)
@@ -118,7 +119,7 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
     if(that->users.size()>= that->MAXPLAYERS)
     {
         that->StopListen();
-        that->isListening = false;
+
     }
 
     Statistics::getInstance()->setNumPlayers(that->users.size());
@@ -126,7 +127,7 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
 void GameServer::ServerAcceptError(evconnlistener* listener, void* ctx)
 {
     GameServer* that = (GameServer*)ctx;
-    event_base_loopexit(that->net_evbase, 0);
+    that->StopListen();
 }
 void GameServer::ServerEchoRead(bufferevent *bev, void *ctx)
 {

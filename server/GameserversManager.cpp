@@ -86,7 +86,7 @@ GameserversManager::GameserversManager():maxchildren(4)
 void GameserversManager::child_loop(int parent_fd)
 {
     ygo::GameServer* gameServer = new ygo::GameServer(server_fd);
-
+    close(0);
     if(!gameServer->StartServer())
     {
         printf("cannot start the gameserver\n");
