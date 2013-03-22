@@ -26,7 +26,6 @@ void CMNetServerInterface::BroadcastSystemChat(std::string msg)
     for(auto it = players.cbegin(); it!=players.cend(); ++it)
                 {
                     SystemChatToPlayer(it->first,msg.c_str());
-                    printf("broadcast n spedito\n");
                 }
 
 }

@@ -568,19 +568,21 @@ void CMNetServer::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
     CMNetServer* that = (CMNetServer*)arg;
     std::list<DuelPlayer *> deadUsers;
     log(VERBOSE,"timeout cb\n");
+    const int maxTimeout = 300;
     for(auto it = that->players.begin(); it!=that->players.end(); ++it)
     {
         it->second.secondsWaiting += 10;
-        if(it->second.secondsWaiting >= 300)
+        if(it->second.secondsWaiting >= maxTimeout)
         {
             deadUsers.push_back(it->first);
         }
-
-        if(it->second.secondsWaiting >= 120 && that->mode == MODE_MATCH &&
+        else if(it->second.secondsWaiting >= 120 && that->mode == MODE_MATCH &&
                 it->first->type != NETPLAYER_TYPE_OBSERVER && it->first->state == CTOS_UPDATE_DECK)
         {
             deadUsers.push_back(it->first);
         }
+        else if(it->first->state ==CTOS_TIME_CONFIRM)
+            it->second.secondsWaiting = maxTimeout-10;
     }
     for(auto it = deadUsers.begin(); it!= deadUsers.end(); ++it)
     {

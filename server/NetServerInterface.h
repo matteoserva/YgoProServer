@@ -18,6 +18,7 @@ struct DuelPlayerInfo
 bool isReady;
 float secondsWaiting;
 
+
 };
 
 class CMNetServerInterface
