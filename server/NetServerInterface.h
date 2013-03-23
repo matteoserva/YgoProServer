@@ -1,7 +1,7 @@
 #ifndef _NetServerInterface_H_
 #define _NetServerInterface_H_
 #include "network.h"
-
+#include <list>
 
 
 namespace ygo
@@ -20,6 +20,7 @@ float secondsWaiting;
 unsigned char last_state_in_timeout;
 bool zombiePlayer;
 
+std::list< std::pair<bool,std::wstring> > pendingMessages;
 
 };
 

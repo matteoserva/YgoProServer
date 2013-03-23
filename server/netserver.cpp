@@ -67,10 +67,11 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
         {
             if(++ReadyMessagesSent == players.size())
             {
+                chatReady=true;
                 EverybodyIsPlaying();
                 //printf("chat pronta\n");
             }
-            chatReady=true;
+
         }
     }
     else if(proto==STOC_REPLAY)
@@ -547,7 +548,17 @@ void CMNetServer::StopServer()
     updateServerState();
 }
 
+void CMNetServer::SystemChatToPlayer(DuelPlayer*dp, const char*msg)
+{
+    if(chatReady)
+    CMNetServerInterface::SystemChatToPlayer(dp,msg);
+    else
+    {
+        std::string temp(msg);
+        players[dp].pendingMessages.push_back(std::pair<bool,std::wstring>(true,std::wstring(std::wstring(temp.begin(),temp.end()))));
+    }
 
+}
 
 void CMNetServer::toObserver(DuelPlayer* dp)
 {

@@ -54,7 +54,7 @@ private:
     void toObserver(DuelPlayer*dp);
     void ShowPlayerOdds();
 public:
-
+    void SystemChatToPlayer(DuelPlayer*dp, const char*msg);
     CMNetServer(RoomManager*roomManager,GameServer*,unsigned char mode);
     void LeaveGame(DuelPlayer* dp);
     bool StartServer(unsigned short port);
