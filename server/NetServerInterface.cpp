@@ -12,6 +12,10 @@ CMNetServerInterface::CMNetServerInterface(RoomManager* roomManager,GameServer*g
 {
 
 }
+DuelPlayer* CMNetServerInterface::getFirstPlayer()
+{
+    return players.begin()->first;
+}
 
 void CMNetServerInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
 {
@@ -24,9 +28,9 @@ void CMNetServerInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
 void CMNetServerInterface::BroadcastSystemChat(std::string msg)
 {
     for(auto it = players.cbegin(); it!=players.cend(); ++it)
-                {
-                    SystemChatToPlayer(it->first,msg.c_str());
-                }
+    {
+        SystemChatToPlayer(it->first,msg.c_str());
+    }
 
 }
 

@@ -41,10 +41,7 @@ public:
     virtual void InsertPlayer(DuelPlayer* dp)=0;
     virtual void LeaveGame(DuelPlayer* dp)=0;
     virtual void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)=0;
-    DuelPlayer* getFirstPlayer()
-    {
-        return players.begin()->first;
-    }
+    DuelPlayer* getFirstPlayer();
 
     void SendMessageToPlayer(DuelPlayer*dp, char*msg);
     void SystemChatToPlayer(DuelPlayer*dp, const char*msg);

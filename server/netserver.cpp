@@ -375,7 +375,7 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
     duel_mode->JoinGame(dp, &csjg, false);
 
     duel_mode->host_player=NULL;
-    players[0].last_state_in_timeout = dp->state;
+    players[dp].last_state_in_timeout = dp->state;
 }
 
 
