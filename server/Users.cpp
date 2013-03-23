@@ -145,18 +145,18 @@ float Users::win_exp(float delta)
 
 static int k(const UserStats &us)
 {
-    int tempK = 100;
+    int tempK = 50;
     int threeshold = 10;
     if(us.wins + us.losses+us.draws <= threeshold)
     {
-        tempK *=2;
+        tempK += tempK/2;
         if(us.score <= 800 && us.score >= 200)
-            tempK *=2;
+            tempK +=tempK/2;
     }
     else if(us.score >= 2000 && us.score < 3000 )
         tempK /=2;
     else if(us.score >= 3000)
-	tempK /=4;
+        tempK /=3;
     return tempK;
 }
 
