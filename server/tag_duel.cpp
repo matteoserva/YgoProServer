@@ -145,6 +145,8 @@ void TagDuel::LeaveGame(DuelPlayer* dp) {
 			EndDuel();
 			netServer->SendPacketToPlayer(players[0], STOC_DUEL_END);
 			netServer->ReSendToPlayer(players[1]);
+			netServer->ReSendToPlayer(players[2]);
+			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 				netServer->ReSendToPlayer(*oit);
 			netServer->StopServer();
