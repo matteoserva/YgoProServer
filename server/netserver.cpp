@@ -590,8 +590,8 @@ void CMNetServer::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
         {
             deadUsers.push_back(it->first);
         }
-        else if(it->first->state ==CTOS_TIME_CONFIRM )
-            deadUsers.push_back(it->first);
+        /*else if(it->first->state ==CTOS_TIME_CONFIRM )
+            deadUsers.push_back(it->first);*/
         else if(that->state == ZOMBIE && it->second.zombiePlayer == false)
             it->second.zombiePlayer = true;
         else if(that->state == ZOMBIE && it->second.zombiePlayer)
