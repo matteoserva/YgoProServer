@@ -24,7 +24,7 @@ void CMNetServer::flushPendingMessages()
 
             for(auto i=it->second.pendingMessages.begin(); i != it->second.pendingMessages.end();i++)
             {
-                SystemChatToPlayer(it->first,i->second);
+                SystemChatToPlayer(it->first,i->second,i->first);
 
             }
             it->second.pendingMessages.clear();
@@ -157,7 +157,7 @@ void CMNetServer::ShowPlayerOdds()
     }
     //printf("invio statistichen\n");
     std::string temp(message);
-    BroadcastSystemChat(std::wstring(temp.begin(),temp.end()));
+    BroadcastSystemChat(std::wstring(temp.begin(),temp.end()),true);
     //SystemChatToPlayer(_players[0],message);
     //SystemChatToPlayer(_players[1],message);
 
@@ -567,15 +567,17 @@ void CMNetServer::StopServer()
     updateServerState();
 }
 
-void CMNetServer::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg)
+void CMNetServer::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg,bool isAdmin)
 {
     if(chatReady)
     {
-        CMNetServerInterface::SystemChatToPlayer(dp,msg);
+        CMNetServerInterface::SystemChatToPlayer(dp,msg,isAdmin);
     }
     else
     {
-        players[dp].pendingMessages.push_back(std::pair<bool,std::wstring>(true,msg));
+        players[dp].pendingMessages.push_back(std::pair<bool,std::wstring>(isAdmin,msg));
+        if(players[dp].pendingMessages.size() > 5)
+            players[dp].pendingMessages.pop_front();
     }
 
 }
@@ -684,10 +686,13 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             return;
         duel_mode->Chat(dp, pdata, len - 1);
 
-        char messaggio[256],name[20];
-        BufferIO::CopyWStr((unsigned short*)pdata, messaggio, 256);
+        wchar_t name[20];
+        wchar_t messaggio[200];
+        BufferIO::CopyWStr((unsigned short*)pdata, messaggio, 200);
         BufferIO::CopyWStr(dp->name, name, 20);
-        log(INFO,"MESSAGGIO. %s: %s\n",name,messaggio);
+        shout(std::wstring(messaggio),false,std::wstring(name));
+        //BufferIO::CopyWStr(dp->name, name, 20);
+        //log(INFO,"MESSAGGIO. %s: %s\n",name,messaggio);
         break;
     }
     case CTOS_UPDATE_DECK:

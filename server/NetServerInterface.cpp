@@ -1,5 +1,6 @@
 #include "NetServerInterface.h"
 #include "debug.h"
+#include "RoomManager.h"
 
 namespace ygo
 {
@@ -8,7 +9,7 @@ char CMNetServerInterface::net_server_read[0x20000];
 char CMNetServerInterface::net_server_write[0x20000];
 
 CMNetServerInterface::CMNetServerInterface(RoomManager* roomManager,GameServer*gameServer):
-    roomManager(roomManager),gameServer(gameServer),last_sent(0)
+    roomManager(roomManager),gameServer(gameServer),last_sent(0),isShouting(false)
 {
 
 }
@@ -25,19 +26,30 @@ void CMNetServerInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
 }
 
-void CMNetServerInterface::BroadcastSystemChat(std::wstring msg)
+void CMNetServerInterface::BroadcastSystemChat(std::wstring msg,bool isAdmin)
 {
+    if(isShouting)
+        return;
     for(auto it = players.cbegin(); it!=players.cend(); ++it)
     {
-        SystemChatToPlayer(it->first,msg);
+        SystemChatToPlayer(it->first,msg,isAdmin);
     }
 
 }
 
-void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg)
+void CMNetServerInterface::shout(std::wstring message,bool isAdmin,std::wstring sender)
+{
+    isShouting=true;
+    if(sender!=L"")
+        message = L"["+sender+L"]: "+message;
+    roomManager->BroadcastMessage(message,isAdmin);
+    isShouting=false;
+}
+
+void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg,bool isAdmin)
 {
     STOC_Chat scc;
-    scc.player = 8;
+    scc.player = isAdmin?8:10;
     int msglen = BufferIO::CopyWStr(msg.c_str(), scc.msg, 256);
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
 }

@@ -1,7 +1,7 @@
 #ifndef _WAITING_ROOM_H_
 #define _WAITING_ROOM_H_
-#include "NetServerInterface.h"
 #include <list>
+#include "NetServerInterface.h"
 
 namespace ygo
 {

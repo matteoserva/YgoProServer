@@ -3,12 +3,10 @@
 #include "network.h"
 #include <list>
 
-
 namespace ygo
 {
 class DuelPlayer;
 
-class RoomManager;
 class GameServer;
 struct DuelPlayerInfo
 {
@@ -23,6 +21,8 @@ bool zombiePlayer;
 std::list< std::pair<bool,std::wstring> > pendingMessages;
 
 };
+
+class RoomManager;
 
 class CMNetServerInterface
 {
@@ -45,7 +45,7 @@ public:
     DuelPlayer* getFirstPlayer();
 
     virtual void SendMessageToPlayer(DuelPlayer*dp, char*msg);
-    virtual void SystemChatToPlayer(DuelPlayer*dp, const std::wstring);
+    virtual void SystemChatToPlayer(DuelPlayer*dp, const std::wstring,bool isAdmin = false);
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
     template<typename ST>
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st)
@@ -59,7 +59,9 @@ public:
             bufferevent_write(dp->bev, net_server_write, last_sent);
 
     }
-    void BroadcastSystemChat(std::wstring);
+    bool isShouting;
+    void shout(std::wstring message,bool isAdmin=false,std::wstring sender=L"");
+    void BroadcastSystemChat(std::wstring,bool isAdmin = false);
     void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
     void ReSendToPlayer(DuelPlayer* dp);
     int getNumPlayers();

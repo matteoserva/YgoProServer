@@ -169,17 +169,17 @@ bool RoomManager::FillRoom(CMNetServer* room)
     return true;
 }
 
-void RoomManager::BroadcastMessage(std::wstring message, bool isSystem)
+void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin)
 {
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
-        (*it)->BroadcastSystemChat(message);
+        (*it)->BroadcastSystemChat(message,isAdmin);
     }
     for(auto it =playingServer.begin(); it!=playingServer.end(); ++it)
     {
-        (*it)->BroadcastSystemChat(message);
+        (*it)->BroadcastSystemChat(message,isAdmin);
     }
-    waitingRoom->BroadcastSystemChat(message);
+    waitingRoom->BroadcastSystemChat(message,isAdmin);
 
 }
 

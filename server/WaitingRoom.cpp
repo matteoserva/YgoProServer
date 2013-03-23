@@ -280,6 +280,13 @@ bool WaitingRoom::ChatMessageReceived(DuelPlayer* dp,unsigned short* msg)
             continue;
         ChatWithPlayer(it->first, std::string(sender),messaggio);
     }
+
+
+        wchar_t name[20];
+        wchar_t messaggiow[200];
+        BufferIO::CopyWStr(msg, messaggiow, 200);
+        BufferIO::CopyWStr(dp->name, name, 20);
+        shout(std::wstring(messaggiow),false,std::wstring(name));
     return true;
 
 }

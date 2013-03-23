@@ -55,7 +55,7 @@ private:
     void ShowPlayerOdds();
     void flushPendingMessages();
 public:
-    void SystemChatToPlayer(DuelPlayer*dp, const std::wstring);
+    void SystemChatToPlayer(DuelPlayer*dp, const std::wstring,bool isAdmin=false);
     CMNetServer(RoomManager*roomManager,GameServer*,unsigned char mode);
     void LeaveGame(DuelPlayer* dp);
     bool StartServer(unsigned short port);
