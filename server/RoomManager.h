@@ -35,6 +35,7 @@ namespace ygo {
         public:
         RoomManager();
         ~RoomManager();
+        void BroadcastMessage(std::wstring, bool);
         void notifyStateChange(CMNetServer* room,CMNetServer::State oldstate,CMNetServer::State newstate);
         bool InsertPlayerInWaitingRoom(DuelPlayer*dp);
         bool InsertPlayer(DuelPlayer*dp);

@@ -207,6 +207,13 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
         ExtractPlayer(dp);
         roomManager->InsertPlayer(dp,MODE_MATCH);
     }
+    else if(!strncmp(messaggio,"!shout ",7) )
+    {
+        char*msg2 = &messaggio[7];
+        std::string tmp(msg2);
+        std::wstring tmp2(tmp.begin(),tmp.end());
+        roomManager->BroadcastMessage(tmp2,true);
+    }
     else
     {
         return false;

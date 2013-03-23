@@ -169,6 +169,20 @@ bool RoomManager::FillRoom(CMNetServer* room)
     return true;
 }
 
+void RoomManager::BroadcastMessage(std::wstring message, bool isSystem)
+{
+    for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
+    {
+        (*it)->BroadcastSystemChat(message);
+    }
+    for(auto it =playingServer.begin(); it!=playingServer.end(); ++it)
+    {
+        (*it)->BroadcastSystemChat(message);
+    }
+    waitingRoom->BroadcastSystemChat(message);
+
+}
+
 bool RoomManager::FillAllRooms()
 {
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
