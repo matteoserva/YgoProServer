@@ -12,11 +12,13 @@ class RoomManager;
 class GameServer;
 struct DuelPlayerInfo
 {
-    DuelPlayerInfo():isReady(false),secondsWaiting(0)
+    DuelPlayerInfo():zombiePlayer(false),isReady(false),secondsWaiting(0)
     {
     };
 bool isReady;
 float secondsWaiting;
+unsigned char last_state_in_timeout;
+bool zombiePlayer;
 
 
 };

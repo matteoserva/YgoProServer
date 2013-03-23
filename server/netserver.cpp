@@ -375,6 +375,7 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
     duel_mode->JoinGame(dp, &csjg, false);
 
     duel_mode->host_player=NULL;
+    players[0].last_state_in_timeout = dp->state;
 }
 
 
@@ -569,10 +570,18 @@ void CMNetServer::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
     std::list<DuelPlayer *> deadUsers;
     log(VERBOSE,"timeout cb\n");
     const int maxTimeout = 300;
+
     for(auto it = that->players.begin(); it!=that->players.end(); ++it)
     {
+        if(it->second.last_state_in_timeout != it->first->state)
+        {
+            it->second.last_state_in_timeout = it->first->state;
+            it->second.secondsWaiting = 0;
+            continue;
+        }
+
         it->second.secondsWaiting += 10;
-        if(it->second.secondsWaiting >= maxTimeout)
+        if(it->first->type != NETPLAYER_TYPE_OBSERVER && it->second.secondsWaiting >= maxTimeout)
         {
             deadUsers.push_back(it->first);
         }
@@ -581,8 +590,12 @@ void CMNetServer::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
         {
             deadUsers.push_back(it->first);
         }
-        else if(it->first->state ==CTOS_TIME_CONFIRM)
-            it->second.secondsWaiting = maxTimeout-10;
+        else if(it->first->state ==CTOS_TIME_CONFIRM )
+            deadUsers.push_back(it->first);
+        else if(that->state == ZOMBIE && it->second.zombiePlayer == false)
+            it->second.zombiePlayer = true;
+        else if(that->state == ZOMBIE && it->second.zombiePlayer)
+            deadUsers.push_back(it->first);
     }
     for(auto it = deadUsers.begin(); it!= deadUsers.end(); ++it)
     {
