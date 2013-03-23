@@ -25,20 +25,20 @@ void CMNetServerInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
 }
 
-void CMNetServerInterface::BroadcastSystemChat(std::string msg)
+void CMNetServerInterface::BroadcastSystemChat(std::wstring msg)
 {
     for(auto it = players.cbegin(); it!=players.cend(); ++it)
     {
-        SystemChatToPlayer(it->first,msg.c_str());
+        SystemChatToPlayer(it->first,msg);
     }
 
 }
 
-void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, const char*msg)
+void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg)
 {
     STOC_Chat scc;
     scc.player = 8;
-    int msglen = BufferIO::CopyWStr(msg, scc.msg, 256);
+    int msglen = BufferIO::CopyWStr(msg.c_str(), scc.msg, 256);
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
 }
 

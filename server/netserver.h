@@ -53,8 +53,9 @@ private:
     void setState(State state);
     void toObserver(DuelPlayer*dp);
     void ShowPlayerOdds();
+    void flushPendingMessages();
 public:
-    void SystemChatToPlayer(DuelPlayer*dp, const char*msg);
+    void SystemChatToPlayer(DuelPlayer*dp, const std::wstring);
     CMNetServer(RoomManager*roomManager,GameServer*,unsigned char mode);
     void LeaveGame(DuelPlayer* dp);
     bool StartServer(unsigned short port);
