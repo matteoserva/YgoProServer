@@ -188,7 +188,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
 
     ChatWithPlayer(dp, "CheckMate","Welcome to the CheckMate server!");
-    ChatWithPlayer(dp, "CheckMate","Type !tag to enter a tag duel, !single for a single duel or !match");
+    //ChatWithPlayer(dp, "CheckMate","Type !tag to enter a tag duel, !single for a single duel or !match");
 
     updateObserversNum();
 
