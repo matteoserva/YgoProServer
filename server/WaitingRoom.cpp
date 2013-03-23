@@ -286,7 +286,8 @@ bool WaitingRoom::ChatMessageReceived(DuelPlayer* dp,unsigned short* msg)
         wchar_t messaggiow[200];
         BufferIO::CopyWStr(msg, messaggiow, 200);
         BufferIO::CopyWStr(dp->name, name, 20);
-        shout(std::wstring(messaggiow),false,std::wstring(name));
+        if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
+            shout(std::wstring(messaggiow),false,std::wstring(name));
     return true;
 
 }
