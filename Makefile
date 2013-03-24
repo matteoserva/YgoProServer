@@ -2,6 +2,8 @@ TARGET = ygopro-server
 
 ###############
 
+include makefile.autoincr.inc
+
 SRC = $(shell ls server/*.c server/*.cpp 2>/dev/null)
 #SRC += $(shell ls ygopro/gframe/lzma/*.c ygopro/gframe/lzma/*.cpp 2>/dev/null)
 SRC += ygopro/gframe/data_manager.cpp ygopro/gframe/deck_manager.cpp # ygopro/gframe/replay.cpp
@@ -33,7 +35,6 @@ LDFLAGS += -lmysqlcppconn
 
 server: $(OUT)
 
-include makefile.autoincr.inc
 
 server/Config.o: update-buildnum server/Config.cpp
 	$(CPP) $(INCLUDES) $(CPPFLAGS) -c server/Config.cpp -o $@ -DVERSION=${VERSION}
@@ -67,3 +68,11 @@ client-clean:
 server-clean:
 	rm -f $(OBJ) $(OUT)
 	$(MAKE) -C ygopro/build/ clean
+
+
+NEWVERS = `expr $(VERSION) + 1`
+update-buildnum:
+	@mv makefile.autoincr.inc makefile.autoincr.inc.bak
+	@sed "s/^VERSION[ \t]*=[ \t]*[0-9]*/VERSION = $(NEWVERS)/" makefile.autoincr.inc.bak > makefile.autoincr.inc
+	@rm makefile.autoincr.inc.bak
+
