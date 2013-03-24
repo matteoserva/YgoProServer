@@ -46,7 +46,7 @@ namespace ygo {
         int getNumRooms();
         std::vector<CMNetServer *> getCompatibleRoomsList(int referenceScore);
         void tryToInsertPlayerInServer(DuelPlayer*dp,CMNetServer* serv);
-        int maxScoreDifference(int referenceScore){return std::max(400,referenceScore/3);}
+        static int maxScoreDifference(int referenceScore){return std::max(400,referenceScore/4);}
     };
 
 
