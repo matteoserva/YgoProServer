@@ -118,8 +118,40 @@ void CMNetServer::auto_idle_cb(evutil_socket_t fd, short events, void* arg)
     }
 }
 
+void CMNetServer::ShowPlayerScores()
+{
+    wchar_t message[256];
+    message[0]=0;
+    wchar_t buffer[64];
+    wcscat(message,L"SCORES:");
+
+    for(auto it = players.cbegin(); it!=players.cend(); ++it)
+    {
+        if(it->first->type == NETPLAYER_TYPE_OBSERVER)
+            continue;
+        if(it->first->cachedRankScore == 0)
+        {
+           BroadcastSystemChat(L"this duel is unranked",true);
+           return;
+        }
+
+
+        BufferIO::CopyWStr(it->first->name,buffer,20);
+        wcscat(message,L"  [");
+        wcscat(message,buffer);
+        wcscat(message,L"]: ");
+        swprintf(buffer,64,L"%d(%+d)",it->first->cachedRankScore, it->first->cachedGameScore-it->first->cachedRankScore);
+        wcscat(message,buffer);
+    }
+    BroadcastSystemChat(message,true);
+}
+
 void CMNetServer::ShowPlayerOdds()
 {
+    char message[256];
+
+
+
     if(mode != MODE_SINGLE)
         return;
     DuelPlayer* _players[2];
@@ -140,7 +172,7 @@ void CMNetServer::ShowPlayerOdds()
     char name1[20];
     BufferIO::CopyWStr(_players[0]->name,name0,20);
     BufferIO::CopyWStr(_players[1]->name,name1,20);
-    char message[256];
+    message[0] = 0;
 
 
     if(_players[0]->cachedRankScore > _players[1]->cachedRankScore)
@@ -155,11 +187,11 @@ void CMNetServer::ShowPlayerOdds()
         float odds = 100*Users::getInstance()->win_exp(_players[1]->cachedRankScore - _players[0]->cachedRankScore);
         sprintf(message,"There is a %d%% chance that %s is going to win this duel",(int) odds,name1);
     }
-    //printf("invio statistichen\n");
     std::string temp(message);
     BroadcastSystemChat(std::wstring(temp.begin(),temp.end()),true);
-    //SystemChatToPlayer(_players[0],message);
-    //SystemChatToPlayer(_players[1],message);
+
+
+
 
 
 }
@@ -173,6 +205,7 @@ void CMNetServer::clientStarted()
         event_add(user_timeout, &timeout);
         chatReady=false;
         ShowPlayerOdds();
+        ShowPlayerScores();
         //duel_mode->host_info.time_limit=60;
     }
 

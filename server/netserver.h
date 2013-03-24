@@ -53,6 +53,7 @@ private:
     void setState(State state);
     void toObserver(DuelPlayer*dp);
     void ShowPlayerOdds();
+    void ShowPlayerScores();
     void flushPendingMessages();
 public:
     void SystemChatToPlayer(DuelPlayer*dp, const std::wstring,bool isAdmin=false);
