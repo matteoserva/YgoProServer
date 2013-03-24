@@ -3,8 +3,12 @@
 #include "debug.h"
 #include "Users.h"
 #include "Config.h"
+#include "Statistics.h"
+
+extern const unsigned int BUILD_NUMBER;
 namespace ygo
 {
+
 int WaitingRoom::minSecondsWaiting;
 int WaitingRoom::maxSecondsWaiting;
 const std::string WaitingRoom::banner = "Checkmate Server!";
@@ -206,6 +210,9 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     //ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
     ChatWithPlayer(dp, "CheckMate","click the 'to duelist' button to choose the game type");
     ChatWithPlayer(dp, "CheckMate","click the 'to observer' button for the available rooms list");
+    char buffer[200];
+    sprintf(buffer,"PID: %d, BUILD: %d, PLAYERS: %d",(int)getpid(),(int)BUILD_NUMBER,Statistics::getInstance()->getNumPlayers());
+    ChatWithPlayer(dp, "CheckMate",buffer);
 
 
 }

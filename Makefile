@@ -10,7 +10,7 @@ SRC += ygopro/gframe/data_manager.cpp ygopro/gframe/deck_manager.cpp # ygopro/gf
 OUT = $(TARGET)
 OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 
-.PHONY:	client ocgcore libclzma
+.PHONY:	client ocgcore libclzma update-buildnum server/Config.o
 
 
 # include directories
@@ -33,6 +33,11 @@ LDFLAGS += -lmysqlcppconn
 
 server: $(OUT)
 
+include makefile.autoincr.inc
+
+server/Config.o: update-buildnum server/Config.cpp
+	$(CPP) $(INCLUDES) $(CPPFLAGS) -c server/Config.cpp -o $@ -DVERSION=${VERSION}
+
 ocgcore:
 	$(MAKE) -C ygopro/build/ ocgcore
 
@@ -49,6 +54,7 @@ $(OUT): $(OBJ) ocgcore #libclzma
 
 .cpp.o:
 	$(CPP) $(INCLUDES) $(CPPFLAGS) -c $< -o $@
+
 
 clean:	client-clean server-clean
 
