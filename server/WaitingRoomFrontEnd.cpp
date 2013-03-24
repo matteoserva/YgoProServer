@@ -209,6 +209,12 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
     }
     else if(!strncmp(messaggio,"!shout ",7) )
     {
+        char name[20];
+        BufferIO::CopyWStr(dp->name,name,20);
+        std::string nome(name);
+        std::transform(nome.begin(), nome.end(), nome.begin(), ::tolower);
+        if(nome != "checkmate")
+            return false;
         char*msg2 = &messaggio[7];
         std::string tmp(msg2);
         std::wstring tmp2(tmp.begin(),tmp.end());
