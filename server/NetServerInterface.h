@@ -35,6 +35,9 @@ protected:
     std::map<DuelPlayer*, DuelPlayerInfo> players;
     GameServer* gameServer;
     void playerReadinessChange(DuelPlayer *dp, bool isReady);
+
+
+
 public:
     CMNetServerInterface(RoomManager* roomManager,GameServer*gameServer);
     virtual ~CMNetServerInterface() {};
@@ -60,6 +63,7 @@ public:
 
     }
     bool isShouting;
+    void shout(unsigned short*,DuelPlayer* dp);
     void shout(std::wstring message,bool isAdmin=false,std::wstring sender=L"");
     void BroadcastSystemChat(std::wstring,bool isAdmin = false);
     void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);

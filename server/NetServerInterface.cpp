@@ -36,6 +36,28 @@ void CMNetServerInterface::BroadcastSystemChat(std::wstring msg,bool isAdmin)
     }
 
 }
+void CMNetServerInterface::shout(unsigned short* msg,DuelPlayer* dp)
+{
+    dp->chatTimestamp.push_back(time(NULL));
+    if(dp->chatTimestamp.size() > 5)
+    {
+        if(dp->chatTimestamp.back() - dp->chatTimestamp.front() <5)
+        {
+            LeaveGame(dp);
+            return;
+        }
+
+        dp->chatTimestamp.pop_front();
+    }
+
+
+    wchar_t name[20];
+    wchar_t messaggio[200];
+    BufferIO::CopyWStr(msg, messaggio, 200);
+    BufferIO::CopyWStr(dp->name, name, 20);
+    if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
+        shout(std::wstring(messaggio),false,std::wstring(name));
+}
 
 void CMNetServerInterface::shout(std::wstring message,bool isAdmin,std::wstring sender)
 {

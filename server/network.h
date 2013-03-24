@@ -9,7 +9,7 @@
 #include <event2/buffer.h>
 #include <event2/thread.h>
 #include "Users.h"
-
+#include <list>
 
 namespace ygo {
 
@@ -118,6 +118,8 @@ struct DuelPlayer {
 		bev = 0;
         netServer=0;
 	}
+
+    std::list<time_t> chatTimestamp;
 };
 
 
