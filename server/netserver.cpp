@@ -173,7 +173,7 @@ void CMNetServer::clientStarted()
         event_add(user_timeout, &timeout);
         chatReady=false;
         ShowPlayerOdds();
-        //duel_mode->host_info.time_limit=10;
+        //duel_mode->host_info.time_limit=60;
     }
 
 }
