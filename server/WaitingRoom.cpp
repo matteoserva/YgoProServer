@@ -155,7 +155,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     info.no_check_deck=false;
     info.start_hand=5;
     info.lflist=1;
-    info.time_limit=120;
+    info.time_limit=60;
     info.start_lp=0;
     info.enable_priority=false;
     info.no_shuffle_deck=false;
