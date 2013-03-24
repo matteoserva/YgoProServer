@@ -15,6 +15,14 @@ namespace ygo {
         private:
         event* keepAliveEvent;
 
+        std::set<std::string> bannedIPs;
+
+        public:
+        void ban(std::string);
+        private:
+        bool isBanned(std::string);
+
+
         static const int SecondsBeforeFillAllRooms = 3;
         static const int RemoveDeadRoomsRatio = 3;
 

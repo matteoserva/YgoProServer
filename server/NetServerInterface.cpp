@@ -43,6 +43,8 @@ void CMNetServerInterface::shout(unsigned short* msg,DuelPlayer* dp)
     {
         if(dp->chatTimestamp.back() - dp->chatTimestamp.front() <5)
         {
+            roomManager->ban(std::string(dp->ip));
+            std::cout<<"banned: "<<std::string(dp->ip)<<std::endl;
             LeaveGame(dp);
             return;
         }

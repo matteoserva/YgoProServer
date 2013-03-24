@@ -199,12 +199,21 @@ bool RoomManager::FillAllRooms()
 
 }
 
+void RoomManager::ban(std::string ip)
+{
+    bannedIPs.insert(ip);
+}
+bool RoomManager::isBanned(std::string ip)
+{
+    return bannedIPs.find(ip) != bannedIPs.end();
+}
+
 bool RoomManager::InsertPlayerInWaitingRoom(DuelPlayer*dp)
 {
     //true is success
 
     CMNetServerInterface* netServer = waitingRoom;
-    if(netServer == NULL)
+    if(netServer == nullptr || isBanned(std::string(dp->ip)))
     {
         gameServer->DisconnectPlayer(dp);
         return false;
