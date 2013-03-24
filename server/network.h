@@ -159,6 +159,9 @@ public:
 	unsigned long pduel;
 	wchar_t name[20];
 	wchar_t pass[20];
+
+	unsigned short time_limit[2];
+	unsigned short time_elapsed;
 };
 
 }

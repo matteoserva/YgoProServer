@@ -28,7 +28,7 @@ public:
 	virtual void GetResponse(DuelPlayer* dp, void* pdata, unsigned int len);
 	virtual void TimeConfirm(DuelPlayer* dp);
 	virtual void EndDuel();
-	
+
 	void DuelEndProc();
 	void WaitforResponse(int playerid);
 	void RefreshMzone(int player, int flag = 0x81fff, int use_cache = 1);
@@ -37,10 +37,10 @@ public:
 	void RefreshGrave(int player, int flag = 0x81fff, int use_cache = 1);
 	void RefreshExtra(int player, int flag = 0x81fff, int use_cache = 1);
 	void RefreshSingle(int player, int location, int sequence, int flag = 0x181fff);
-	
+
 	static int MessageHandler(long fduel, int type);
 	static void TagTimer(evutil_socket_t fd, short events, void* arg);
-	
+
 protected:
 	DuelPlayer* players[4];
 	DuelPlayer* pplayer[4];
@@ -52,8 +52,7 @@ protected:
 	unsigned char last_response;
 	Replay last_replay;
 	unsigned char turn_count;
-	unsigned short time_limit[2];
-	unsigned short time_elapsed;
+
 };
 
 }

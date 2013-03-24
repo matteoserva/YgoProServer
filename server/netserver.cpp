@@ -17,18 +17,18 @@ CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned 
 
 void CMNetServer::flushPendingMessages()
 {
-        if(!chatReady)
-            return;
-        for(auto it = players.begin(); it!=players.end(); ++it)
+    if(!chatReady)
+        return;
+    for(auto it = players.begin(); it!=players.end(); ++it)
+    {
+
+        for(auto i=it->second.pendingMessages.begin(); i != it->second.pendingMessages.end(); i++)
         {
+            SystemChatToPlayer(it->first,i->second,i->first);
 
-            for(auto i=it->second.pendingMessages.begin(); i != it->second.pendingMessages.end();i++)
-            {
-                SystemChatToPlayer(it->first,i->second,i->first);
-
-            }
-            it->second.pendingMessages.clear();
         }
+        it->second.pendingMessages.clear();
+    }
 
 }
 void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
@@ -173,7 +173,7 @@ void CMNetServer::clientStarted()
         event_add(user_timeout, &timeout);
         chatReady=false;
         ShowPlayerOdds();
-
+        //duel_mode->host_info.time_limit=10;
     }
 
 }
@@ -335,7 +335,7 @@ void CMNetServer::createGame()
     info.no_check_deck=false;
     info.start_hand=5;
     info.lflist=1;
-    info.time_limit=120;
+    info.time_limit=20;
     info.start_lp=(getNumDayOfWeek() == 6)?8000:8000;
     info.enable_priority=false;
     info.no_shuffle_deck=false;
@@ -670,7 +670,16 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!dp->game || !duel_mode->pduel)
             return;
+
+
         duel_mode->GetResponse(dp, pdata, len > 64 ? 64 : len - 1);
+        int resp_type = dp->type;
+        if(mode == MODE_TAG)
+            resp_type= dp->type < 2 ? 0 : 1;
+        if(duel_mode->time_limit[resp_type]>0 and duel_mode->time_limit[resp_type]<20)
+            duel_mode->time_limit[resp_type] +=1;
+        printf("response inviato da %d\n",dp->type);
+        ;
         break;
     }
     case CTOS_TIME_CONFIRM:
