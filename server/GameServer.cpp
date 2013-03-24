@@ -259,8 +259,10 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             BufferIO::CopyWStr(result.first.c_str(), dp->name, 20);
             dp->loginStatus = result.second;
 
-            int score = Users::getInstance()->getScore(result.first);
-            dp->cachedRankScore = score;
+            auto score = Users::getInstance()->getFullScore(result.first);
+            dp->cachedRankScore = score.first;
+            dp->cachedGameScore = score.second;
+
             return;
         }
         else if(pktType == CTOS_JOIN_GAME && dp->name[0] != 0)

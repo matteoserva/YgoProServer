@@ -111,20 +111,30 @@ std::pair<std::string,Users::LoginResult> Users::login(std::string username, std
     }
 }
 
+std::pair<int,int> Users::getFullScore(std::string username)
+{
+    if(username[0] == '-')
+        return std::pair<int,int>(0,0);
+
+    try
+    {
+        std::pair<int,int> score = database->getScore(username);
+        return score;
+    }
+    catch(std::exception)
+    {
+        return std::pair<int,int>(0,0);
+    }
+
+}
+
 int Users::getScore(std::string username)
 {
     if(username[0] == '-')
         return 0;
 
-    try
-    {
-        int score = database->getScore(username);
-        return score;
-    }
-    catch(std::exception)
-    {
-        return 0;
-    }
+    std::pair<int,int> full = getFullScore(username);
+    return full.first;
 }
 
 int Users::getRank(std::string username)

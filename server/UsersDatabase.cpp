@@ -27,26 +27,29 @@ int UsersDatabase::getRank(std::string username)
     }
 }
 
-int UsersDatabase::getScore(std::string username)
+
+
+std::pair<int,int> UsersDatabase::getScore(std::string username)
 {
     if(!con)
-        return 0;
+        return std::pair<int,int>(0,0);
     try
     {
         //std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from (SELECT username,score, @rownum := @rownum + 1 AS rank FROM stats, (SELECT @rownum := 0) r ORDER BY score DESC) z where username = ?"));
-        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT score from ranking where username = ?"));
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select ranking.score,stats.score from ranking join stats where ranking.username=stats.username and ranking.username = ?"));
 
         stmt->setString(1, username);
 
         std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
         if(!res->next())
-            return 0;
+            return std::pair<int,int>(0,0);
         int score = res->getInt(1);
-        return score;
+        int gameScore = res->getInt(2);
+        return std::pair<int,int>(score,gameScore);
     }
     catch (sql::SQLException &e)
     {
-        return 0;
+        return std::pair<int,int>(0,0);
 
     }
 }

@@ -70,6 +70,7 @@ public:
 
     static float win_exp(float delta);
     int getScore(std::string username);
+    std::pair<int,int> getFullScore(std::string username);
     int getRank(std::string username);
     static Users* getInstance();
     std::pair<std::string,LoginResult> login(std::string,char* ip);

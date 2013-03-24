@@ -109,6 +109,7 @@ struct DuelPlayer {
 	CMNetServerInterface* netServer;
     char ip[INET_ADDRSTRLEN];
     unsigned int cachedRankScore;
+    unsigned int cachedGameScore;
     Users::LoginResult loginStatus;
 	DuelPlayer() {
 		game = 0;
