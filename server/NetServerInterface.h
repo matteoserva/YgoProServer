@@ -36,6 +36,7 @@ protected:
     GameServer* gameServer;
     void playerReadinessChange(DuelPlayer *dp, bool isReady);
 
+    static DuelPlayer* last_chat_dp;
 
 
 public:

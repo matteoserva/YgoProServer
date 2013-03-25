@@ -5,6 +5,7 @@
 namespace ygo
 {
 
+DuelPlayer* CMNetServerInterface::last_chat_dp = nullptr;
 char CMNetServerInterface::net_server_read[0x20000];
 char CMNetServerInterface::net_server_write[0x20000];
 
@@ -38,6 +39,10 @@ void CMNetServerInterface::BroadcastSystemChat(std::wstring msg,bool isAdmin)
 }
 void CMNetServerInterface::shout(unsigned short* msg,DuelPlayer* dp)
 {
+    if(last_chat_dp == dp && time(NULL) - dp->chatTimestamp.back() <5)
+        return;
+    last_chat_dp = dp;
+
     dp->chatTimestamp.push_back(time(NULL));
     if(dp->chatTimestamp.size() > 5)
     {
