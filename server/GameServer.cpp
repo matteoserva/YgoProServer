@@ -111,7 +111,21 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
     dp.netServer=0;
     dp.loginStatus = Users::LoginResult::NOTENTERED;
     sockaddr_in* sa = (sockaddr_in*)address;
+
     inet_ntop(AF_INET, &(sa->sin_addr), dp.ip, INET_ADDRSTRLEN);
+
+    //prendo il reverse hostname
+    char node[NI_MAXHOST];
+
+    int res = getnameinfo(address, socklen, node, sizeof(node), nullptr, 0, 0);
+    if (res)
+    {
+        printf("%s\n", gai_strerror(res));
+        //exit(1);
+    }
+    else
+    printf("indirizzo: %s\n",node);
+
     that->users[bev] = dp;
 
     bufferevent_setcb(bev, ServerEchoRead, NULL, ServerEchoEvent, ctx);
