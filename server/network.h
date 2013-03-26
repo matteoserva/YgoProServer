@@ -119,6 +119,7 @@ struct DuelPlayer {
         netServer=0;
 	}
 
+    std::string countryCode;
     std::list<time_t> chatTimestamp;
 };
 

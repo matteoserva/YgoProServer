@@ -114,6 +114,8 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
 
     inet_ntop(AF_INET, &(sa->sin_addr), dp.ip, INET_ADDRSTRLEN);
 
+    dp.countryCode = Users::getInstance()->getCountryCode(std::string(dp.ip));
+
 /*
     //prendo il reverse hostname
     char node[NI_MAXHOST];

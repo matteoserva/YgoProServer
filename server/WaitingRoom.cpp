@@ -285,7 +285,7 @@ bool WaitingRoom::ChatMessageReceived(DuelPlayer* dp,unsigned short* msg)
     {
         if(it->first== dp)
             continue;
-        ChatWithPlayer(it->first, std::string(sender),messaggio);
+        ChatWithPlayer(it->first, std::string(sender) + "<"+dp->countryCode+">",messaggio);
     }
 
     shout(msg,dp);

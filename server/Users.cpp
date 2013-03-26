@@ -205,6 +205,14 @@ void Users::Draw(std::string win, std::string los)
     }
 }
 
+std::string Users::getCountryCode(std::string ip)
+{
+    return database->getCountryCode(ip);
+
+
+
+}
+
 void Users::Draw(std::string win1, std::string win2,std::string los1, std::string los2)
 {
     if(win1[0] == '-')

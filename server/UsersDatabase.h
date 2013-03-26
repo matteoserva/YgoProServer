@@ -33,6 +33,7 @@ public:
     bool setUserStats(UserStats&);
     int getRank(std::string username);
     std::pair<int,int> getScore(std::string username);
+    std::string getCountryCode(std::string);
 
 private:
     sql::Connection *con;

@@ -2,6 +2,8 @@
 #include "Config.h"
 #include <memory> //unique_ptr
 #include <cppconn/prepared_statement.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 namespace ygo
 {
 int UsersDatabase::getRank(std::string username)
@@ -27,7 +29,40 @@ int UsersDatabase::getRank(std::string username)
     }
 }
 
+std::string UsersDatabase::getCountryCode(std::string ip)
+{
+    if(!con)
+        return "UNK";
 
+
+    std::string binaryIP = "";
+    binaryIP.resize(4);
+    if(inet_pton(AF_INET,ip.c_str(),&binaryIP[0]) != 1)
+        return "UNK";
+
+    try
+    {
+
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select country from `dbip_lookup` where addr_type = 'ipv4' and ip_start <= ? order by ip_start desc limit 1"));
+
+        stmt->setString(1, binaryIP);
+
+        std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
+        if(!res->next())
+            return "UNK";
+        std::string country = res->getString(1);
+        return country;
+    }
+
+    catch (sql::SQLException &e)
+    {
+        return "UNK";
+
+    }
+
+
+
+}
 
 std::pair<int,int> UsersDatabase::getScore(std::string username)
 {

@@ -68,6 +68,7 @@ private:
 
 public:
 
+    std::string getCountryCode(std::string);
     static float win_exp(float delta);
     int getScore(std::string username);
     std::pair<int,int> getFullScore(std::string username);

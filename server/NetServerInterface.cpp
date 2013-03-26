@@ -58,15 +58,18 @@ void CMNetServerInterface::shout(unsigned short* msg,DuelPlayer* dp)
     }
 
 
-    wchar_t name[20];
+    wchar_t name[25];
     wchar_t messaggio[200];
     BufferIO::CopyWStr(msg, messaggio, 200);
     BufferIO::CopyWStr(dp->name, name, 20);
+    std::wstring tmp(dp->countryCode.begin(),dp->countryCode.end());
+    tmp = L"<"+tmp+L">";
+    wcscat(name,tmp.c_str());
     if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
-        shout(std::wstring(messaggio),false,std::wstring(name));
+        shout_internal(std::wstring(messaggio),false,std::wstring(name));
 }
 
-void CMNetServerInterface::shout(std::wstring message,bool isAdmin,std::wstring sender)
+void CMNetServerInterface::shout_internal(std::wstring message,bool isAdmin,std::wstring sender)
 {
     isShouting=true;
     if(sender!=L"")
