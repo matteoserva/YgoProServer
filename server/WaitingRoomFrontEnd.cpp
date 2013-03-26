@@ -193,19 +193,22 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
 
     if(!strcmp(messaggio,"!tag") || !strcmp(messaggio,"!t"))
     {
-        ExtractPlayer(dp);
-        roomManager->InsertPlayer(dp,MODE_TAG);
+        SystemChatToPlayer(dp,L"??????????????????????????????????",true);
+        //ExtractPlayer(dp);
+        //roomManager->InsertPlayer(dp,MODE_TAG);
 
     }
     else if(!strcmp(messaggio,"!single") || !strcmp(messaggio,"!s"))
     {
-        ExtractPlayer(dp);
-        roomManager->InsertPlayer(dp,MODE_SINGLE);
+        SystemChatToPlayer(dp,L"??????????????????????????????????",true);
+        //ExtractPlayer(dp);
+        //roomManager->InsertPlayer(dp,MODE_SINGLE);
     }
     else if(!strcmp(messaggio,"!match") || !strcmp(messaggio,"!m"))
     {
-        ExtractPlayer(dp);
-        roomManager->InsertPlayer(dp,MODE_MATCH);
+        SystemChatToPlayer(dp,L"??????????????????????????????????",true);
+        //ExtractPlayer(dp);
+        //roomManager->InsertPlayer(dp,MODE_MATCH);
     }
     else if(!strncmp(messaggio,"!shout ",7) )
     {
