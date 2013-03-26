@@ -193,20 +193,20 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
 
     if(!strcmp(messaggio,"!tag") || !strcmp(messaggio,"!t"))
     {
-        SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.png",true);
+        SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.php",true);
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_TAG);
 
     }
     else if(!strcmp(messaggio,"!single") || !strcmp(messaggio,"!s"))
     {
-        SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.png",true);
+        SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.php",true);
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_SINGLE);
     }
     else if(!strcmp(messaggio,"!match") || !strcmp(messaggio,"!m"))
     {
-        SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.png",true);
+        SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.php",true);
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_MATCH);
     }
