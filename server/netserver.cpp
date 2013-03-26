@@ -139,7 +139,12 @@ void CMNetServer::ShowPlayerScores()
         BufferIO::CopyWStr(it->first->name,buffer,20);
         wcscat(message,L"  [");
         wcscat(message,buffer);
-        wcscat(message,L"]: ");
+        wcscat(message,L"]<");
+
+        std::wstring tmp(it->first->countryCode.begin(),it->first->countryCode.end());
+        wcscat(message,tmp.c_str());
+        wcscat(message,L">: ");
+
         swprintf(buffer,64,L"%d(%+d)",it->first->cachedRankScore, it->first->cachedGameScore-it->first->cachedRankScore);
         wcscat(message,buffer);
     }
