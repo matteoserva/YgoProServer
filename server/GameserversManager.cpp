@@ -47,7 +47,7 @@ bool GameserversManager::serversAlmostEmpty()
 int GameserversManager::getNumAliveChildren()
 {
     int alive=0;
-    for(auto it = children.cbegin(); it != children.cend();++it)
+    for(auto it = children.cbegin(); it != children.cend(); ++it)
         if(it->second.isAlive)
             alive++;
     return alive;
@@ -108,6 +108,7 @@ void GameserversManager::child_loop(int parent_fd)
             gss.rooms = Statistics::getInstance()->getNumRooms();
             gss.players = Statistics::getInstance()->getNumPlayers();
             gss.isAlive = !needsReboot;
+            gss.type = STATS;
             write(parent_fd,&gss,sizeof(GameServerStats));
             GameServer::CheckAliveThread(gameServer);
             if (needsReboot)
@@ -185,21 +186,42 @@ int GameserversManager::getNumPlayers()
         pl += it->second.players;
     return pl;
 }
-bool GameserversManager::handleChildMessage(int child_fd,int bytesread, void*buffer)
+bool GameserversManager::handleChildMessage(int child_fd)
 {
+    //true is OK
+    byte buffer[500];
+    int bytesread = read(child_fd,buffer,sizeof(MessageType));
+    if(bytesread != sizeof(MessageType))
+        return false;
+
+    MessageType type = *((MessageType *)buffer);
+
+    int remaining;
+    switch(type)
+    {
+    case STATS:
+        remaining = sizeof(GameServerStats)-sizeof(MessageType);
+        break;
+
+    default:
+        return false;
+    }
+
+    bytesread += read(child_fd,buffer+sizeof(MessageType),remaining);
+
 
     if((int)bytesread < (int) sizeof(GameServerStats))
         return false;
     GameServerStats* gss = (GameServerStats*)buffer;
 
-            log(VERBOSE,"il figlio ha spedito un messaggio\n");
-            children[child_fd].players = gss->players;
-            children[child_fd].rooms= gss->rooms;
-            children[child_fd].isAlive= gss->isAlive;
+    log(VERBOSE,"il figlio ha spedito un messaggio\n");
+    children[child_fd].players = gss->players;
+    children[child_fd].rooms= gss->rooms;
+    children[child_fd].isAlive= gss->isAlive;
 
-            Statistics::getInstance()->setNumPlayers(getNumPlayers());
-            Statistics::getInstance()->setNumRooms(getNumRooms());
-            // while(1);
+    Statistics::getInstance()->setNumPlayers(getNumPlayers());
+    Statistics::getInstance()->setNumRooms(getNumRooms());
+    // while(1);
     return true;
 }
 
@@ -213,7 +235,7 @@ void GameserversManager::parent_loop()
     fd_set rfds;
     Statistics::getInstance()->StartThread();
 
-    byte buffer[500];
+
     while(true)
     {
         FD_ZERO(&rfds);
@@ -245,9 +267,9 @@ void GameserversManager::parent_loop()
             }
         }
 
-        int bytesread = read(child_fd,&buffer,sizeof(buffer));
 
-        if(!handleChildMessage(child_fd,bytesread,buffer))
+
+        if(!handleChildMessage(child_fd))
         {
             //il figlio ha chiuso
             printf("figlio terminato,fd: %d, pid: %d\n",child_fd,children[child_fd].pid);
@@ -313,11 +335,11 @@ void GameserversManager::killOneTerminatingServer()
     int chosen_pid=0;
     for(auto it = children.cbegin(); it != children.cend(); ++it)
         if(!it->second.isAlive && it->second.players < chosen_one_players)
-            {
-                chosen_one_players = it->second.players;
-                chosen_one = it->first;
-                chosen_pid = it->second.pid;
-            }
+        {
+            chosen_one_players = it->second.players;
+            chosen_one = it->first;
+            chosen_pid = it->second.pid;
+        }
     kill(chosen_one,SIGKILL);
 
 

@@ -43,7 +43,7 @@ private:
     bool serversAlmostFull();
     bool serversAlmostEmpty();
     void killOneTerminatingServer();
-    bool handleChildMessage(int,int, void*);
+    bool handleChildMessage(int);
     void closeChild(int);
 public:
     void StartServer(int port);
