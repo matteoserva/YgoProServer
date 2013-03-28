@@ -169,7 +169,7 @@ bool RoomManager::FillRoom(CMNetServer* room)
     return true;
 }
 
-void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin)
+void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,bool crossServer)
 {
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
@@ -181,6 +181,8 @@ void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin)
     }
     waitingRoom->BroadcastSystemChat(message,isAdmin);
 
+    if(!crossServer)
+        ;//gameServer, newMessageFromRoomManager
 }
 
 bool RoomManager::FillAllRooms()

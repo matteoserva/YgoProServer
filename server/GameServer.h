@@ -53,6 +53,7 @@ public:
     void DisconnectPlayer(DuelPlayer* dp);
     void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
     static int CheckAliveThread(void* parama);
+    int getNumPlayers();
 };
 
 }

@@ -47,7 +47,12 @@ bool GameServer::StartServer()
 
     return true;
 }
+int GameServer::getNumPlayers()
+{
+    return users.size();
 
+
+}
 GameServer::~GameServer()
 {
     if(listener)
@@ -140,7 +145,7 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
 
     }
 
-    Statistics::getInstance()->setNumPlayers(that->users.size());
+    Statistics::getInstance()->setNumPlayers(that->getNumPlayers());
 }
 void GameServer::ServerAcceptError(evconnlistener* listener, void* ctx)
 {
