@@ -207,20 +207,23 @@ bool GameserversManager::handleChildMessage(int child_fd)
         return false;
     }
 
-    bytesread += read(child_fd,buffer+sizeof(MessageType),remaining);
+    bytesread = read(child_fd,buffer+sizeof(MessageType),remaining);
 
-
-    if((int)bytesread < (int) sizeof(GameServerStats))
+    if((int)bytesread < remaining)
         return false;
-    GameServerStats* gss = (GameServerStats*)buffer;
 
-    log(VERBOSE,"il figlio ha spedito un messaggio\n");
-    children[child_fd].players = gss->players;
-    children[child_fd].rooms= gss->rooms;
-    children[child_fd].isAlive= gss->isAlive;
+    if(type == STATS)
+    {
+        GameServerStats* gss = (GameServerStats*)buffer;
 
-    Statistics::getInstance()->setNumPlayers(getNumPlayers());
-    Statistics::getInstance()->setNumRooms(getNumRooms());
+        log(VERBOSE,"il figlio ha spedito un messaggio\n");
+        children[child_fd].players = gss->players;
+        children[child_fd].rooms= gss->rooms;
+        children[child_fd].isAlive= gss->isAlive;
+
+        Statistics::getInstance()->setNumPlayers(getNumPlayers());
+        Statistics::getInstance()->setNumRooms(getNumRooms());
+    }
     // while(1);
     return true;
 }
