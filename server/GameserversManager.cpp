@@ -87,18 +87,35 @@ GameserversManager::GameserversManager():maxchildren(4)
     signal(SIGINT, sigterm_handler);
 }
 
-void GameserversManager::chatCallback(std::wstring message,bool isAdmin,std::wstring name)
+void GameserversManager::chatCallback(std::wstring message,bool isAdmin,void*ptr)
 {
-    printf("GameServerManager::chat received!!\n");
+    GameserversManager* that = (GameserversManager*)ptr;
+
+    GameServerChat gsc;
+    gsc.type = CHAT;
+    wcscpy(gsc.messaggio,message.c_str());
+    gsc.isAdmin = isAdmin;
+    write(that->parent_fd,&gsc,sizeof(GameServerChat));
+    /*for(auto it = that->children.cbegin(); it != that->children.cend(); ++it)
+    {
+            if(it->first)
+            ChildInfo gss = it->second;
+            printf("pid: %5d, rooms: %3d, users %3d",gss.pid,gss.rooms,gss.players);
+            if(!it->second.isAlive)
+                printf("  *dying*");
+            printf("\n");
+    }*/
 
 
 }
 
-void GameserversManager::child_loop(int parent_fd)
+void GameserversManager::child_loop(int receive_fd)
 {
+
     ygo::GameServer* gameServer = new ygo::GameServer(server_fd);
     close(0);
-    gameServer->setChatCallback(GameserversManager::chatCallback);
+    gameServer->setChatCallback(GameserversManager::chatCallback,this);
+
     if(!gameServer->StartServer())
     {
         printf("cannot start the gameserver\n");
@@ -107,9 +124,31 @@ void GameserversManager::child_loop(int parent_fd)
     else
     {
         bool isRebooting = false;
+
+
+        fd_set rfds;
+
+
+
+
+
+
         while(1)
         {
-            sleep(1);
+            FD_ZERO(&rfds);
+            int max_fd=0;
+
+            FD_SET(receive_fd,&rfds);
+            timeval timeout = {1, 0};
+            auto retval = select(receive_fd + 1, &rfds, NULL, NULL, &timeout);
+
+
+            if(retval > 0)
+            {
+                GameServerChat gsc;
+                int bytesread = read(receive_fd,&gsc,sizeof(gsc));
+                gameServer->injectChatMessage(gsc.messaggio,gsc.isAdmin);
+            }
             //printf("spedisco il messaggiofiglio\n");
             GameServerStats gss;
             gss.rooms = Statistics::getInstance()->getNumRooms();
@@ -145,7 +184,14 @@ int GameserversManager::spawn_gameserver()
 {
     int pid;
     int pipefd[2];
+    int pipefd2[2];
+
     if (pipe(pipefd) == -1)
+    {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
+    if (pipe(pipefd2) == -1)
     {
         perror("pipe");
         exit(EXIT_FAILURE);
@@ -154,8 +200,10 @@ int GameserversManager::spawn_gameserver()
     if(pid = fork())
     {
         close (pipefd[1]);
+        close (pipefd2[0]);
         ChildInfo gss;
         gss.pid = pid;
+        gss.child_fd = pipefd2[1];
         gss.isAlive=true;
         children[pipefd[0]] = gss;
         //gss.players=0;
@@ -168,13 +216,14 @@ int GameserversManager::spawn_gameserver()
     Statistics::getInstance()->setNumPlayers(0);
     Statistics::getInstance()->setNumRooms(0);
     close(pipefd[0]);
+    close(pipefd2[1]);
     for(auto it = children.cbegin(); it != children.cend(); ++it)
         closeChild(it->first);
     children.clear();
 
     isFather = false;
-
-    child_loop(pipefd[1]);
+    parent_fd = pipefd[1];
+    child_loop(pipefd2[0]);
     return 0;
 
 }
@@ -236,13 +285,14 @@ bool GameserversManager::handleChildMessage(int child_fd)
     }
     else if(type == CHAT)
     {
-     /*   GameServerStats* gss = (GameServerStats*)buffer;
+        GameServerStats* gss = (GameServerStats*)buffer;
 
         for(auto it = children.cbegin(); it != children.cend(); ++it)
         {
-            max_fd = max(max_fd,it->first);
-            FD_SET(it->first,&rfds);
-        }*/
+            if(it->first == child_fd)
+               continue;
+            write(it->second.child_fd,buffer,sizeof(GameServerChat));
+        }
     }
     // while(1);
     return true;
@@ -370,6 +420,7 @@ void GameserversManager::killOneTerminatingServer()
 void GameserversManager::closeChild(int child)
 {
     close(child);
+    close(children[child].child_fd);
 
 }
 void GameserversManager::StartServer(int port)

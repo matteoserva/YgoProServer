@@ -182,7 +182,7 @@ void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,bool cross
     waitingRoom->BroadcastSystemChat(message,isAdmin);
 
     if(!crossServer)
-        ;//gameServer, newMessageFromRoomManager
+        gameServer->callChatCallback(message,isAdmin);
 }
 
 bool RoomManager::FillAllRooms()

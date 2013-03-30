@@ -13,13 +13,16 @@
 namespace ygo
 {
 
-typedef void (*ChatCallback)(std::wstring ,bool ,std::wstring );
+typedef void (*ChatCallback)(std::wstring ,bool ,void* );
 
 
 class GameServer
 {
 private:
     ChatCallback chat_cb;
+    void* chat_cb_ptr;
+
+
     int MAXPLAYERS;
     std::unordered_map<bufferevent*, DuelPlayer> users;
     unsigned short server_port;
@@ -35,9 +38,18 @@ private:
     void RestartListen();
     bool isListening;
 
+    std::list<std::pair<std::wstring,bool>> injectedMessages;
+    std::mutex injectedMessages_mutex;
+
 public:
-    void callChatCallback(std::wstring a,bool b,std::wstring c);
-    void setChatCallback(ChatCallback);
+    void injectChatMessage(std::wstring a,bool b);
+    void callChatCallback(std::wstring a,bool b);
+    void setChatCallback(ChatCallback,void*);
+
+    static void checkInjectedMessages_cb(evutil_socket_t fd, short events, void* arg);
+
+
+
     event_base* volatile net_evbase;
     RoomManager roomManager;
     GameServer(int server_fd);

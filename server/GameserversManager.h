@@ -28,6 +28,7 @@ struct ChildInfo
     int rooms;
     int players;
     bool isAlive;
+    int child_fd;
     ChildInfo():rooms(0),players(0),isAlive(true){};
 
 };
@@ -35,7 +36,12 @@ struct ChildInfo
 class GameserversManager
 {
 private:
-    static void chatCallback(std::wstring message,bool isAdmin,std::wstring name);
+    /*child related */
+    int parent_fd;
+
+
+
+    static void chatCallback(std::wstring message,bool isAdmin,void*);
     int maxchildren;
     int server_fd;
     int spawn_gameserver();

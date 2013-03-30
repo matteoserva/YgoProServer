@@ -153,17 +153,26 @@ void GameServer::ServerAcceptError(evconnlistener* listener, void* ctx)
     that->StopListen();
 }
 
-void GameServer::setChatCallback(ChatCallback ccb)
+void GameServer::setChatCallback(ChatCallback ccb,void*ptr)
 {
     chat_cb = ccb;
+    chat_cb_ptr=ptr;
 }
 
-void GameServer::callChatCallback(std::wstring a,bool b,std::wstring c)
+void GameServer::callChatCallback(std::wstring a,bool b)
 {
     if(chat_cb == nullptr)
         return;
-    (*chat_cb)(a,b,c);
+    (*chat_cb)(a,b,chat_cb_ptr);
 }
+
+void GameServer::injectChatMessage(std::wstring a,bool b)
+{
+        std::lock_guard<std::mutex> lock(injectedMessages_mutex);
+injectedMessages.push_back(std::pair<std::wstring,bool>(a,b));
+printf("messaggio iniettato\n");
+}
+
 
 void GameServer::ServerEchoRead(bufferevent *bev, void *ctx)
 {
@@ -243,6 +252,27 @@ void GameServer::keepAlive(evutil_socket_t fd, short events, void* arg)
     that->isAlive = true;
 
 }
+
+void GameServer::checkInjectedMessages_cb(evutil_socket_t fd, short events, void* arg)
+{
+    GameServer*that = (GameServer*) arg;
+    std::lock_guard<std::mutex> lock(that->injectedMessages_mutex);
+    if(that->injectedMessages.size() == 0)
+        return;
+
+    for(auto it = that->injectedMessages.begin();it!=that->injectedMessages.end();++it)
+    {
+
+        that->roomManager.BroadcastMessage(it->first,it->second,true);
+
+
+    }
+
+    that->injectedMessages.clear();
+
+}
+
+
 int GameServer::ServerThread(void* parama)
 {
     GameServer*that = (GameServer*)parama;
@@ -252,8 +282,14 @@ int GameServer::ServerThread(void* parama)
     timeval timeout = {5, 0};
     event_add(keepAliveEvent, &timeout);
 
+    event* cicle_injected = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, checkInjectedMessages_cb, parama);
+    timeval timeout2 = {0, 200000};
+    event_add(cicle_injected, &timeout2);
+
+
     event_base_dispatch(that->net_evbase);
     event_free(keepAliveEvent);
+    event_free(cicle_injected);
     event_base_free(that->net_evbase);
     that->net_evbase = 0;
     //checkAlive.join();
