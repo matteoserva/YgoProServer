@@ -10,16 +10,16 @@
 #include "RoomManager.h"
 
 #include "netserver.h"
-
 namespace ygo
 {
 
-
+typedef void (*ChatCallback)(std::wstring ,bool ,std::wstring );
 
 
 class GameServer
 {
 private:
+    ChatCallback chat_cb;
     int MAXPLAYERS;
     std::unordered_map<bufferevent*, DuelPlayer> users;
     unsigned short server_port;
@@ -35,9 +35,8 @@ private:
     void RestartListen();
     bool isListening;
 
-
-
 public:
+    void setChatCallback(ChatCallback);
     event_base* volatile net_evbase;
     RoomManager roomManager;
     GameServer(int server_fd);

@@ -152,6 +152,11 @@ void GameServer::ServerAcceptError(evconnlistener* listener, void* ctx)
     GameServer* that = (GameServer*)ctx;
     that->StopListen();
 }
+
+void GameServer::setChatCallback(ChatCallback ccb)
+{
+    chat_cb = ccb;
+}
 void GameServer::ServerEchoRead(bufferevent *bev, void *ctx)
 {
     GameServer* that = (GameServer*)ctx;

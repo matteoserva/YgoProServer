@@ -1,7 +1,10 @@
+#ifndef _GAMESERVERMANAGER_H_
+#define _GAMESERVERMANAGER_H_
+
 #include "GameServer.h"
 namespace ygo
 {
-enum MessageType{STATS};
+enum MessageType{STATS,CHAT};
 struct GameServerStats
 {
     MessageType type;
@@ -10,6 +13,13 @@ struct GameServerStats
     int players;
     bool isAlive;
     GameServerStats();
+};
+
+struct GameServerChat
+{
+    MessageType type;
+    bool isAdmin;
+    wchar_t messaggio[200];
 };
 
 struct ChildInfo
@@ -53,3 +63,5 @@ public:
 
 };
 }
+
+#endif

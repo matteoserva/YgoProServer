@@ -189,7 +189,7 @@ int GameserversManager::getNumPlayers()
 bool GameserversManager::handleChildMessage(int child_fd)
 {
     //true is OK
-    byte buffer[500];
+    byte buffer[sizeof(GameServerChat)];
     int bytesread = read(child_fd,buffer,sizeof(MessageType));
     if(bytesread != sizeof(MessageType))
         return false;
@@ -201,6 +201,9 @@ bool GameserversManager::handleChildMessage(int child_fd)
     {
     case STATS:
         remaining = sizeof(GameServerStats)-sizeof(MessageType);
+        break;
+    case CHAT:
+        remaining = sizeof(GameServerChat)-sizeof(MessageType);
         break;
 
     default:
@@ -223,6 +226,16 @@ bool GameserversManager::handleChildMessage(int child_fd)
 
         Statistics::getInstance()->setNumPlayers(getNumPlayers());
         Statistics::getInstance()->setNumRooms(getNumRooms());
+    }
+    else if(type == CHAT)
+    {
+     /*   GameServerStats* gss = (GameServerStats*)buffer;
+
+        for(auto it = children.cbegin(); it != children.cend(); ++it)
+        {
+            max_fd = max(max_fd,it->first);
+            FD_SET(it->first,&rfds);
+        }*/
     }
     // while(1);
     return true;
