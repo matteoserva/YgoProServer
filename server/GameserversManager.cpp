@@ -29,11 +29,12 @@ GameServerStats::GameServerStats(): rooms(0),players(0)
 
 bool GameserversManager::serversAlmostFull()
 {
-    int threeshold = Config::getInstance()->max_users_per_process*9/10;
+    int threeshold = Config::getInstance()->max_users_per_process/10;
     threeshold = max(threeshold,1);
     threeshold = min(threeshold,5);
     log(VERBOSE,"high threeshold = %d\n",threeshold);
-    return getNumPlayersInAliveChildren()+threeshold > getNumAliveChildren()*Config::getInstance()->max_users_per_process;
+    bool isAlmostFull = getNumPlayersInAliveChildren()+threeshold > getNumAliveChildren()*Config::getInstance()->max_users_per_process;
+    return isAlmostFull;
 }
 bool GameserversManager::serversAlmostEmpty()
 {
@@ -41,7 +42,8 @@ bool GameserversManager::serversAlmostEmpty()
     threeshold = min(threeshold,50);
     threeshold = max(threeshold,1);
     log(VERBOSE,"low threeshold = %d\n",threeshold);
-    return getNumPlayersInAliveChildren() <= (getNumAliveChildren()-1) * Config::getInstance()->max_users_per_process -threeshold;
+    bool isAlmostEmpty = getNumPlayersInAliveChildren() <= (getNumAliveChildren()-1) * Config::getInstance()->max_users_per_process -threeshold;
+    return isAlmostEmpty;
 }
 
 int GameserversManager::getNumAliveChildren()
