@@ -87,11 +87,18 @@ GameserversManager::GameserversManager():maxchildren(4)
     signal(SIGINT, sigterm_handler);
 }
 
+void GameserversManager::chatCallback(std::wstring message,bool isAdmin,std::wstring name)
+{
+    printf("GameServerManager::chat received!!\n");
+
+
+}
 
 void GameserversManager::child_loop(int parent_fd)
 {
     ygo::GameServer* gameServer = new ygo::GameServer(server_fd);
     close(0);
+    gameServer->setChatCallback(GameserversManager::chatCallback);
     if(!gameServer->StartServer())
     {
         printf("cannot start the gameserver\n");

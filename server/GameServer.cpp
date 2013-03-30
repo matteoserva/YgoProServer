@@ -12,7 +12,7 @@
 using ygo::Config;
 namespace ygo
 {
-GameServer::GameServer(int server_fd):server_fd(server_fd)
+GameServer::GameServer(int server_fd):server_fd(server_fd),chat_cb(nullptr)
 {
     server_port = 0;
     net_evbase = 0;
@@ -157,6 +157,14 @@ void GameServer::setChatCallback(ChatCallback ccb)
 {
     chat_cb = ccb;
 }
+
+void GameServer::callChatCallback(std::wstring a,bool b,std::wstring c)
+{
+    if(chat_cb == nullptr)
+        return;
+    (*chat_cb)(a,b,c);
+}
+
 void GameServer::ServerEchoRead(bufferevent *bev, void *ctx)
 {
     GameServer* that = (GameServer*)ctx;

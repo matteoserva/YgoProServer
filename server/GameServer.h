@@ -36,6 +36,7 @@ private:
     bool isListening;
 
 public:
+    void callChatCallback(std::wstring a,bool b,std::wstring c);
     void setChatCallback(ChatCallback);
     event_base* volatile net_evbase;
     RoomManager roomManager;

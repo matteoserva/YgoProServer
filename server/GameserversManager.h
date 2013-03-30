@@ -35,7 +35,7 @@ struct ChildInfo
 class GameserversManager
 {
 private:
-
+    static void chatCallback(std::wstring message,bool isAdmin,std::wstring name);
     int maxchildren;
     int server_fd;
     int spawn_gameserver();
