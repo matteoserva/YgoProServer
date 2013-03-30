@@ -194,6 +194,8 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
     if(!strcmp(messaggio,"!tag") || !strcmp(messaggio,"!t"))
     {
         SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.php",true);
+        playerReadinessChange(dp,false);
+        ShowStats(dp);
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_TAG);
 
@@ -201,12 +203,24 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
     else if(!strcmp(messaggio,"!single") || !strcmp(messaggio,"!s"))
     {
         SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.php",true);
+        playerReadinessChange(dp,false);
+        ShowStats(dp);
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_SINGLE);
     }
     else if(!strcmp(messaggio,"!match") || !strcmp(messaggio,"!m"))
     {
         SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.php",true);
+        playerReadinessChange(dp,false);
+        ShowStats(dp);
+        //ExtractPlayer(dp);
+        //roomManager->InsertPlayer(dp,MODE_MATCH);
+    }
+    else if(!strcmp(messaggio,"!help") || !strcmp(messaggio,"!h"))
+    {
+        SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.php",true);
+        playerReadinessChange(dp,false);
+        ShowStats(dp);
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_MATCH);
     }
