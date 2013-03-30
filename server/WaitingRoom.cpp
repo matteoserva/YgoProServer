@@ -208,8 +208,8 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     }
 
     //ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
-    ChatWithPlayer(dp, "CheckMate","click the 'to duelist' button to choose the game type");
-    ChatWithPlayer(dp, "CheckMate","click the 'to observer' button for the available rooms list");
+    ChatWithPlayer(dp, "CheckMate","click the 'duelist' button to choose the game type");
+    ChatWithPlayer(dp, "CheckMate","click the 'spectate' button for the available rooms list");
     char buffer[200];
     sprintf(buffer,"PID: %d, BUILD: %d, PLAYERS: %d",(int)getpid(),(int)BUILD_NUMBER,Statistics::getInstance()->getNumPlayers());
     ChatWithPlayer(dp, "CheckMate",buffer);
