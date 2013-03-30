@@ -89,8 +89,8 @@ void GameServer::StopServer()
 
 void GameServer::StopListen()
 {
-        evconnlistener_disable(listener);
-        isListening = false;
+    evconnlistener_disable(listener);
+    isListening = false;
 }
 
 void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx)
@@ -121,19 +121,19 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
 
     dp.countryCode = Users::getInstance()->getCountryCode(std::string(dp.ip));
 
-/*
-    //prendo il reverse hostname
-    char node[NI_MAXHOST];
+    /*
+        //prendo il reverse hostname
+        char node[NI_MAXHOST];
 
-    int res = getnameinfo(address, socklen, node, sizeof(node), nullptr, 0, 0);
-    if (res)
-    {
-        printf("%s\n", gai_strerror(res));
-        //exit(1);
-    }
-    else
-    printf("indirizzo: %s\n",node);
-*/
+        int res = getnameinfo(address, socklen, node, sizeof(node), nullptr, 0, 0);
+        if (res)
+        {
+            printf("%s\n", gai_strerror(res));
+            //exit(1);
+        }
+        else
+        printf("indirizzo: %s\n",node);
+    */
 
     that->users[bev] = dp;
 
@@ -168,9 +168,8 @@ void GameServer::callChatCallback(std::wstring a,bool b)
 
 void GameServer::injectChatMessage(std::wstring a,bool b)
 {
-        std::lock_guard<std::mutex> lock(injectedMessages_mutex);
-injectedMessages.push_back(std::pair<std::wstring,bool>(a,b));
-printf("messaggio iniettato\n");
+    std::lock_guard<std::mutex> lock(injectedMessages_mutex);
+    injectedMessages.push_back(std::pair<std::wstring,bool>(a,b));
 }
 
 
@@ -238,7 +237,7 @@ int GameServer::CheckAliveThread(void* parama)
     if(!that->isAlive)
     {
         volatile int *p = reinterpret_cast<volatile int*>(0);
-    	*p = 0x1337D00D;
+        *p = 0x1337D00D;
         exit(EXIT_FAILURE);
     }
     that->isAlive=false;
@@ -260,7 +259,7 @@ void GameServer::checkInjectedMessages_cb(evutil_socket_t fd, short events, void
     if(that->injectedMessages.size() == 0)
         return;
 
-    for(auto it = that->injectedMessages.begin();it!=that->injectedMessages.end();++it)
+    for(auto it = that->injectedMessages.begin(); it!=that->injectedMessages.end(); ++it)
     {
 
         that->roomManager.BroadcastMessage(it->first,it->second,true);
