@@ -213,6 +213,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     char buffer[200];
     sprintf(buffer,"PID: %d, BUILD: %d, PLAYERS: %d",(int)getpid(),(int)BUILD_NUMBER,Statistics::getInstance()->getNumPlayers());
     ChatWithPlayer(dp, "CheckMate",buffer);
+    ChatWithPlayer(dp, "CheckMate","profile and stats at http://ygopro.cyberplanet.it/");
 
 
 }
