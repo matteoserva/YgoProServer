@@ -208,12 +208,16 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     }
 
     //ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
-    ChatWithPlayer(dp, "CheckMate","click the 'duelist' button to choose the game type");
-    ChatWithPlayer(dp, "CheckMate","click the 'spectate' button for the available rooms list");
+    ChatWithPlayer(dp, "CheckMate","click the 'duelist' button to choose the game type or 'spectate' for the available rooms list");
     char buffer[200];
+
     sprintf(buffer,"PID: %d, BUILD: %d, PLAYERS: %d",(int)getpid(),(int)BUILD_NUMBER,Statistics::getInstance()->getNumPlayers());
     ChatWithPlayer(dp, "CheckMate",buffer);
     ChatWithPlayer(dp, "CheckMate","profile and stats at http://ygopro.cyberplanet.it/");
+    if(dp->countryCode == "IT")
+    {
+        SystemChatToPlayer(dp, L"[BIP][BIP] Duellante italiano rilevato [BIP] Benvenuto nel mio server! buon divertimento",true);
+    }
 
 
 }
