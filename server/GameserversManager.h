@@ -19,7 +19,7 @@ struct GameServerChat
 {
     MessageType type;
     bool isAdmin;
-    wchar_t messaggio[200];
+    wchar_t messaggio[260];
 };
 
 struct ChildInfo

@@ -171,6 +171,8 @@ bool RoomManager::FillRoom(CMNetServer* room)
 
 void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,bool crossServer)
 {
+    if(message.length() > 250)
+        return;
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
         (*it)->BroadcastSystemChat(message,isAdmin);
