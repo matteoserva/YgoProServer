@@ -1,7 +1,7 @@
 #include "NetServerInterface.h"
 #include "debug.h"
 #include "RoomManager.h"
-
+#include "GameServer.h"
 namespace ygo
 {
 
@@ -132,13 +132,29 @@ void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
 
 bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,char* msg)
 {
+    return false;
     char messaggio[256];
     int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
     log(INFO,"ricevuto messaggio %s\n",messaggio);
-
+    if(msg[0] == 0 || msg[0] != '!')
+        return false;
     if(!strncmp(messaggio,"!pm ",3) )
     {
-        printf("chatcommand\n");
+        std::wstring nome(L"CheckMate");
+
+        std::string nomes(&msg[4]);
+        auto pos = nomes.find(' ');
+        if(pos == std::string::npos)
+            return false;
+
+        std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
+        DuelPlayer* dest = gameServer->findPlayer(nome);
+        if(dest == nullptr)
+            return false;
+
+
+
+        dest->netServer->SystemChatToPlayer(dest,L"chatcommand",false);
         return true;
     }
     return false;

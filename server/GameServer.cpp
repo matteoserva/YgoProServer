@@ -176,10 +176,10 @@ DuelPlayer* GameServer::findPlayer(std::wstring nome)
 {
     for(auto it = loggedUsers.begin();it!=loggedUsers.end();++it)
     {
-        /*if(!wcscmp(it->second.name,nome.c_str()))
+        if(it->first ==nome)
         {
-            return &(it->second);
-        }*/
+            return (it->second);
+        }
     }
 
     return nullptr;
@@ -315,6 +315,7 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
                     wchar_t nome[25];
                     BufferIO::CopyWStr(dp->name,nome,20);
                     std::wstring nomes(nome);
+                    std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
                     if(loggedUsers.find(nomes)!=loggedUsers.end())
                         loggedUsers.erase(nomes);
         }
@@ -367,7 +368,10 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
                 {
                     wchar_t nome[25];
                     BufferIO::CopyWStr(dp->name,nome,20);
-                    loggedUsers[std::wstring(nome)] = dp;
+                    std::wstring nomes(nome);
+                    std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
+
+                    loggedUsers[nomes] = dp;
                 }
 
             }
