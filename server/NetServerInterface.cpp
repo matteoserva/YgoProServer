@@ -78,8 +78,10 @@ void CMNetServerInterface::shout_internal(std::wstring message,bool isAdmin,std:
     isShouting=false;
 }
 
-void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg,bool isAdmin)
+void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, std::wstring msg,bool isAdmin)
 {
+    if(msg.length() > 256)
+        msg.resize(256);
     STOC_Chat scc;
     scc.player = isAdmin?8:10;
     int msglen = BufferIO::CopyWStr(msg.c_str(), scc.msg, 256);

@@ -49,7 +49,7 @@ public:
     DuelPlayer* getFirstPlayer();
 
     virtual void SendMessageToPlayer(DuelPlayer*dp, char*msg);
-    virtual void SystemChatToPlayer(DuelPlayer*dp, const std::wstring,bool isAdmin = false);
+    virtual void SystemChatToPlayer(DuelPlayer*dp, std::wstring,bool isAdmin = false);
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
     template<typename ST>
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st)
