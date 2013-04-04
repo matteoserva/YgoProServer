@@ -130,4 +130,18 @@ void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
         bufferevent_write(dp->bev, net_server_write, last_sent);
 }
 
+bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,char* msg)
+{
+    char messaggio[256];
+    int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
+    log(INFO,"ricevuto messaggio %s\n",messaggio);
+
+    if(!strncmp(messaggio,"!pm ",3) )
+    {
+        printf("chatcommand\n");
+        return true;
+    }
+    return false;
+}
+
 }

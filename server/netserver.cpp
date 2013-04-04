@@ -732,17 +732,15 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!dp->game)
             return;
+        char messaggio[256];
+        int msglen = BufferIO::CopyWStr((unsigned short*) pdata,messaggio, 256);
+        if(msglen != 0 && handleChatCommand(dp,messaggio))
+            break;
+
         duel_mode->Chat(dp, pdata, len - 1);
 
         shout((unsigned short*)pdata,dp);
-        /*wchar_t name[20];
-        wchar_t messaggio[200];
-        BufferIO::CopyWStr((unsigned short*)pdata, messaggio, 200);
-        BufferIO::CopyWStr(dp->name, name, 20);
-        if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
-            shout(std::wstring(messaggio),false,std::wstring(name));
-        //BufferIO::CopyWStr(dp->name, name, 20);
-        //log(INFO,"MESSAGGIO. %s: %s\n",name,messaggio);*/
+
         break;
     }
     case CTOS_UPDATE_DECK:

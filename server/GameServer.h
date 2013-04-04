@@ -25,6 +25,9 @@ private:
 
     int MAXPLAYERS;
     std::unordered_map<bufferevent*, DuelPlayer> users;
+    std::map<std::wstring,DuelPlayer*> loggedUsers;
+
+
     unsigned short server_port;
     evconnlistener* listener;
     int server_fd;
@@ -49,7 +52,7 @@ public:
     static void checkInjectedMessages_cb(evutil_socket_t fd, short events, void* arg);
 
 
-
+    DuelPlayer* findPlayer(std::wstring);
     event_base* volatile net_evbase;
     RoomManager roomManager;
     GameServer(int server_fd);

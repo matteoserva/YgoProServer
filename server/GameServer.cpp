@@ -172,7 +172,18 @@ void GameServer::injectChatMessage(std::wstring a,bool b)
     injectedMessages.push_back(std::pair<std::wstring,bool>(a,b));
 }
 
+DuelPlayer* GameServer::findPlayer(std::wstring nome)
+{
+    for(auto it = loggedUsers.begin();it!=loggedUsers.end();++it)
+    {
+        /*if(!wcscmp(it->second.name,nome.c_str()))
+        {
+            return &(it->second);
+        }*/
+    }
 
+    return nullptr;
+}
 void GameServer::ServerEchoRead(bufferevent *bev, void *ctx)
 {
     GameServer* that = (GameServer*)ctx;
@@ -299,11 +310,23 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
     auto bit = users.find(dp->bev);
     if(bit != users.end())
     {
+        if(dp->loginStatus == Users::LoginResult::NOPASSWORD || dp->loginStatus == Users::LoginResult::AUTHENTICATED)
+        {
+                    wchar_t nome[25];
+                    BufferIO::CopyWStr(dp->name,nome,20);
+                    std::wstring nomes(nome);
+                    if(loggedUsers.find(nomes)!=loggedUsers.end())
+                        loggedUsers.erase(nomes);
+        }
+
         dp->netServer=NULL;
         bufferevent_flush(dp->bev, EV_WRITE, BEV_FLUSH);
         bufferevent_disable(dp->bev, EV_READ);
         bufferevent_free(dp->bev);
         users.erase(bit);
+
+
+
     }
 
     if(listener != nullptr)
@@ -338,7 +361,17 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         }
         else if(pktType == CTOS_JOIN_GAME && dp->name[0] != 0)
         {
-            if(!roomManager.InsertPlayerInWaitingRoom(dp))
+            if(roomManager.InsertPlayerInWaitingRoom(dp))
+            {
+                if(dp->loginStatus == Users::LoginResult::NOPASSWORD || dp->loginStatus == Users::LoginResult::AUTHENTICATED)
+                {
+                    wchar_t nome[25];
+                    BufferIO::CopyWStr(dp->name,nome,20);
+                    loggedUsers[std::wstring(nome)] = dp;
+                }
+
+            }
+            else
                 return;
         }
         else if(!strcmp(data,"ping"))
@@ -356,6 +389,9 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             return;
         }
     }
+
+
+
 
     int time1 = clock();
     dp->netServer->HandleCTOSPacket(dp,data,len);

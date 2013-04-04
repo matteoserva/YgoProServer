@@ -187,9 +187,13 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
 
 bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
 {
+    if(CMNetServerInterface::handleChatCommand(dp,msg))
+        return true;
     char messaggio[256];
     int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
     log(INFO,"ricevuto messaggio %s\n",messaggio);
+
+
 
     if(!strcmp(messaggio,"!tag") || !strcmp(messaggio,"!t"))
     {
@@ -237,6 +241,7 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
         std::wstring tmp2(tmp.begin(),tmp.end());
         roomManager->BroadcastMessage(tmp2,true);
     }
+
     else
     {
         return false;
