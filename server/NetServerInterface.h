@@ -46,7 +46,7 @@ public:
     virtual void InsertPlayer(DuelPlayer* dp)=0;
     virtual void LeaveGame(DuelPlayer* dp)=0;
     virtual void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)=0;
-    virtual bool handleChatCommand(DuelPlayer* dp,char* msg);
+    virtual bool handleChatCommand(DuelPlayer* dp,wchar_t* msg);
     DuelPlayer* getFirstPlayer();
 
     virtual void SendMessageToPlayer(DuelPlayer*dp, char*msg);

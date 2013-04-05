@@ -732,7 +732,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         if(!dp->game)
             return;
-        char messaggio[256];
+        wchar_t messaggio[256];
         int msglen = BufferIO::CopyWStr((unsigned short*) pdata,messaggio, 256);
         if(msglen != 0 && handleChatCommand(dp,messaggio))
             break;

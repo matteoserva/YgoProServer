@@ -305,6 +305,27 @@ int GameServer::ServerThread(void* parama)
     //checkAlive.join();
     return 0;
 }
+
+bool GameServer::dispatchPM(std::wstring recipient,std::wstring message)
+{
+    std::transform(recipient.begin(), recipient.end(), recipient.begin(), ::tolower);
+    printf("dispatch\n");
+    DuelPlayer* dp = findPlayer(recipient);
+    if(dp==nullptr)
+        return false;
+
+    dp->netServer->SystemChatToPlayer(dp,message,false);
+    printf("completed\n");
+    return true;
+}
+    bool GameServer::sendPM(std::wstring recipient,std::wstring message)
+    {
+        return dispatchPM(recipient,message);
+
+
+    }
+
+
 void GameServer::DisconnectPlayer(DuelPlayer* dp)
 {
     auto bit = users.find(dp->bev);
@@ -316,6 +337,7 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
                     BufferIO::CopyWStr(dp->name,nome,20);
                     std::wstring nomes(nome);
                     std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
+                    printf("rimuovo %Ls\n",nomes.c_str());
                     if(loggedUsers.find(nomes)!=loggedUsers.end())
                         loggedUsers.erase(nomes);
         }

@@ -20,7 +20,7 @@ class WaitingRoom:public CMNetServerInterface
 private:
     std::map<DuelPlayer*, DuelPlayerStatus> player_status;
     static const std::string banner;
-    bool handleChatCommand(DuelPlayer* dp,char* msg);
+    bool handleChatCommand(DuelPlayer* dp,wchar_t* msg);
 
     bool ChatMessageReceived(DuelPlayer* dp,unsigned short* msg);
     static int minSecondsWaiting;

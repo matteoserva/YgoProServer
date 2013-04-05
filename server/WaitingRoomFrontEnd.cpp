@@ -185,17 +185,15 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
 
 }
 
-bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
+bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
 {
-    if(CMNetServerInterface::handleChatCommand(dp,msg))
+    if(CMNetServerInterface::handleChatCommand(dp,messaggio))
         return true;
-    char messaggio[256];
-    int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
-    log(INFO,"ricevuto messaggio %s\n",messaggio);
 
 
 
-    if(!strcmp(messaggio,"!tag") || !strcmp(messaggio,"!t"))
+
+    if(!wcscmp(messaggio,L"!tag") || !wcscmp(messaggio,L"!t"))
     {
         SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.php",true);
         playerReadinessChange(dp,false);
@@ -204,7 +202,7 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
         //roomManager->InsertPlayer(dp,MODE_TAG);
 
     }
-    else if(!strcmp(messaggio,"!single") || !strcmp(messaggio,"!s"))
+    else if(!wcscmp(messaggio,L"!single") || !wcscmp(messaggio,L"!s"))
     {
         SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.php",true);
         playerReadinessChange(dp,false);
@@ -212,7 +210,7 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_SINGLE);
     }
-    else if(!strcmp(messaggio,"!match") || !strcmp(messaggio,"!m"))
+    else if(!wcscmp(messaggio,L"!match") || !wcscmp(messaggio,L"!m"))
     {
         SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.php",true);
         playerReadinessChange(dp,false);
@@ -220,7 +218,7 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_MATCH);
     }
-    else if(!strcmp(messaggio,"!help") || !strcmp(messaggio,"!h"))
+    else if(!wcscmp(messaggio,L"!help") || !wcscmp(messaggio,L"!h"))
     {
         SystemChatToPlayer(dp,L"http://ygopro.cyberplanet.it/help.php",true);
         playerReadinessChange(dp,false);
@@ -228,7 +226,7 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_MATCH);
     }
-    else if(!strncmp(messaggio,"!shout ",7) )
+    else if(!wcsncmp(messaggio,L"!shout ",7) )
     {
         char name[20];
         BufferIO::CopyWStr(dp->name,name,20);
@@ -236,10 +234,9 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,char* msg)
         std::transform(nome.begin(), nome.end(), nome.begin(), ::tolower);
         if(nome != "checkmate")
             return false;
-        char*msg2 = &messaggio[7];
-        std::string tmp(msg2);
-        std::wstring tmp2(tmp.begin(),tmp.end());
-        roomManager->BroadcastMessage(tmp2,true);
+        wchar_t*msg2 = &messaggio[7];
+        std::wstring tmp(msg2);
+        roomManager->BroadcastMessage(tmp,true);
     }
 
     else

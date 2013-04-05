@@ -130,31 +130,50 @@ void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
         bufferevent_write(dp->bev, net_server_write, last_sent);
 }
 
-bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,char* msg)
+bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
 {
-    return false;
-    char messaggio[256];
-    int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
-    log(INFO,"ricevuto messaggio %s\n",messaggio);
+    wchar_t* messaggio=msg;
+    wchar_t mittente[20];
     if(msg[0] == 0 || msg[0] != '!')
         return false;
-    if(!strncmp(messaggio,"!pm ",3) )
+    if(!wcsncmp(messaggio,L"!pm ",3) )
     {
-        std::wstring nome(L"CheckMate");
+            wchar_t mittente[20];
 
-        std::string nomes(&msg[4]);
-        auto pos = nomes.find(' ');
-        if(pos == std::string::npos)
-            return false;
+         if(dp->loginStatus != Users::LoginResult::NOPASSWORD && dp->loginStatus != Users::LoginResult::AUTHENTICATED)
+         {
+              SystemChatToPlayer(dp,L"You must login first",true);
+            return true;
+         }
 
-        std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
-        DuelPlayer* dest = gameServer->findPlayer(nome);
-        if(dest == nullptr)
-            return false;
+         BufferIO::CopyWStr(dp->name,mittente,20);
 
+        if(wcslen(messaggio) < 5)
+        {
+            SystemChatToPlayer(dp,L"I need a username",true);
+            return true;
+        }
+        wchar_t *second = &messaggio[4];
+        wchar_t* pos = wcschr(second,' ');
+        if (pos == nullptr || pos == second)
+        {
+            SystemChatToPlayer(dp,L"error reading username",true);
+            return true;
+        }
 
+        std::wstring nome(second,pos-second);
+        std::wstring mess(pos);
+        if(mess.length()>200)
+        {
+            SystemChatToPlayer(dp,L"message too long",true);
+            return true;
+        }
 
-        dest->netServer->SystemChatToPlayer(dest,L"chatcommand",false);
+        bool result = gameServer->sendPM(nome,L"!pm "+std::wstring(mittente) + mess);
+
+        if(result == false)
+            SystemChatToPlayer(dp,L"Player not found, or player with a different server PID",true);
+
         return true;
     }
     return false;

@@ -44,6 +44,9 @@ private:
     std::list<std::pair<std::wstring,bool>> injectedMessages;
     std::mutex injectedMessages_mutex;
 
+    bool dispatchPM(std::wstring,std::wstring);
+
+
 public:
     void injectChatMessage(std::wstring a,bool b);
     void callChatCallback(std::wstring a,bool b);
@@ -69,6 +72,9 @@ public:
     void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
     static int CheckAliveThread(void* parama);
     int getNumPlayers();
+
+    bool sendPM(std::wstring,std::wstring);
+
 };
 
 }

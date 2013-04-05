@@ -277,7 +277,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
 
 bool WaitingRoom::ChatMessageReceived(DuelPlayer* dp,unsigned short* msg)
 {
-    char messaggio[256];
+    wchar_t messaggio[256];
     int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
     if(msglen == 0)
         return false;
