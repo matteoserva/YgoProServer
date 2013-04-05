@@ -295,12 +295,12 @@ bool WaitingRoom::ChatMessageReceived(DuelPlayer* dp,unsigned short* msg)
 
     shout(msg,dp);
 
-       /* wchar_t name[20];
-        wchar_t messaggiow[200];
-        BufferIO::CopyWStr(msg, messaggiow, 200);
-        BufferIO::CopyWStr(dp->name, name, 20);
-        if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
-            shout(std::wstring(messaggiow),false,std::wstring(name));*/
+    /* wchar_t name[20];
+     wchar_t messaggiow[200];
+     BufferIO::CopyWStr(msg, messaggiow, 200);
+     BufferIO::CopyWStr(dp->name, name, 20);
+     if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
+         shout(std::wstring(messaggiow),false,std::wstring(name));*/
     return true;
 
 }

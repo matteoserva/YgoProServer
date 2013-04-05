@@ -138,15 +138,15 @@ bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
         return false;
     if(!wcsncmp(messaggio,L"!pm ",3) )
     {
-            wchar_t mittente[20];
+        wchar_t mittente[20];
 
-         if(dp->loginStatus != Users::LoginResult::NOPASSWORD && dp->loginStatus != Users::LoginResult::AUTHENTICATED)
-         {
-              SystemChatToPlayer(dp,L"You must login first",true);
+        if(dp->loginStatus != Users::LoginResult::NOPASSWORD && dp->loginStatus != Users::LoginResult::AUTHENTICATED)
+        {
+            SystemChatToPlayer(dp,L"You must login first",true);
             return true;
-         }
+        }
 
-         BufferIO::CopyWStr(dp->name,mittente,20);
+        BufferIO::CopyWStr(dp->name,mittente,20);
 
         if(wcslen(messaggio) < 5)
         {

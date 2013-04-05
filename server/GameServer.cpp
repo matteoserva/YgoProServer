@@ -174,7 +174,7 @@ void GameServer::injectChatMessage(std::wstring a,bool b)
 
 DuelPlayer* GameServer::findPlayer(std::wstring nome)
 {
-    for(auto it = loggedUsers.begin();it!=loggedUsers.end();++it)
+    for(auto it = loggedUsers.begin(); it!=loggedUsers.end(); ++it)
     {
         if(it->first ==nome)
         {
@@ -318,12 +318,12 @@ bool GameServer::dispatchPM(std::wstring recipient,std::wstring message)
     printf("completed\n");
     return true;
 }
-    bool GameServer::sendPM(std::wstring recipient,std::wstring message)
-    {
-        return dispatchPM(recipient,message);
+bool GameServer::sendPM(std::wstring recipient,std::wstring message)
+{
+    return dispatchPM(recipient,message);
 
 
-    }
+}
 
 
 void GameServer::DisconnectPlayer(DuelPlayer* dp)
@@ -333,13 +333,15 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
     {
         if(dp->loginStatus == Users::LoginResult::NOPASSWORD || dp->loginStatus == Users::LoginResult::AUTHENTICATED)
         {
-                    wchar_t nome[25];
-                    BufferIO::CopyWStr(dp->name,nome,20);
-                    std::wstring nomes(nome);
-                    std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
-                    printf("rimuovo %Ls\n",nomes.c_str());
-                    if(loggedUsers.find(nomes)!=loggedUsers.end())
-                        loggedUsers.erase(nomes);
+            std::lock_guard<std::mutex> lock(loggedUsers_mutex);
+
+            wchar_t nome[25];
+            BufferIO::CopyWStr(dp->name,nome,20);
+            std::wstring nomes(nome);
+            std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
+            printf("rimuovo %Ls, %d\n",nomes.c_str(),(int)loggedUsers.size());
+            if(loggedUsers.find(nomes)!=loggedUsers.end())
+                loggedUsers.erase(nomes);
         }
 
         dp->netServer=NULL;
@@ -392,6 +394,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
                     BufferIO::CopyWStr(dp->name,nome,20);
                     std::wstring nomes(nome);
                     std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
+                    std::lock_guard<std::mutex> lock(loggedUsers_mutex);
 
                     loggedUsers[nomes] = dp;
                 }
