@@ -1329,9 +1329,9 @@ void SingleDuel::EndDuel() {
 		netServer->ReSendToPlayer(*oit);
     if(players[0]->cachedRankScore > 2000)
     {
-        char filename[80],name[20],name2[20];
+        char filename[80],name[20],name2[20],numbuf[10];
 
-        strcpy(filename,"replay/");
+        sprintf(filename,"replay/%d-",players[0]->cachedRankScore);
         int len = BufferIO::CopyWStr(players[0]->name,name,20);
         for(int i = 0;i<len;i++)
             if(!isalnum(name[i]))
@@ -1343,6 +1343,8 @@ void SingleDuel::EndDuel() {
             if(!isalnum(name2[i]))
                 name[i]='_';
         strcat(filename,name2);
+
+
         strcat(filename,".yrp");
         std::string n1(name);
         std::string n2(name2);
