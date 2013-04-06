@@ -295,6 +295,16 @@ bool GameserversManager::handleChildMessage(int child_fd)
                continue;
             write(it->second.child_fd,buffer,sizeof(GameServerChat));
         }
+
+        /*FILE* fp = fopen("cm-error.log", "at");
+        if(fp)
+        {
+            fprintf(fp, "server crashato pid: %d\n", (int) getpid());
+            fclose(fp);
+        } */
+
+
+
     }
     // while(1);
     return true;

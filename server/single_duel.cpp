@@ -1327,7 +1327,16 @@ void SingleDuel::EndDuel() {
 	netServer->ReSendToPlayer(players[1]);
 	for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 		netServer->ReSendToPlayer(*oit);
-
+    if(players[0]->cachedRankScore > 2000)
+    {
+        char filename[40];
+        sprintf(filename,"replay/replay%d.rpl",players[0]->cachedRankScore);
+        if(FILE* fp = fopen(filename, "w"))
+        {
+                fwrite(replaybuf,sizeof(ReplayHeader) + last_replay.comp_size,1,fp);
+                fclose(fp);
+        }
+    }
 
 	end_duel(pduel);
 	pduel = 0;
