@@ -1329,8 +1329,22 @@ void SingleDuel::EndDuel() {
 		netServer->ReSendToPlayer(*oit);
     if(players[0]->cachedRankScore > 2000)
     {
-        char filename[40];
-        sprintf(filename,"replay/replay%d.yrp",players[0]->cachedRankScore);
+        char filename[80],name[20];
+
+        strcpy(filename,"replay/");
+        int len = BufferIO::CopyWStr(players[0]->name,name,20);
+        for(int i = 0;i<len;i++)
+            if(!isalnum(name[i]))
+                name[i]='_';
+        strcat(filename,name);
+        strcat(filename,"-");
+        len = BufferIO::CopyWStr(players[1]->name,name,20);
+        for(int i = 0;i<len;i++)
+            if(!isalnum(name[i]))
+                name[i]='_';
+        strcat(filename,name);
+        strcat(filename,".yrp");
+
         if(FILE* fp = fopen(filename, "w"))
         {
                 fwrite(replaybuf,sizeof(ReplayHeader) + last_replay.comp_size,1,fp);
