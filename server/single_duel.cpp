@@ -1330,7 +1330,7 @@ void SingleDuel::EndDuel() {
     if(players[0]->cachedRankScore > 2000)
     {
         char filename[40];
-        sprintf(filename,"replay/replay%d.rpl",players[0]->cachedRankScore);
+        sprintf(filename,"replay/replay%d.yrp",players[0]->cachedRankScore);
         if(FILE* fp = fopen(filename, "w"))
         {
                 fwrite(replaybuf,sizeof(ReplayHeader) + last_replay.comp_size,1,fp);
