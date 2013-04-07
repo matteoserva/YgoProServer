@@ -1329,25 +1329,25 @@ void SingleDuel::EndDuel() {
 		netServer->ReSendToPlayer(*oit);
     if(players[0]->cachedRankScore > 2000)
     {
-        char filename[80],name[20],name2[20],numbuf[10];
+        char filename[80],name[20],name2[20],names[30],names2[30];
 
         sprintf(filename,"replay/%d-",players[0]->cachedRankScore);
         int len = BufferIO::CopyWStr(players[0]->name,name,20);
         for(int i = 0;i<len;i++)
             if(!isalnum(name[i]))
                 name[i]='_';
-        strcat(filename,name);
-        strcat(filename,"-");
+
         len = BufferIO::CopyWStr(players[1]->name,name2,20);
         for(int i = 0;i<len;i++)
             if(!isalnum(name2[i]))
                 name[i]='_';
-        strcat(filename,name2);
 
+        sprintf(names,"%d%s",players[0]->cachedRankScore,name);
+        sprintf(names2,"%d%s",players[1]->cachedRankScore,name2);
+        sprintf(filename,"replay/%s-%s.yrp",names,names2);
 
-        strcat(filename,".yrp");
-        std::string n1(name);
-        std::string n2(name2);
+        std::string n1(names);
+        std::string n2(names2);
         std::wstring namew1(n1.begin(),n1.end());
         std::wstring namew2(n2.begin(),n2.end());
         deckManager.SaveDeck(pdeck[0], namew1.c_str());
