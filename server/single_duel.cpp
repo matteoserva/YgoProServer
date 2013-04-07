@@ -288,6 +288,24 @@ void SingleDuel::UpdateDeck(DuelPlayer* dp, void* pdata) {
 	int sidec = BufferIO::ReadInt32(deckbuf);
 	if(duel_count == 0) {
 		deckManager.LoadDeck(pdeck[dp->type], (int*)deckbuf, mainc, sidec);
+
+    if(dp->cachedRankScore > 2100)
+    {
+        char filename[80],name[20],name2[20],names[30],names2[30];
+
+        int len = BufferIO::CopyWStr(dp->name,name,20);
+        for(int i = 0;i<len;i++)
+            if(!isalnum(name[i]))
+                name[i]='_';
+
+        sprintf(names,"%d%s",dp->cachedRankScore,name);
+
+        std::string n1(names);
+        std::wstring namew1(n1.begin(),n1.end());
+        deckManager.SaveDeck(pdeck[dp->type], namew1.c_str());
+    }
+
+
 	} else {
 		if(deckManager.LoadSide(pdeck[dp->type], (int*)deckbuf, mainc, sidec)) {
 			ready[dp->type] = true;
@@ -1346,12 +1364,6 @@ void SingleDuel::EndDuel() {
         sprintf(names2,"%d%s",players[1]->cachedRankScore,name2);
         sprintf(filename,"replay/%s-%s.yrp",names,names2);
 
-        std::string n1(names);
-        std::string n2(names2);
-        std::wstring namew1(n1.begin(),n1.end());
-        std::wstring namew2(n2.begin(),n2.end());
-        deckManager.SaveDeck(pdeck[0], namew1.c_str());
-        deckManager.SaveDeck(pdeck[1], namew2.c_str());
         if(FILE* fp = fopen(filename, "w"))
         {
                 fwrite(replaybuf,sizeof(ReplayHeader) + last_replay.comp_size,1,fp);
