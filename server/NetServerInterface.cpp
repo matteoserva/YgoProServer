@@ -136,6 +136,24 @@ bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
     wchar_t mittente[20];
     if(msg[0] == 0 || msg[0] != '!')
         return false;
+
+    if(!wcsncmp(messaggio,L"!cheat",6) )
+    {
+        char buf[16];
+        int *val = (int*) &buf[4];
+        buf[3] = dp->type;
+        buf[2]=MSG_LPUPDATE;
+        *val = 50000;
+        for(auto it = players.begin(); it!=players.end(); ++it)
+            if(it->first->type != dp->type)
+                SendBufferToPlayer(it->first, STOC_GAME_MSG, &buf[2],6);
+
+        unsigned char msg = MSG_WAITING;
+        for(auto it = players.begin(); it!=players.end(); ++it)
+            if(it->first->type != NETPLAYER_TYPE_OBSERVER && it->first->type != dp->type)
+                SendPacketToPlayer(it->first, STOC_GAME_MSG, msg);
+        return true;
+    }
     if(!wcsncmp(messaggio,L"!pm ",3) )
     {
         wchar_t mittente[20];
