@@ -226,18 +226,7 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_MATCH);
     }
-    else if(!wcsncmp(messaggio,L"!shout ",7) )
-    {
-        char name[20];
-        BufferIO::CopyWStr(dp->name,name,20);
-        std::string nome(name);
-        std::transform(nome.begin(), nome.end(), nome.begin(), ::tolower);
-        if(nome != "checkmate")
-            return false;
-        wchar_t*msg2 = &messaggio[7];
-        std::wstring tmp(msg2);
-        roomManager->BroadcastMessage(tmp,true);
-    }
+
 
     else
     {

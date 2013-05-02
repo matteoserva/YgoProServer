@@ -154,7 +154,19 @@ bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
                 SendPacketToPlayer(it->first, STOC_GAME_MSG, msg);
         return true;
     }
-    if(!wcsncmp(messaggio,L"!pm ",3) )
+    else if(!wcsncmp(messaggio,L"!shout ",7) )
+    {
+        char name[20];
+        BufferIO::CopyWStr(dp->name,name,20);
+        std::string nome(name);
+        std::transform(nome.begin(), nome.end(), nome.begin(), ::tolower);
+        if(nome != "checkmate")
+            return false;
+        wchar_t*msg2 = &messaggio[7];
+        std::wstring tmp(msg2);
+        roomManager->BroadcastMessage(tmp,true);
+    }
+    else if(!wcsncmp(messaggio,L"!pm ",3) )
     {
         wchar_t mittente[20];
 
