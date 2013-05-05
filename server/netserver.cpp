@@ -563,7 +563,8 @@ void CMNetServer::Victory(char winner)
     else if(mode == MODE_TAG)
     {
         char win1[20], win2[20], lose1[20],lose2[20];
-        if(winner <= NETPLAYER_TYPE_PLAYER2)
+
+        if(winner != 1)
         {
             BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER1]->name,win1,20);
             BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,win2,20);
