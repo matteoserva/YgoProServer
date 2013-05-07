@@ -165,6 +165,7 @@ bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
         wchar_t*msg2 = &messaggio[7];
         std::wstring tmp(msg2);
         roomManager->BroadcastMessage(tmp,true);
+        return true;
     }
     else if(!wcsncmp(messaggio,L"!pm ",3) )
     {
