@@ -274,7 +274,7 @@ void RoomManager::removeDeadRooms()
 
         if(p->state == CMNetServer::State::DEAD)
         {
-            log(INFO,"elimino il server %d\n",i);
+            log(VERBOSE,"elimino il server %d\n",i);
             delete (*it);
             it=zombieServer.erase(it);
         }

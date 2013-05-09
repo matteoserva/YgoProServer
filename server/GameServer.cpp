@@ -339,7 +339,7 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
             BufferIO::CopyWStr(dp->name,nome,20);
             std::wstring nomes(nome);
             std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
-            printf("rimuovo %Ls, %d\n",nomes.c_str(),(int)loggedUsers.size());
+            log(VERBOSE,"rimuovo %Ls, %d\n",nomes.c_str(),(int)loggedUsers.size());
             if(loggedUsers.find(nomes)!=loggedUsers.end())
                 loggedUsers.erase(nomes);
         }

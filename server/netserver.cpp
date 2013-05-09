@@ -271,7 +271,7 @@ void CMNetServer::playerConnected(DuelPlayer *dp)
         players[dp] = DuelPlayerInfo();
     numPlayers=players.size();
 
-    log(INFO,"netserver: giocatori connessi:%d\n",numPlayers);
+    log(VERBOSE,"netserver: giocatori connessi:%d\n",numPlayers);
     updateServerState();
 }
 
