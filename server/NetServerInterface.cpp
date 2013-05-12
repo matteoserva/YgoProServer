@@ -84,6 +84,15 @@ void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, std::wstring msg,bo
         msg.resize(256);
     STOC_Chat scc;
     scc.player = isAdmin?8:10;
+
+    static int inc = 0;
+    if(isAdmin && msg[0] == '-')
+    {
+        inc = (inc+1)%9;
+        scc.player=11 + inc;
+    }
+
+
     int msglen = BufferIO::CopyWStr(msg.c_str(), scc.msg, 256);
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
 }
