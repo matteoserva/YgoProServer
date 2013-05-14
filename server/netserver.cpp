@@ -514,9 +514,9 @@ void CMNetServer::Victory(char winner)
         return;
     if(mode == MODE_TAG && !_players[3])
         return;
-    if((mode == MODE_SINGLE || mode == MODE_MATCH) && winner > 1)
+    if((mode == MODE_SINGLE || mode == MODE_MATCH) && winner > 2)
         return;
-    if(mode == MODE_TAG && winner > 3)
+    if(mode == MODE_TAG && winner > 2)
         return;
 
     //anti cheat
