@@ -523,7 +523,7 @@ void CMNetServer::Victory(char winner)
     if(mode!= MODE_TAG && !strcmp(_players[NETPLAYER_TYPE_PLAYER1]->ip,_players[NETPLAYER_TYPE_PLAYER2]->ip))
         winner = -1;
 
-    if(winner < 0)
+    if(winner < 0 || winner == 2)
     {
         if(mode != MODE_TAG)
         {
