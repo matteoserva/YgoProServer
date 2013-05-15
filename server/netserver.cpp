@@ -459,7 +459,7 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
         if(mode == MODE_SINGLE || mode == MODE_MATCH)
             last_winner = 1-dp->type;
         else
-            last_winner = 3-dp->type;
+            last_winner = (dp->type > 1)?0:1;
     }
 
     if(state != ZOMBIE && dp->game == duel_mode)
