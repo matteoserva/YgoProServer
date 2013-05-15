@@ -39,7 +39,7 @@ bool GameserversManager::serversAlmostFull()
 bool GameserversManager::serversAlmostEmpty()
 {
     int threeshold = 0.5*Config::getInstance()->max_users_per_process;
-    threeshold = min(threeshold,50);
+    threeshold = min(threeshold,30);
     threeshold = max(threeshold,1);
     log(VERBOSE,"low threeshold = %d\n",threeshold);
     bool isAlmostEmpty = getNumPlayersInAliveChildren() <= (getNumAliveChildren()-1) * Config::getInstance()->max_users_per_process -threeshold;
