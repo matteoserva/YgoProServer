@@ -832,9 +832,13 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         playerReadinessChange(dp,CTOS_HS_NOTREADY - pktType);
 
         duel_mode->PlayerReady(dp, CTOS_HS_NOTREADY - pktType);
-        duel_mode->host_player = dp;
-        duel_mode->StartDuel(dp);
-        duel_mode->host_player=NULL;
+        if(pktType == CTOS_HS_READY)
+        {
+            duel_mode->host_player = dp;
+            duel_mode->StartDuel(dp);
+            duel_mode->host_player=NULL;
+        }
+
         break;
     }
     case CTOS_HS_KICK:
