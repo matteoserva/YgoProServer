@@ -38,8 +38,11 @@ void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
     {
         clientStarted();
     }
-
-
+    else if(proto == STOC_CHANGE_SIDE)
+    {
+        chatReady=false;
+        ReadyMessagesSent=0;
+    }
 }
 
 void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_TypeChange sctc)
