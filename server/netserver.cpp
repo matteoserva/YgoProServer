@@ -157,7 +157,7 @@ void CMNetServer::ShowPlayerOdds()
 
 
 
-    if(mode != MODE_SINGLE)
+    if(mode == MODE_TAG)
         return;
     DuelPlayer* _players[2];
     for(int i = 0; i<2; i++)
@@ -182,14 +182,14 @@ void CMNetServer::ShowPlayerOdds()
 
     if(_players[0]->cachedRankScore > _players[1]->cachedRankScore)
     {
-        float odds = 100*Users::getInstance()->win_exp(_players[0]->cachedRankScore - _players[1]->cachedRankScore);
+        float odds = 100.0*Users::getInstance()->win_exp(_players[0]->cachedRankScore - _players[1]->cachedRankScore);
         sprintf(message,"There is a %d%% chance that %s is going to win this duel",(int) odds,name0);
 
 
     }
     else
     {
-        float odds = 100*Users::getInstance()->win_exp(_players[1]->cachedRankScore - _players[0]->cachedRankScore);
+        float odds = 100.0*Users::getInstance()->win_exp(_players[1]->cachedRankScore - _players[0]->cachedRankScore);
         sprintf(message,"There is a %d%% chance that %s is going to win this duel",(int) odds,name1);
     }
     std::string temp(message);
