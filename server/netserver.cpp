@@ -793,7 +793,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_HS_TODUELIST:
     {
-        if(!duel_mode || duel_mode->pduel)
+        if(!duel_mode || duel_mode->pduel || state ==PLAYING)
             break;
         playerReadinessChange(dp,false);
         duel_mode->ToDuelist(dp);
@@ -822,7 +822,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_HS_TOOBSERVER:
     {
-        if(!duel_mode || duel_mode->pduel)
+        if(!duel_mode || duel_mode->pduel || state ==PLAYING)
             break;
         toObserver(dp);
         break;
@@ -830,7 +830,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     case CTOS_HS_READY:
     case CTOS_HS_NOTREADY:
     {
-        if(!duel_mode || duel_mode->pduel)
+        if(!duel_mode || duel_mode->pduel || state ==PLAYING)
             break;
         playerReadinessChange(dp,CTOS_HS_NOTREADY - pktType);
 
