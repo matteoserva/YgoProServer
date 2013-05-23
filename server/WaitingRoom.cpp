@@ -11,7 +11,7 @@ namespace ygo
 
 int WaitingRoom::minSecondsWaiting;
 int WaitingRoom::maxSecondsWaiting;
-const std::string WaitingRoom::banner = "http://j.gs/2CW8";
+const std::string WaitingRoom::banner = "[Checkmate Server!]";
 
 WaitingRoom::WaitingRoom(RoomManager*roomManager,GameServer*gameServer):
     CMNetServerInterface(roomManager,gameServer),cicle_users(0)
