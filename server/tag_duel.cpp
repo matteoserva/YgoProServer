@@ -1419,7 +1419,6 @@ void TagDuel::WaitforResponse(int playerid) {
 		netServer->ReSendToPlayer(players[2]);
 		netServer->ReSendToPlayer(players[3]);
 		cur_player[playerid]->state = CTOS_TIME_CONFIRM;
-		TimeConfirm(cur_player[playerid]);
 	} else
 		cur_player[playerid]->state = CTOS_RESPONSE;
 }

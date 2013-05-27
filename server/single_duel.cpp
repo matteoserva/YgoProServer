@@ -1385,7 +1385,6 @@ void SingleDuel::WaitforResponse(int playerid) {
 		netServer->SendPacketToPlayer(players[0], STOC_TIME_LIMIT, sctl);
 		netServer->SendPacketToPlayer(players[1], STOC_TIME_LIMIT, sctl);
 		players[playerid]->state = CTOS_TIME_CONFIRM;
-		TimeConfirm(players[playerid]);
 	} else
 		players[playerid]->state = CTOS_RESPONSE;
 }
