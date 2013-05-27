@@ -6,8 +6,6 @@
 #include "debug.h"
 #include "Users.h"
 #include <algorithm>
-
-static const int MAX_TIME_LIMIT=80;
 namespace ygo
 {
 CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
@@ -378,7 +376,7 @@ void CMNetServer::createGame()
     info.no_check_deck=false;
     info.start_hand=5;
     info.lflist=1;
-    info.time_limit=MAX_TIME_LIMIT;
+    info.time_limit=60;
     info.start_lp=(getNumDayOfWeek() == 6)?8000:8000;
     info.enable_priority=false;
     info.no_shuffle_deck=false;
@@ -727,7 +725,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         int resp_type = dp->type;
         if(mode == MODE_TAG)
             resp_type= dp->type < 2 ? 0 : 1;
-        if(duel_mode->time_limit[resp_type]>0 and duel_mode->time_limit[resp_type]<MAX_TIME_LIMIT)
+        if(duel_mode->time_limit[resp_type]>0 and duel_mode->time_limit[resp_type]<60)
             duel_mode->time_limit[resp_type] +=1;
         //printf("response inviato da %d\n",dp->type);
         ;
