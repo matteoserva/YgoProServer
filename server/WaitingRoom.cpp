@@ -202,7 +202,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
     ShowStats(dp);
 
-    if(dp->loginStatus != Users::LoginResult::AUTHENTICATED)
+    if(dp->loginStatus != Users::LoginResult::AUTHENTICATED && dp->loginStatus != Users::LoginResult::UNRANKED)
     {
         ChatWithPlayer(dp, "CheckMate","to register and login, go back and change the username to yourusername$yourpassword");
     }
