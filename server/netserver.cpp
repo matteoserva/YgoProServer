@@ -6,6 +6,8 @@
 #include "debug.h"
 #include "Users.h"
 #include <algorithm>
+
+static const int TIMEOUT_INTERVAL=2;
 namespace ygo
 {
 CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
@@ -209,7 +211,7 @@ void CMNetServer::clientStarted()
     if(state==FULL)
     {
         setState(PLAYING);
-        timeval timeout = {10, 0};
+        timeval timeout = {TIMEOUT_INTERVAL, 0};
         event_add(user_timeout, &timeout);
         chatReady=false;
         ShowPlayerOdds();
@@ -659,7 +661,7 @@ void CMNetServer::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
             continue;
         }
 
-        it->second.secondsWaiting += 10;
+        it->second.secondsWaiting += TIMEOUT_INTERVAL;
         if(it->first->type != NETPLAYER_TYPE_OBSERVER && it->second.secondsWaiting >= maxTimeout)
         {
             deadUsers.push_back(it->first);
@@ -669,7 +671,7 @@ void CMNetServer::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
         {
             deadUsers.push_back(it->first);
         }
-        else if(it->first->state ==CTOS_TIME_CONFIRM && it->second.secondsWaiting >= 20)
+        else if(it->first->state ==CTOS_TIME_CONFIRM && it->second.secondsWaiting >= 2)
             that->duel_mode->TimeConfirm(it->first);
         else if(it->first->state ==CTOS_HAND_RESULT && it->second.secondsWaiting >= 60)
             deadUsers.push_back(it->first);

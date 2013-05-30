@@ -69,9 +69,12 @@ void CMNetServerInterface::shout(unsigned short* msg,DuelPlayer* dp)
         shout_internal(std::wstring(messaggio),false,std::wstring(name));
 }
 
+#include <algorithm>
+
 void CMNetServerInterface::shout_internal(std::wstring message,bool isAdmin,std::wstring sender)
 {
     isShouting=true;
+    //std::replace(message.begin(),message.end(),'e','3');
     if(sender!=L"")
         message = L"["+sender+L"]: "+message;
     roomManager->BroadcastMessage(message,isAdmin);

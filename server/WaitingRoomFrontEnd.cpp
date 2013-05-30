@@ -31,7 +31,8 @@ void WaitingRoom::ShowStats(DuelPlayer* dp)
     case Users::LoginResult::AUTHENTICATED:
         sprintf(message, "Rank:  %d",rank);
         SendNameToPlayer(dp,2,message);
-        sprintf(message, "Score: %d(%+d)",score,dp->cachedGameScore-score);
+        sprintf(message, "http://goo.gl/4hx6r");
+        //sprintf(message, "Score: %d(%+d)",score,dp->cachedGameScore-score);
         SendNameToPlayer(dp,3,message);
         break;
 
