@@ -20,6 +20,7 @@ void WaitingRoom::ReadyFlagPressed(DuelPlayer* dp,bool readyFlag)
 void WaitingRoom::ShowStats(DuelPlayer* dp)
 {
     char name[20],message[256];
+    wchar_t wmessage[21];
     BufferIO::CopyWStr(dp->name,name,20);
     SendNameToPlayer(dp,0,name);
     std::string username(name);
@@ -29,8 +30,8 @@ void WaitingRoom::ShowStats(DuelPlayer* dp)
     switch (dp->loginStatus)
     {
     case Users::LoginResult::AUTHENTICATED:
-        sprintf(message, "Rank:  %d",rank);
-        SendNameToPlayer(dp,2,message);
+        swprintf(wmessage,20, L"Rank: %d, stats:",rank);
+        SendNameToPlayer(dp,2,wmessage);
         sprintf(message, "http://goo.gl/4hx6r");
         //sprintf(message, "Score: %d(%+d)",score,dp->cachedGameScore-score);
         SendNameToPlayer(dp,3,message);
