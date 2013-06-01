@@ -43,7 +43,7 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
 
     char stringbuf[512];
 
-    sprintf(stringbuf,"{\"id\":\"%s\",\"sender\":\"000\",\"recipient\":\"channel|xxx\",\"type\":\"msg\",\"body\":\"%s\",\"timestamp\":%lu}",randomname,buffer,80000UL);
+    sprintf(stringbuf,"{\"id\":\"%s\",\"sender\":\"000\",\"recipient\":\"channel|xxx\",\"type\":\"msg\",\"body\":\"%s\",\"timestamp\":%u}",randomname,buffer,(unsigned)time(NULL));
 
     while (entry != NULL)
     {
