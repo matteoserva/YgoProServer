@@ -6,9 +6,13 @@
 #include "debug.h"
 #include "Statistics.h"
 #include <time.h>
+
+#include "ExternalChat.h"
 using namespace std;
 namespace ygo
 {
+
+
 
 static volatile bool needsReboot;
 void sigterm_handler(int signum)
@@ -295,6 +299,7 @@ bool GameserversManager::handleChildMessage(int child_fd)
                continue;
             write(it->second.child_fd,buffer,sizeof(GameServerChat));
         }
+        ExternalChat::getInstance()->broadcastMessage((GameServerChat*) gss);
 
         /*FILE* fp = fopen("cm-error.log", "at");
         if(fp)
