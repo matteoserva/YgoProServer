@@ -1,9 +1,10 @@
 #include "ExternalChat.h"
 #include <dirent.h>
 #include <stdio.h>
+
 //{"id":"1370101637.4086.51aa178563c099.72780478","sender":"f79556c7709d11e00e774b912b2244ac659987ac","recipient":"channel|xxx","type":"msg","body":"fsd\u2192\u2193","timestamp":1370101637}
 
-
+static const char* PATH = "./ExternalChat_dir";
 namespace ygo
 {
 
@@ -32,7 +33,7 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
         }
     }
     *bufferp=0;
-    const char* PATH = "./ExternalChat_dir";
+
     DIR *dir = opendir(PATH);
     struct dirent *entry = readdir(dir);
 
@@ -68,6 +69,41 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
 std::list<GameServerChat> ExternalChat::getPendingMessages()
 {
     std::list<GameServerChat> lista;
+    char dirpath[128];
+    char filename[512];
+    char linebuf[256];
+    snprintf(dirpath,128,"%s/000/messages",PATH);
+
+    DIR *dir = opendir(dirpath);
+    struct dirent *entry = readdir(dir);
+    while (entry != NULL)
+    {
+        if (entry->d_type == DT_REG)
+        {
+            snprintf(filename,512,"%s/%s",dirpath,entry->d_name);
+            if(FILE* fp = fopen(filename, "r"))
+            {
+                char nome[20];
+                fgets(linebuf, 50, fp);
+                strncpy(nome,linebuf,20);
+                GameServerChat gss;
+
+
+                fgets(linebuf, 200, fp);
+
+                swprintf(gss.messaggio,250,L"[%hs<('_')>]:%hs",nome,linebuf);
+                gss.isAdmin=false;
+                gss.type=MessageType::CHAT;
+                lista.push_back(gss);
+                unlink(filename);
+                //fwrite(stringbuf,strlen(stringbuf),1,fp);
+                fclose(fp);
+            }
+
+            printf("filename %s\n",filename);
+        }
+        entry = readdir(dir);
+    }
 
     return lista;
 }

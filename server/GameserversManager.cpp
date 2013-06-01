@@ -376,10 +376,13 @@ void GameserversManager::parent_loop()
                 printf("PADRE:figli terminati. esco\n");
                 exit(0);
             }
+        }
+        std::list<GameServerChat> lista =  ExternalChat::getInstance()->getPendingMessages();
 
-
-
-
+        for(auto lit = lista.cbegin();lit!= lista.cend();++lit)
+        for(auto it = children.cbegin(); it != children.cend(); ++it)
+        {
+            write(it->second.child_fd,&(*lit),sizeof(GameServerChat));
         }
 
 
