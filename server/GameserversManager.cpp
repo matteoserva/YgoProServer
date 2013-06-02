@@ -218,6 +218,7 @@ int GameserversManager::spawn_gameserver()
         return pid;
     }
 
+    ExternalChat::getInstance()->disconnect();
     Statistics::getInstance()->StopThread();
     Statistics::getInstance()->setNumPlayers(0);
     Statistics::getInstance()->setNumRooms(0);
@@ -324,7 +325,7 @@ void GameserversManager::parent_loop()
 
     fd_set rfds;
     Statistics::getInstance()->StartThread();
-
+    ExternalChat::getInstance()->connect();
 
     while(true)
     {

@@ -1,10 +1,14 @@
 #include "ExternalChat.h"
 #include <dirent.h>
 #include <stdio.h>
-
+#include <cppconn/prepared_statement.h>
+#include <cppconn/driver.h>
+#include "mysql_driver.h"
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <netinet/in.h>
 //{"id":"1370101637.4086.51aa178563c099.72780478","sender":"f79556c7709d11e00e774b912b2244ac659987ac","recipient":"channel|xxx","type":"msg","body":"fsd\u2192\u2193","timestamp":1370101637}
 
-static const char* PATH = "./ExternalChat_dir";
 namespace ygo
 {
 
@@ -16,109 +20,124 @@ ExternalChat* ExternalChat::getInstance()
 
 void ExternalChat::broadcastMessage(GameServerChat* msg)
 {
+    if(!con)
+        return;
+
+
     char buffer[1024];
-    char* bufferp=buffer;
-    wchar_t * msgp = msg->messaggio;
-    for(; *msgp != 0; msgp++)
+    const char* localIP = "127.0.0.1";
+    std::string binaryIP = "";
+    binaryIP.resize(4);
+    if(inet_pton(AF_INET,localIP,&binaryIP[0]) != 1)
+        return ;
+
+    BufferIO::EncodeUTF8(msg->messaggio,buffer);
+
+    try
     {
-        if(*msgp < 255)
-        {
-            *bufferp = *msgp;
-            bufferp++;
-        }
-        else
-        {
-            int n = sprintf(bufferp,"\\u%d",*msgp);
-            bufferp += n;
-        }
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("INSERT INTO ajax_chat_messages(userName,userID,userRole,channel,dateTime,ip,text) VALUES (?,3, 1,0,now(),?,?)"));
+        //sql::PreparedStatement *stmt = con->prepareStatement("INSERT INTO users VALUES (?, ?, ?)");
+        stmt->setString(1, "[---]");
+        stmt->setString(2, binaryIP);
+        stmt->setString(3, buffer);
+        stmt->execute();
+
     }
-    *bufferp=0;
-
-    DIR *dir = opendir(PATH);
-    struct dirent *entry = readdir(dir);
-
-    char randomname[20];
-    gen_random(randomname,10);
-
-    char filename[128];
-
-    char stringbuf[512];
-
-    sprintf(stringbuf,"{\"id\":\"%s\",\"sender\":\"000\",\"recipient\":\"channel|xxx\",\"type\":\"msg\",\"body\":\"%s\",\"timestamp\":%u}",randomname,buffer,(unsigned)time(NULL));
-
-    while (entry != NULL)
+    catch (sql::SQLException &e)
     {
-        if (entry->d_type == DT_DIR && strcmp(entry->d_name,"000") && entry->d_name[0]!= '.')
-        {
-            snprintf(filename,128,"%s/%s/messages/%s",PATH,entry->d_name,randomname);
-            if(FILE* fp = fopen(filename, "w"))
-            {
-                fwrite(stringbuf,strlen(stringbuf),1,fp);
-                fclose(fp);
-            }
-
-            printf("filename %s\n",filename);
-        }
-        entry = readdir(dir);
+        std::cout << "# ERR: SQLException in " << __FILE__;
+        std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
+        std::cout << "# ERR: " << e.what();
+        std::cout << " (MySQL error code: " << e.getErrorCode();
+        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+        return;
     }
-    closedir(dir);
-    printf("external broadcast: %s\n",buffer);
-
-
 }
 std::list<GameServerChat> ExternalChat::getPendingMessages()
 {
     std::list<GameServerChat> lista;
-    char dirpath[128];
-    char filename[512];
-    char linebuf[256];
-    snprintf(dirpath,128,"%s/000/messages",PATH);
-
-    DIR *dir = opendir(dirpath);
-    struct dirent *entry = readdir(dir);
-    while (entry != NULL)
+        if(!con)
+        return lista;
+    try
     {
-        if (entry->d_type == DT_REG)
+        //std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from (SELECT username,score, @rownum := @rownum + 1 AS rank FROM stats, (SELECT @rownum := 0) r ORDER BY score DESC) z where username = ?"));
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select userName,text,id from ajax_chat_messages where text not like '/%' and id > ? and userID != 3 order by id desc limit 5"));
+
+        stmt->setInt(1, last_id);
+
+        std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
+        while(res->next())
         {
-            snprintf(filename,512,"%s/%s",dirpath,entry->d_name);
-            if(FILE* fp = fopen(filename, "r"))
-            {
-                char nome[20];
-                fgets(linebuf, 50, fp);
-                strncpy(nome,linebuf,20);
-                for(int i = strlen(nome)-1; i >0; i--)
-                {
-                    if(nome[i]>0x20)
-                        break;
-                    nome[i] =0;
-                }
-                GameServerChat gss;
-
-
-                fgets(linebuf, 200, fp);
-
-                swprintf(gss.messaggio,250,L"[%hs<^_^>]:%hs",nome,linebuf);
-                gss.isAdmin=false;
-                gss.type=MessageType::CHAT;
-                lista.push_back(gss);
-                unlink(filename);
-                //fwrite(stringbuf,strlen(stringbuf),1,fp);
-                fclose(fp);
-            }
-
-            printf("filename %s\n",filename);
+            std::string username = res->getString(1);
+            std::string message = res->getString(2);
+            int id = res->getInt(3);
+            if(id>last_id)
+                last_id = id;
+            wchar_t buffer[1024];
+            GameServerChat gsc;
+            gsc.isAdmin = false;
+            gsc.type=MessageType::CHAT;
+            BufferIO::DecodeUTF8(message.c_str(),buffer);
+            swprintf(gsc.messaggio,260,L"[%hs<^_^>]: %ls",username.c_str(),buffer);
+            lista.push_front(gsc);
         }
-        entry = readdir(dir);
+
+    }
+    catch (sql::SQLException &e)
+    {
+        std::cout << "# ERR: SQLException in " << __FILE__;
+        std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
+        std::cout << "# ERR: " << e.what();
+        std::cout << " (MySQL error code: " << e.getErrorCode();
+        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+
     }
 
-    closedir(dir);
     return lista;
 }
 
-ExternalChat::ExternalChat()
+ExternalChat::ExternalChat():con(nullptr)
 {
+    last_id=0;
+}
 
+void ExternalChat::connect()
+{
+    if(con)
+        return;
+    Config* config = Config::getInstance();
+    std::string host = "tcp://" + config->mysql_host + ":3306";
+    try
+    {
+        /* Create a connection */
+        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
+        con = driver->connect(host, config->mysql_username, config->mysql_password);
+        bool myTrue = true;
+        con->setClientOption("OPT_RECONNECT", &myTrue);
 
+        /* Connect to the MySQL database */
+        con->setSchema(config->mysql_database);
+
+    }
+    catch (sql::SQLException &e)
+    {
+        std::cout<<"errore nella connessione\n";
+        std::cout << "# ERR: SQLException in " << __FILE__;
+        std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
+        std::cout << "# ERR: " << e.what();
+        std::cout << " (MySQL error code: " << e.getErrorCode();
+        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+    }
+
+}
+
+void ExternalChat::disconnect()
+{
+    if(con == nullptr)
+        return;
+    //con->close();
+        delete con;
+    con = nullptr;
 }
 
 void ExternalChat::gen_random(char *s, const int len) {

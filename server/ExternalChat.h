@@ -2,6 +2,7 @@
 #define EXTERNALCHAT_CPP
 
 #include "GameserversManager.h"
+#include <mysql_connection.h>
 
 namespace ygo
 {
@@ -12,8 +13,15 @@ class ExternalChat
     void broadcastMessage(GameServerChat*);
     std::list<GameServerChat> getPendingMessages();
     static ExternalChat* getInstance();
+    void connect();
+    void disconnect();
+
+
 
     private:
+    int last_id;
+    sql::Connection *con;
+
     ExternalChat();
     void gen_random(char *s, const int len);
 
