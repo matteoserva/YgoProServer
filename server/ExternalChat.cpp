@@ -86,12 +86,18 @@ std::list<GameServerChat> ExternalChat::getPendingMessages()
                 char nome[20];
                 fgets(linebuf, 50, fp);
                 strncpy(nome,linebuf,20);
+                for(int i = strlen(nome)-1; i >0; i--)
+                {
+                    if(nome[i]>0x20)
+                        break;
+                    nome[i] =0;
+                }
                 GameServerChat gss;
 
 
                 fgets(linebuf, 200, fp);
 
-                swprintf(gss.messaggio,250,L"[%hs<('_')>]:%hs",nome,linebuf);
+                swprintf(gss.messaggio,250,L"[%hs<^_^>]:%hs",nome,linebuf);
                 gss.isAdmin=false;
                 gss.type=MessageType::CHAT;
                 lista.push_back(gss);
@@ -105,6 +111,7 @@ std::list<GameServerChat> ExternalChat::getPendingMessages()
         entry = readdir(dir);
     }
 
+    closedir(dir);
     return lista;
 }
 
