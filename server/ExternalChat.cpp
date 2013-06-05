@@ -9,6 +9,10 @@
 #include <netinet/in.h>
 //{"id":"1370101637.4086.51aa178563c099.72780478","sender":"f79556c7709d11e00e774b912b2244ac659987ac","recipient":"channel|xxx","type":"msg","body":"fsd\u2192\u2193","timestamp":1370101637}
 
+#include "MySqlWrapper.h"
+
+
+
 namespace ygo
 {
 
@@ -20,9 +24,6 @@ ExternalChat* ExternalChat::getInstance()
 
 void ExternalChat::broadcastMessage(GameServerChat* msg)
 {
-    if(!con)
-        return;
-
 
     char buffer[1024];
     const char* localIP = "127.0.0.1";
@@ -35,6 +36,7 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
 
     try
     {
+        sql::Connection* con = MySqlWrapper::getInstance()->getConnection();
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("INSERT INTO ajax_chat_messages(userName,userID,userRole,channel,dateTime,ip,text) VALUES (?,3, 1,0,now(),?,?)"));
         //sql::PreparedStatement *stmt = con->prepareStatement("INSERT INTO users VALUES (?, ?, ?)");
         stmt->setString(1, "[---]");
@@ -56,10 +58,11 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
 std::list<GameServerChat> ExternalChat::getPendingMessages()
 {
     std::list<GameServerChat> lista;
-        if(!con)
-        return lista;
+
     try
     {
+        sql::Connection* con = MySqlWrapper::getInstance()->getConnection();
+
         //std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from (SELECT username,score, @rownum := @rownum + 1 AS rank FROM stats, (SELECT @rownum := 0) r ORDER BY score DESC) z where username = ?"));
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select userName,text,id from ajax_chat_messages where text not like '/%' and id > ? and userID != 3 order by id desc limit 5"));
 
@@ -96,48 +99,19 @@ std::list<GameServerChat> ExternalChat::getPendingMessages()
     return lista;
 }
 
-ExternalChat::ExternalChat():con(nullptr)
+ExternalChat::ExternalChat()
 {
     last_id=0;
 }
 
 void ExternalChat::connect()
 {
-    if(con)
-        return;
-    Config* config = Config::getInstance();
-    std::string host = "tcp://" + config->mysql_host + ":3306";
-    try
-    {
-        /* Create a connection */
-        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
-        con = driver->connect(host, config->mysql_username, config->mysql_password);
-        bool myTrue = true;
-        con->setClientOption("OPT_RECONNECT", &myTrue);
-
-        /* Connect to the MySQL database */
-        con->setSchema(config->mysql_database);
-
-    }
-    catch (sql::SQLException &e)
-    {
-        std::cout<<"errore nella connessione\n";
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-    }
 
 }
 
 void ExternalChat::disconnect()
 {
-    if(con == nullptr)
-        return;
-    //con->close();
-        delete con;
-    con = nullptr;
+
 }
 
 void ExternalChat::gen_random(char *s, const int len) {

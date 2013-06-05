@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include "ExternalChat.h"
+#include "MySqlWrapper.h"
 using namespace std;
 namespace ygo
 {
@@ -203,7 +204,11 @@ int GameserversManager::spawn_gameserver()
         exit(EXIT_FAILURE);
     }
 
-    if(pid = fork())
+    MySqlWrapper::getInstance()->disconnect();
+    pid = fork();
+    MySqlWrapper::getInstance()->connect();
+
+    if(pid)
     {
         close (pipefd[1]);
         close (pipefd2[0]);
@@ -326,6 +331,7 @@ void GameserversManager::parent_loop()
     fd_set rfds;
     Statistics::getInstance()->StartThread();
     ExternalChat::getInstance()->connect();
+    MySqlWrapper::getInstance()->connect();
 
     while(true)
     {

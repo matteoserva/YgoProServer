@@ -20,7 +20,6 @@ class ExternalChat
 
     private:
     int last_id;
-    sql::Connection *con;
 
     ExternalChat();
     void gen_random(char *s, const int len);
