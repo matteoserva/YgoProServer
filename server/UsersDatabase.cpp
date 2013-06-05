@@ -4,14 +4,16 @@
 #include <cppconn/prepared_statement.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+#include "MySqlWrapper.h"
 namespace ygo
 {
 int UsersDatabase::getRank(std::string username)
 {
-    if(!con)
-        return 0;
+
     try
     {
+        sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
         //std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from (SELECT username,score, @rownum := @rownum + 1 AS rank FROM stats, (SELECT @rownum := 0) r ORDER BY score DESC) z where username = ?"));
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from ranking where username = ?"));
 
@@ -31,8 +33,7 @@ int UsersDatabase::getRank(std::string username)
 
 std::string UsersDatabase::getCountryCode(std::string ip)
 {
-    if(!con)
-        return "UNK";
+
 
 
     std::string binaryIP = "";
@@ -42,6 +43,7 @@ std::string UsersDatabase::getCountryCode(std::string ip)
 
     try
     {
+        sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
 
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select country from `dbip_lookup` where addr_type = 'ipv4' and ip_start <= ? order by ip_start desc limit 1"));
 
@@ -66,10 +68,11 @@ std::string UsersDatabase::getCountryCode(std::string ip)
 
 std::pair<int,int> UsersDatabase::getScore(std::string username)
 {
-    if(!con)
-        return std::pair<int,int>(0,0);
+
     try
     {
+                sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
+
         //std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from (SELECT username,score, @rownum := @rownum + 1 AS rank FROM stats, (SELECT @rownum := 0) r ORDER BY score DESC) z where username = ?"));
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select ranking.score,stats.score from ranking join stats where ranking.username=stats.username and ranking.username = ?"));
 
@@ -91,14 +94,15 @@ std::pair<int,int> UsersDatabase::getScore(std::string username)
 
 bool UsersDatabase::setUserStats(UserStats &us)
 {
-    if(!con)
-        return false;
+
     //true is success
     int retries = 3;
     do
     {
         try
         {
+                    sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
+
             std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("UPDATE stats SET score = ?, wins = ?, losses = ?, draws = ?,tags = ? WHERE username = ?"));
             stmt->setString(6, us.username);
             stmt->setInt(1, us.score);
@@ -124,11 +128,12 @@ bool UsersDatabase::setUserStats(UserStats &us)
 
 UserStats UsersDatabase::getUserStats(std::string username)
 {
-    if(!con)
-        throw std::exception();
+
     //true is success
     try
     {
+                sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
+
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT username,score,wins,losses,draws,tags FROM stats where username = ?"));
         //sql::PreparedStatement *stmt = con->prepareStatement("INSERT INTO users VALUES (?, ?, ?)");
         stmt->setString(1, username);
@@ -160,11 +165,11 @@ UserStats UsersDatabase::getUserStats(std::string username)
 
 bool UsersDatabase::createUser(std::string username, std::string password, int score,int wins,int losses,int draws)
 {
-    if(!con)
-        return false;
-    //true is success
+
     try
     {
+                sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
+
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("INSERT INTO users(username,password) VALUES (?, ?)"));
         //sql::PreparedStatement *stmt = con->prepareStatement("INSERT INTO users VALUES (?, ?, ?)");
         stmt->setString(1, username);
@@ -192,10 +197,11 @@ bool UsersDatabase::createUser(std::string username, std::string password, int s
 
 bool UsersDatabase::userExists(std::string username)
 {
-    if(!con)
-        return false;
+
     try
     {
+                sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
+
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select count(*) FROM users WHERE username = ?"));
         stmt->setString(1, username);
 
@@ -214,10 +220,11 @@ bool UsersDatabase::userExists(std::string username)
 
 bool UsersDatabase::login(std::string username,std::string password,char*ip)
 {
-    if(!con)
-        return false;
+
     try
     {
+                sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
+
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select password FROM users WHERE username = ?"));
         stmt->setString(1, username);
         //stmt->setString(2, password);
@@ -249,39 +256,13 @@ bool UsersDatabase::login(std::string username,std::string password,char*ip)
     }
 }
 
-UsersDatabase::UsersDatabase():con(nullptr)
+UsersDatabase::UsersDatabase()
 {
-    Config* config = Config::getInstance();
-    std::string host = "tcp://" + config->mysql_host + ":3306";
-    std::cout<<"Stringa host"<<host<<std::endl;
-    try
-    {
-        /* Create a connection */
-        sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
-        con = driver->connect(host, config->mysql_username, config->mysql_password);
-        bool myTrue = true;
-        con->setClientOption("OPT_RECONNECT", &myTrue);
 
-        /* Connect to the MySQL database */
-        con->setSchema(config->mysql_database);
-
-    }
-    catch (sql::SQLException &e)
-    {
-        std::cout<<"errore nella connessione\n";
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-    }
 }
 UsersDatabase::~UsersDatabase()
 {
-    if(con == nullptr)
-        return;
-    //con->close();
-        delete con;
+
 }
 
 

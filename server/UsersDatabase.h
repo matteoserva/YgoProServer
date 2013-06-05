@@ -36,7 +36,7 @@ public:
     std::string getCountryCode(std::string);
 
 private:
-    sql::Connection *con;
+
 };
 
 
