@@ -1,6 +1,6 @@
 #ifndef _STATISTICS_H_
 #define _STATISTICS_H_
-#include <thread>
+#include <time.h>
 namespace ygo
 {
 
@@ -12,9 +12,8 @@ private:
     int numRooms;
     Statistics();
     int sendStatistics();
-    static int StatisticsThread(void* param);
-    std::thread updateThread;
     volatile bool isRunning;
+    time_t last_send;
 
 public:
     static Statistics* getInstance();
