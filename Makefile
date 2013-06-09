@@ -30,7 +30,9 @@ CXX=icpc
 LIBS = 
 
 # compile flags
-LDFLAGS = -levent  -lsqlite3 -levent_pthreads ygopro/bin/debug/libocgcore.a -llua5.2 #-lduma  #ygopro/bin/debug/libclzma.a 
+#LDFLAGS = -levent  -lsqlite3 -levent_pthreads ygopro/bin/debug/libocgcore.a -llua5.2 #-lduma  #ygopro/bin/debug/libclzma.a 
+
+LDFLAGS = -levent  -lsqlite3 -levent_pthreads -L./ygopro/bin/debug/ -locgcore -llua5.2
 LDFLAGS += -lmysqlcppconn
 
 server: $(OUT)

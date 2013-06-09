@@ -184,26 +184,24 @@ void CMNetServer::ShowPlayerOdds()
     BufferIO::CopyWStr(_players[1]->name,name1,20);
     message[0] = 0;
 
-
+    float odds;
+    char* chosen_one;
     if(_players[0]->cachedRankScore > _players[1]->cachedRankScore)
     {
-        float odds = 100.0*Users::getInstance()->win_exp(_players[0]->cachedRankScore - _players[1]->cachedRankScore);
-        sprintf(message,"There is a %d%% chance that %s is going to win this duel",(int) odds,name0);
-
-
+        odds = 100.0*Users::getInstance()->win_exp(_players[0]->cachedRankScore - _players[1]->cachedRankScore);
+        chosen_one = name0;
     }
     else
     {
-        float odds = 100.0*Users::getInstance()->win_exp(_players[1]->cachedRankScore - _players[0]->cachedRankScore);
-        sprintf(message,"There is a %d%% chance that %s is going to win this duel",(int) odds,name1);
+        odds = 100.0*Users::getInstance()->win_exp(_players[1]->cachedRankScore - _players[0]->cachedRankScore);
+        chosen_one = name1;
     }
+
+    sprintf(message,"There is a %d%% chance that %s is going to win this duel",(int) odds,chosen_one);
+
     std::string temp(message);
     BroadcastSystemChat(std::wstring(temp.begin(),temp.end()),true);
-
-
-
-
-
+    BroadcastSystemChat(L"View the full statistics at http://ygopro.cyberplanet.it",true);
 }
 
 void CMNetServer::clientStarted()
