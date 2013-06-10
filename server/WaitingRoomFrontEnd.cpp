@@ -158,13 +158,15 @@ void WaitingRoom::ToDuelistPressed(DuelPlayer* dp)
 }
 void WaitingRoom::changePlayerStatus(DuelPlayer* dp,DuelPlayerStatus::Status newstatus)
 {
+    if(player_status[dp].status==DuelPlayerStatus::CHALLENGERECEIVED)
+        refuse_challenge(dp);
     player_status[dp].status=newstatus;
 
 
 }
 void WaitingRoom::player_erase_cb(DuelPlayer* dp)
 {
-
+    refuse_challenge(dp);
 
 }
 
@@ -208,7 +210,11 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
             roomManager->tryToInsertPlayerInServer(dpnemico,netserver);
         }
         else
+        {
+            refuse_challenge(dp);
             ShowStats(dp);
+        }
+
 
         break;
     }
@@ -246,7 +252,7 @@ bool WaitingRoom::send_challenge_request(DuelPlayer* dp,wchar_t * second)
         }
 
         if(abs(dpnemico->cachedRankScore - dp->cachedRankScore) > roomManager->maxScoreDifference(dp->cachedRankScore))
-            SystemChatToPlayer(dp,L"The difference between your scores is too high,true");
+            SystemChatToPlayer(dp,L"The difference between your scores is too high,true",true);
 
         wchar_t dpname[20];
         BufferIO::CopyWStr(dp->name,dpname,20);
@@ -254,14 +260,37 @@ bool WaitingRoom::send_challenge_request(DuelPlayer* dp,wchar_t * second)
         player_status[dp].challenger = dpnemico;
                 player_status[dpnemico].challenger = dp;
 
-
+        SystemChatToPlayer(dp,L"Challenge request sent!",true);
         return true;
+
+
+
+}
+
+void WaitingRoom::refuse_challenge(DuelPlayer* dp)
+{
+    DuelPlayer* opponent = player_status[dp].challenger;
+    if(opponent == nullptr)
+        return;
+
+    if(player_status[dp].status!=DuelPlayerStatus::CHALLENGERECEIVED)
+            SystemChatToPlayer(dp,L"the player refused your challenge request",true);
+
+    player_status[dp].challenger = nullptr;
+    if(player_status.find(opponent) == player_status.end())
+        return;
+    dp = opponent;
+        if(player_status[dp].status!=DuelPlayerStatus::CHALLENGERECEIVED)
+            SystemChatToPlayer(dp,L"the player refused your challenge request",true);
+    player_status[dp].challenger = nullptr;
+
 
 
 }
 
 void WaitingRoom::ShowChallengeReceived(DuelPlayer* dp,wchar_t * opponent)
 {
+    SystemChatToPlayer(dp,L"A player challenges you!",true);
     SendNameToPlayer(dp,0,L"challenge received");
     SendNameToPlayer(dp,1,opponent);
     SendNameToPlayer(dp,2,"[ACCEPT]");
@@ -312,14 +341,10 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_MATCH);
     }
-    else if(false && !wcsncmp(messaggio,L"!challenge ",11) )
+    else if( !wcsncmp(messaggio,L"!challenge ",11) )
     {
 
-        /*if(dp->loginStatus != Users::LoginResult::NOPASSWORD && dp->loginStatus != Users::LoginResult::AUTHENTICATED)
-        {
-            SystemChatToPlayer(dp,L"You must login first",true);
-            return true;
-        }*/
+
 
         if(wcslen(messaggio) < 13)
         {

@@ -388,12 +388,15 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         {
             if(roomManager.InsertPlayerInWaitingRoom(dp))
             {
+                wchar_t nome[25];
+                BufferIO::CopyWStr(dp->name,nome,20);
+                std::wstring nomes(nome);
+                std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
+                BufferIO::CopyWStr(nomes.c_str(),dp->namew_low,20);
+
                 if(dp->loginStatus == Users::LoginResult::NOPASSWORD || dp->loginStatus == Users::LoginResult::AUTHENTICATED)
                 {
-                    wchar_t nome[25];
-                    BufferIO::CopyWStr(dp->name,nome,20);
-                    std::wstring nomes(nome);
-                    std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
+
                     std::lock_guard<std::mutex> lock(loggedUsers_mutex);
 
                     loggedUsers[nomes] = dp;

@@ -65,6 +65,7 @@ private:
     void changePlayerStatus(DuelPlayer* dp,DuelPlayerStatus::Status);
     void ShowChallengeReceived(DuelPlayer* dp,wchar_t * opponent);
     bool send_challenge_request(DuelPlayer* dp,wchar_t * opponent);
+    void refuse_challenge(DuelPlayer* dp);
 };
 
 

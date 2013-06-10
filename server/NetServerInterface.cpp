@@ -113,15 +113,11 @@ void CMNetServerInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char prot
 
 DuelPlayer* CMNetServerInterface::findPlayerByName(std::wstring user)
 {
+    std::transform(user.begin(), user.end(), user.begin(), ::tolower);
     for(auto it = players.cbegin();it != players.cend();++it)
     {
-        wchar_t nameu[20];
-        BufferIO::CopyWStr(it->first->name,nameu,20);
-        if(!wcsncmp(user.c_str(),nameu,20))
+        if(!wcsncmp(user.c_str(),it->first->namew_low,20))
             return it->first;
-
-
-
     }
     return nullptr;
 

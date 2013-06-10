@@ -102,6 +102,7 @@ class DuelMode;
 class CMNetServerInterface;
 struct DuelPlayer {
 	unsigned short name[20];
+	wchar_t namew_low[20];
 	DuelMode* game;
 	unsigned char type;
 	unsigned char state;
