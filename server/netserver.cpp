@@ -201,7 +201,7 @@ void CMNetServer::ShowPlayerOdds()
 
     std::string temp(message);
     BroadcastSystemChat(std::wstring(temp.begin(),temp.end()),true);
-    BroadcastSystemChat(L"View the full statistics at http://ygopro.cyberplanet.it",true);
+    BroadcastSystemChat(L"View the full statistics at http://www.ygopro.it",true);
 }
 
 void CMNetServer::clientStarted()

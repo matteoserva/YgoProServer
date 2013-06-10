@@ -16,6 +16,8 @@ CMNetServerInterface::CMNetServerInterface(RoomManager* roomManager,GameServer*g
 }
 DuelPlayer* CMNetServerInterface::getFirstPlayer()
 {
+    if(players.begin()== players.end())
+        return nullptr;
     return players.begin()->first;
 }
 
@@ -107,6 +109,22 @@ int CMNetServerInterface::getNumPlayers()
 void CMNetServerInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
 {
     SendBufferToPlayer(dp, proto, nullptr, 0);
+}
+
+DuelPlayer* CMNetServerInterface::findPlayerByName(std::wstring user)
+{
+    for(auto it = players.cbegin();it != players.cend();++it)
+    {
+        wchar_t nameu[20];
+        BufferIO::CopyWStr(it->first->name,nameu,20);
+        if(!wcsncmp(user.c_str(),nameu,20))
+            return it->first;
+
+
+
+    }
+    return nullptr;
+
 }
 
 void CMNetServerInterface::playerReadinessChange(DuelPlayer *dp, bool isReady)

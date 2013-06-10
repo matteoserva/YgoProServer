@@ -30,7 +30,7 @@ namespace ygo {
         void removeDeadRooms();
         bool FillRoom(CMNetServer* room);
         bool FillAllRooms();
-        CMNetServer* createServer(unsigned char mode);
+
         static void keepAlive(evutil_socket_t fd, short events, void* arg);
         public:
         event_base* net_evbase;
@@ -41,6 +41,8 @@ namespace ygo {
         void setGameServer(ygo::GameServer*);
 
         public:
+         CMNetServer* createServer(unsigned char mode);
+
         RoomManager();
         ~RoomManager();
         void BroadcastMessage(std::wstring, bool, bool crossServer = false);

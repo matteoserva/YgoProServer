@@ -8,11 +8,13 @@ namespace ygo
 
 struct DuelPlayerStatus
 {
-    enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER,CUSTOMMODE};
+    enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER,CUSTOMMODE,CHALLENGERECEIVED};
     Status status;
     std::vector<CMNetServer *> listaStanzeCompatibili;
     std::wstring lastName0;
-    DuelPlayerStatus():status(Status::STATS) {};
+    DuelPlayer *challenger;
+
+    DuelPlayerStatus():status(Status::STATS),challenger(nullptr) {};
 };
 
 class WaitingRoom:public CMNetServerInterface
@@ -35,6 +37,8 @@ private:
     {
         SendNameToPlayer(dp,pos,std::wstring(s.begin(),s.end()));
     }
+    void player_erase_cb(DuelPlayer* );
+
 public:
     DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*);
     DuelPlayer* ExtractBestMatchPlayer(int referenceScore);
@@ -58,7 +62,9 @@ private:
     void ShowCustomMode(DuelPlayer* dp);
     void ButtonKickPressed(DuelPlayer* dp,int pos);
     void ReadyFlagPressed(DuelPlayer* dp,bool readyFlag);
-
+    void changePlayerStatus(DuelPlayer* dp,DuelPlayerStatus::Status);
+    void ShowChallengeReceived(DuelPlayer* dp,wchar_t * opponent);
+    bool send_challenge_request(DuelPlayer* dp,wchar_t * opponent);
 };
 
 

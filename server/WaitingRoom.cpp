@@ -98,6 +98,7 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
 
 void WaitingRoom::ExtractPlayer(DuelPlayer* dp)
 {
+    player_erase_cb(dp);
     players.erase(dp);
     player_status.erase(dp);
     dp->netServer=0;
@@ -213,7 +214,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
     sprintf(buffer,"PID: %d, BUILD: %d, PLAYERS: %d",(int)getpid(),(int)BUILD_NUMBER,Statistics::getInstance()->getNumPlayers());
     ChatWithPlayer(dp, "CheckMate",buffer);
-    ChatWithPlayer(dp, "CheckMate","profile and stats at http://ygopro.cyberplanet.it/");
+    ChatWithPlayer(dp, "CheckMate","profile and stats at http://ygopro.it/");
     if(dp->countryCode == "IT")
     {
         SystemChatToPlayer(dp, L"[BIP][BIP] Duellante italiano rilevato [BIP] Benvenuto nel mio server! buon divertimento",true);

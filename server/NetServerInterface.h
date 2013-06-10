@@ -49,6 +49,8 @@ public:
     virtual bool handleChatCommand(DuelPlayer* dp,wchar_t* msg);
     DuelPlayer* getFirstPlayer();
 
+    DuelPlayer* findPlayerByName(std::wstring);
+
     virtual void SendMessageToPlayer(DuelPlayer*dp, char*msg);
     virtual void SystemChatToPlayer(DuelPlayer*dp, std::wstring,bool isAdmin = false);
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);

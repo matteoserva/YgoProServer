@@ -57,7 +57,7 @@ void RoomManager::tryToInsertPlayerInServer(DuelPlayer*dp,CMNetServer* serv)
         waitingRoom->ToObserverPressed(dp);
         return;
     }
-    if(abs(dp->cachedRankScore - serv->getFirstPlayer()->cachedRankScore) > maxScoreDifference(dp->cachedRankScore))
+    if(serv->getFirstPlayer() != nullptr && abs(dp->cachedRankScore - serv->getFirstPlayer()->cachedRankScore) > maxScoreDifference(dp->cachedRankScore))
     {
         printf("serv non piu' compatibile, cached %d, servscore %d\n",dp->cachedRankScore,serv->getFirstPlayer()->cachedRankScore);
         waitingRoom->ToObserverPressed(dp);

@@ -32,7 +32,7 @@ void WaitingRoom::ShowStats(DuelPlayer* dp)
     case Users::LoginResult::AUTHENTICATED:
         swprintf(wmessage,20, L"Rank: %d, stats:",rank);
         SendNameToPlayer(dp,2,wmessage);
-        sprintf(message, "http://goo.gl/4hx6r");
+        sprintf(message, "www.ygopro.it");
         //sprintf(message, "Score: %d(%+d)",score,dp->cachedGameScore-score);
         SendNameToPlayer(dp,3,message);
         break;
@@ -75,7 +75,7 @@ void WaitingRoom::ShowStats(DuelPlayer* dp)
     }
 
 
-    player_status[dp].status = DuelPlayerStatus::STATS;
+    changePlayerStatus(dp,DuelPlayerStatus::STATS);
     //ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
 }
 
@@ -122,7 +122,7 @@ void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
         SendNameToPlayer(dp,i+1,testo);
         log(VERBOSE,"waitingroom, trovato server\n");
     }
-    player_status[dp].status=DuelPlayerStatus::CHOOSESERVER;
+    changePlayerStatus(dp,DuelPlayerStatus::CHOOSESERVER);
     player_status[dp].listaStanzeCompatibili = lista;
 
     if(lista.size() == 0)
@@ -135,7 +135,7 @@ void WaitingRoom::ShowCustomMode(DuelPlayer* dp)
     SendNameToPlayer(dp,1,"");
     SendNameToPlayer(dp,2,"not working yet");
     SendNameToPlayer(dp,3,"");
-    player_status[dp].status=DuelPlayerStatus::CUSTOMMODE;
+    changePlayerStatus(dp,DuelPlayerStatus::CUSTOMMODE);
 }
 void WaitingRoom::ToDuelistPressed(DuelPlayer* dp)
 {
@@ -154,7 +154,18 @@ void WaitingRoom::ToDuelistPressed(DuelPlayer* dp)
     SendNameToPlayer(dp,2,"[MATCH]");
     SendNameToPlayer(dp,3,"[TAG]");
     EnableCrosses(dp);
-    player_status[dp].status=DuelPlayerStatus::CHOOSEGAMETYPE;
+    changePlayerStatus(dp,DuelPlayerStatus::CHOOSEGAMETYPE);
+}
+void WaitingRoom::changePlayerStatus(DuelPlayer* dp,DuelPlayerStatus::Status newstatus)
+{
+    player_status[dp].status=newstatus;
+
+
+}
+void WaitingRoom::player_erase_cb(DuelPlayer* dp)
+{
+
+
 }
 
 void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
@@ -183,8 +194,81 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
             break;
         roomManager->tryToInsertPlayerInServer(dp,player_status[dp].listaStanzeCompatibili[pos-1]);
         break;
+
+     case DuelPlayerStatus::CHALLENGERECEIVED:
+        if(pos ==2 && player_status.find(player_status[dp].challenger) != player_status.end() && player_status[player_status[dp].challenger].challenger== dp)
+        {
+            DuelPlayer* dpnemico = player_status[dp].challenger;
+            CMNetServer* netserver = roomManager->createServer(MODE_SINGLE);
+            player_status[dp].challenger = nullptr;
+            player_status[dpnemico].challenger = nullptr;
+
+
+            roomManager->tryToInsertPlayerInServer(dp,netserver);
+            roomManager->tryToInsertPlayerInServer(dpnemico,netserver);
+        }
+        else
+            ShowStats(dp);
+
+        break;
     }
 
+}
+
+bool WaitingRoom::send_challenge_request(DuelPlayer* dp,wchar_t * second)
+{
+        std::wstring nomenemico(second);
+
+        DuelPlayer* dpnemico = findPlayerByName(nomenemico);
+        if(dpnemico == nullptr)
+        {
+            SystemChatToPlayer(dp,L"Username not found.",true);
+            return true;
+
+        }
+
+        if(dp == dpnemico)
+        {
+            SystemChatToPlayer(dp,L"You cannot challenge yourself",true);
+            return true;
+
+        }
+
+        if(player_status[dp].challenger)
+        {
+            SystemChatToPlayer(dp,L"You have already sent a challenge request",true);
+            return true;
+        }
+        if(player_status[dpnemico].challenger)
+        {
+            SystemChatToPlayer(dp,L"This player is not ready to receive a challenge request",true);
+            return true;
+        }
+
+        if(abs(dpnemico->cachedRankScore - dp->cachedRankScore) > roomManager->maxScoreDifference(dp->cachedRankScore))
+            SystemChatToPlayer(dp,L"The difference between your scores is too high,true");
+
+        wchar_t dpname[20];
+        BufferIO::CopyWStr(dp->name,dpname,20);
+        ShowChallengeReceived(dpnemico,dpname);
+        player_status[dp].challenger = dpnemico;
+                player_status[dpnemico].challenger = dp;
+
+
+        return true;
+
+
+}
+
+void WaitingRoom::ShowChallengeReceived(DuelPlayer* dp,wchar_t * opponent)
+{
+    SendNameToPlayer(dp,0,L"challenge received");
+    SendNameToPlayer(dp,1,opponent);
+    SendNameToPlayer(dp,2,"[ACCEPT]");
+    SendNameToPlayer(dp,3,"[DECLINE]");
+    EnableCrosses(dp);
+
+    changePlayerStatus(dp,DuelPlayerStatus::CHALLENGERECEIVED);
 }
 
 bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
@@ -228,7 +312,27 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_MATCH);
     }
+    else if(false && !wcsncmp(messaggio,L"!challenge ",11) )
+    {
 
+        /*if(dp->loginStatus != Users::LoginResult::NOPASSWORD && dp->loginStatus != Users::LoginResult::AUTHENTICATED)
+        {
+            SystemChatToPlayer(dp,L"You must login first",true);
+            return true;
+        }*/
+
+        if(wcslen(messaggio) < 13)
+        {
+            SystemChatToPlayer(dp,L"I need a username",true);
+            return true;
+        }
+        wchar_t *second = &messaggio[11];
+        send_challenge_request(dp,second);
+
+
+
+        return true;
+    }
 
     else
     {
