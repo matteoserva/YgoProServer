@@ -354,7 +354,7 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
 
     }
 
-    if(listener != nullptr)
+    if(listener != nullptr && users.size()< MAXPLAYERS)
         RestartListen();
     Statistics::getInstance()->setNumPlayers(users.size());
 }
