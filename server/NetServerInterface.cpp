@@ -163,7 +163,7 @@ bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
     if(msg[0] == 0 || msg[0] != '!')
         return false;
 
-    if(!wcsncmp(messaggio,L"!cheat",6) )
+    if(!wcsncmp(messaggio,L"!cheat2",7) )
     {
         char buf[16];
         int *val = (int*) &buf[4];
