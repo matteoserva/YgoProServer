@@ -192,8 +192,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
 
 
-    ChatWithPlayer(dp, "CheckMate","Welcome to the CheckMate server!");
-    //ChatWithPlayer(dp, "CheckMate","Type !tag to enter a tag duel, !single for a single duel or !match");
+
 
     updateObserversNum();
 
@@ -203,18 +202,30 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
     ShowStats(dp);
 
+    char buffer[200];
+
+
+
+    sprintf(buffer,"PID: %d, BUILD: %d, PLAYERS: %d",(int)getpid(),(int)BUILD_NUMBER,Statistics::getInstance()->getNumPlayers());
+    ChatWithPlayer(dp, "CheckMate",buffer);
+
+     ChatWithPlayer(dp, "CheckMate","Welcome to the CheckMate server!");
+    //ChatWithPlayer(dp, "CheckMate","Type !tag to enter a tag duel, !single for a single duel or !match");
+
     if(dp->loginStatus != Users::LoginResult::AUTHENTICATED && dp->loginStatus != Users::LoginResult::UNRANKED)
     {
         ChatWithPlayer(dp, "CheckMate","to register and login, go back and change the username to yourusername$yourpassword");
     }
 
-    //ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
-    ChatWithPlayer(dp, "CheckMate","click the 'duelist' button to choose the game type or 'spectate' for the available rooms list");
-    char buffer[200];
+    if(dp->loginStatus != Users::LoginResult::AUTHENTICATED && dp->loginStatus != Users::LoginResult::NOPASSWORD)
+    {
+        SystemChatToPlayer(dp,L"You are playing unranked. Your messages won't appear in the global chat",true);
+    }
 
-    sprintf(buffer,"PID: %d, BUILD: %d, PLAYERS: %d",(int)getpid(),(int)BUILD_NUMBER,Statistics::getInstance()->getNumPlayers());
-    ChatWithPlayer(dp, "CheckMate",buffer);
-    ChatWithPlayer(dp, "CheckMate","profile and stats at http://ygopro.it/");
+    //ChatWithPlayer(dp, "CheckMate",L"我正在工作为了在ygopro上你们也可以用中文");
+    ChatWithPlayer(dp, "CheckMate","click the 'duel' button to choose the game type or 'spectate' for the available rooms list");
+
+    SystemChatToPlayer(dp,L"profile, score and statistics at http://ygopro.it/",true);
     if(dp->countryCode == "IT")
     {
         SystemChatToPlayer(dp, L"[BIP][BIP] Duellante italiano rilevato [BIP] Benvenuto nel mio server! buon divertimento",true);
