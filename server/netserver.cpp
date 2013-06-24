@@ -451,7 +451,7 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
      * if the player leaves during side decking
      * the player MUST become a loser
      */
-    if(state == PLAYING && mode == MODE_MATCH && last_winner > 0 && last_winner == dp->type)
+    if(state == PLAYING && mode == MODE_MATCH && last_winner == dp->type)
     {
         last_winner = 1-dp->type;
     }
