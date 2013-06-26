@@ -1,6 +1,6 @@
 #include "Statistics.h"
 #include <stdio.h>
-
+#include "Config.h"
 #include "debug.h"
 namespace ygo
 {
@@ -74,7 +74,7 @@ int Statistics::sendStatistics()
     last_send = time(NULL);
 
     char buffer[1024];
-    int n = sprintf(buffer,"rooms: %d\nplayers: %d",numRooms,numPlayers);
+    int n = sprintf(buffer,"rooms: %d\nplayers: %d/%d",numRooms,numPlayers,Config::getInstance()->max_processes*Config::getInstance()->max_users_per_process);
     if(n>0)
     if(FILE* fp = fopen("stats.txt", "w"))
         {

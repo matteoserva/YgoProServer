@@ -150,7 +150,7 @@ void CMNetServer::ShowPlayerScores()
         wcscat(message,tmp.c_str());
         wcscat(message,L">: ");
 
-        swprintf(buffer,64,L"%d(%+d)",it->first->cachedRankScore, it->first->cachedGameScore-it->first->cachedRankScore);
+	swprintf(buffer,64,L"%d",it->first->cachedGameScore);
         wcscat(message,buffer);
     }
     BroadcastSystemChat(message,true);
