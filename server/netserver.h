@@ -28,6 +28,7 @@ class CMNetServer:public CMNetServerInterface
     static void crash_detected();
     static bool isCrashed;
 private:
+    bool noVictory;
     static void DuelTimer(evutil_socket_t fd, short events, void* arg);
     void updateUserTimeout(DuelPlayer* dp);
     void Victory(char winner);

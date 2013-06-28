@@ -11,7 +11,7 @@ static const int TIMEOUT_INTERVAL=2;
 namespace ygo
 {
 CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
-    :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0),last_winner(-1),user_timeout(nullptr)
+    :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0),last_winner(-1),user_timeout(nullptr),noVictory(false)
 {
     createGame();
 }
@@ -500,7 +500,7 @@ void CMNetServer::StopListen()
 
 void CMNetServer::Victory(char winner)
 {
-    if(isCrashed)
+    if(noVictory)
         return;
     DuelPlayer* _players[4];
     for(int i = 0; i<4; i++)
@@ -867,6 +867,8 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         setState(ZOMBIE);
         updateServerState();
+        isCrashed=false;
+        noVictory = true;
     }
 }
 
