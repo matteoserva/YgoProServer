@@ -6,7 +6,7 @@
 #include "../ocgcore/duel.h"
 #include "../ocgcore/field.h"
 #include "../ocgcore/mtrandom.h"
-
+#include <algorithm>
 namespace ygo {
 
 SingleDuel::SingleDuel(bool is_match) {
@@ -412,14 +412,16 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.WriteData(players[0]->name, 40, false);
 	last_replay.WriteData(players[1]->name, 40, false);
 	if(!host_info.no_shuffle_deck) {
-		for(int i = 0; i < pdeck[0].main.size(); ++i) {
+	    random_shuffle(pdeck[0].main.begin(),pdeck[0].main.end());
+        random_shuffle(pdeck[1].main.begin(),pdeck[1].main.end());
+		/*for(int i = 0; i < pdeck[0].main.size(); ++i) {
 			int swap = rnd.real() * pdeck[0].main.size();
 			std::swap(pdeck[0].main[i], pdeck[0].main[swap]);
 		}
 		for(int i = 0; i < pdeck[1].main.size(); ++i) {
 			int swap = rnd.real() * pdeck[1].main.size();
 			std::swap(pdeck[1].main[i], pdeck[1].main[swap]);
-		}
+		}*/
 	}
 	time_limit[0] = host_info.time_limit;
 	time_limit[1] = host_info.time_limit;

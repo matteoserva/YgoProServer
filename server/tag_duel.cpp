@@ -6,6 +6,7 @@
 #include "../ocgcore/duel.h"
 #include "../ocgcore/field.h"
 #include "../ocgcore/mtrandom.h"
+#include <algorithm>
 
 namespace ygo {
 
@@ -363,22 +364,11 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.WriteData(players[2]->name, 40, false);
 	last_replay.WriteData(players[3]->name, 40, false);
 	if(!host_info.no_shuffle_deck) {
-		for(int i = 0; i < pdeck[0].main.size(); ++i) {
-			int swap = rnd.real() * pdeck[0].main.size();
-			std::swap(pdeck[0].main[i], pdeck[0].main[swap]);
-		}
-		for(int i = 0; i < pdeck[1].main.size(); ++i) {
-			int swap = rnd.real() * pdeck[1].main.size();
-			std::swap(pdeck[1].main[i], pdeck[1].main[swap]);
-		}
-		for(int i = 0; i < pdeck[2].main.size(); ++i) {
-			int swap = rnd.real() * pdeck[2].main.size();
-			std::swap(pdeck[2].main[i], pdeck[2].main[swap]);
-		}
-		for(int i = 0; i < pdeck[3].main.size(); ++i) {
-			int swap = rnd.real() * pdeck[3].main.size();
-			std::swap(pdeck[3].main[i], pdeck[3].main[swap]);
-		}
+		random_shuffle(pdeck[0].main.begin(),pdeck[0].main.end());
+        random_shuffle(pdeck[1].main.begin(),pdeck[1].main.end());
+        random_shuffle(pdeck[2].main.begin(),pdeck[2].main.end());
+        random_shuffle(pdeck[3].main.begin(),pdeck[3].main.end());
+
 	}
 	time_limit[0] = host_info.time_limit;
 	time_limit[1] = host_info.time_limit;

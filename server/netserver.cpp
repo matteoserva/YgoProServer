@@ -863,7 +863,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     }
 
-    if(isCrashed)
+    if(false && isCrashed)
     {
         setState(ZOMBIE);
         updateServerState();
