@@ -500,6 +500,8 @@ void CMNetServer::StopListen()
 
 void CMNetServer::Victory(char winner)
 {
+    if(isCrashed)
+        return;
     DuelPlayer* _players[4];
     for(int i = 0; i<4; i++)
         _players[i]=0;
@@ -865,7 +867,6 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
         setState(ZOMBIE);
         updateServerState();
-        isCrashed=false;
     }
 }
 
