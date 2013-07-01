@@ -10,6 +10,12 @@
 #include "Users.h"
 #include <signal.h>
 
+static void sighandleralrm(int sig)
+{
+
+    kill(getpid(),SIGSEGV);
+}
+
 
 static void sighandler(int sig)
 {
@@ -53,7 +59,7 @@ bool GameServer::StartServer()
     struct sigaction sa;
 
     signal(SIGSEGV, sighandler);
-    signal(SIGALRM, sighandler);
+    signal(SIGALRM, sighandleralrm);
     Thread::NewThread(ServerThread, this);
     blocca_sigsegv();
     return true;
