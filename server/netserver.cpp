@@ -13,7 +13,7 @@ static const int TIMEOUT_INTERVAL=2;
 namespace ygo
 {
 CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
-    :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0),last_winner(-1),user_timeout(nullptr),noVictory(false)
+    :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0),last_winner(-1),user_timeout(nullptr)
 {
     createGame();
 }
@@ -81,7 +81,7 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
     if(proto == STOC_GAME_MSG)
     {
         unsigned char* wbuf = (unsigned char*)buffer;
-        if(wbuf[0] == MSG_WIN)
+        if(wbuf[0] == MSG_WIN && state == PLAYING)
         {
             log(VERBOSE,"---------vittoria per il giocatore\n");
             last_winner =wbuf[1];
@@ -502,7 +502,7 @@ void CMNetServer::StopListen()
 
 void CMNetServer::Victory(char winner)
 {
-    if(noVictory)
+    if(last_winner < 0)
         return;
     DuelPlayer* _players[4];
     for(int i = 0; i<4; i++)
@@ -738,9 +738,10 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         catch (std::string &errore)
         {
             printf("aiuto!\n");
+            last_winner = -1;
             setState(ZOMBIE);
             updateServerState();
-            noVictory = true;
+
             kill(SIGTERM,getpid());
 
         }
@@ -882,28 +883,12 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     }
 
-    if(false && isCrashed)
-    {
-        setState(ZOMBIE);
-        updateServerState();
-        isCrashed=false;
-        noVictory = true;
-    }
+
 
 
 }
 
-bool CMNetServer::isCrashed = false;
-void CMNetServer::crash_detected()
-{
-    isCrashed = true;
 
-    FILE* fp = fopen("cm-error.log", "at");
-    if(!fp)
-        return;
-    fprintf(fp, "server crashato pid: %d\n", (int) getpid());
-    fclose(fp);
-}
 
 }
 
