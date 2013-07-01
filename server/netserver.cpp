@@ -6,6 +6,8 @@
 #include "debug.h"
 #include "Users.h"
 #include <algorithm>
+#include <signal.h>
+
 
 static const int TIMEOUT_INTERVAL=2;
 namespace ygo
@@ -150,7 +152,7 @@ void CMNetServer::ShowPlayerScores()
         wcscat(message,tmp.c_str());
         wcscat(message,L">: ");
 
-	swprintf(buffer,64,L"%d",it->first->cachedGameScore);
+        swprintf(buffer,64,L"%d",it->first->cachedGameScore);
         wcscat(message,buffer);
     }
     BroadcastSystemChat(message,true);
@@ -722,15 +724,29 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(!dp->game || !duel_mode->pduel)
             return;
 
+        alarm(10);
 
-        duel_mode->GetResponse(dp, pdata, len > 64 ? 64 : len - 1);
-        int resp_type = dp->type;
-        if(mode == MODE_TAG)
-            resp_type= dp->type < 2 ? 0 : 1;
-        if(duel_mode->time_limit[resp_type]>0 and duel_mode->time_limit[resp_type]<60)
-            duel_mode->time_limit[resp_type] +=1;
-        //printf("response inviato da %d\n",dp->type);
-        ;
+        try
+        {
+            duel_mode->GetResponse(dp, pdata, len > 64 ? 64 : len - 1);
+            int resp_type = dp->type;
+            if(mode == MODE_TAG)
+                resp_type= dp->type < 2 ? 0 : 1;
+            if(duel_mode->time_limit[resp_type]>0 and duel_mode->time_limit[resp_type]<60)
+                duel_mode->time_limit[resp_type] +=1;
+        }
+        catch (std::string &errore)
+        {
+            printf("aiuto!\n");
+            setState(ZOMBIE);
+            updateServerState();
+            noVictory = true;
+            kill(SIGTERM,getpid());
+
+        }
+        alarm(0);
+
+
         break;
     }
     case CTOS_TIME_CONFIRM:
@@ -772,10 +788,13 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_TP_RESULT:
     {
+
         if(!dp->game)
             return;
         CTOS_TPResult* pkt = (CTOS_TPResult*)pdata;
         dp->game->TPResult(dp, pkt->res);
+
+
         break;
     }
 
@@ -870,6 +889,8 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         isCrashed=false;
         noVictory = true;
     }
+
+
 }
 
 bool CMNetServer::isCrashed = false;

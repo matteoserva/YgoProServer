@@ -19,7 +19,7 @@ OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 INCLUDES = -I ./server/ -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I ./ygopro/ocgcore/ -I ./ygopro/gframe/  -I /usr/include/irrlicht/
 
 # C compiler flags (-g -O2 -Wall)
-CCFLAGS =   -O0 -g -fstack-protector-all -Wall -wd858
+CCFLAGS =   -O0 -g -fstack-protector-all -Wall -wd858  -fnon-call-exceptions
 CPPFLAGS =  -std=c++0x $(CCFLAGS) -D_GLIBCXX_DEBUG
 
 # compiler
@@ -30,9 +30,9 @@ CXX=icpc
 LIBS = 
 
 # compile flags
-#LDFLAGS = -levent  -lsqlite3 -levent_pthreads ygopro/bin/debug/libocgcore.a -llua5.2 #-lduma  #ygopro/bin/debug/libclzma.a 
+LDFLAGS = -levent  -lsqlite3 -levent_pthreads ygopro/bin/debug/libocgcore.a -llua5.2 #-lduma  #ygopro/bin/debug/libclzma.a
 
-LDFLAGS = -levent  -lsqlite3 -levent_pthreads -L./ygopro/bin/debug/ -locgcore -llua5.2
+#LDFLAGS = -levent  -lsqlite3 -levent_pthreads -L./ygopro/bin/debug/ -locgcore -llua5.2
 LDFLAGS += -lmysqlcppconn
 
 server: $(OUT)
@@ -53,7 +53,7 @@ $(OUT): $(OBJ) ocgcore #libclzma
 	$(CPP) $(CPPFLAGS) -o $(OUT) $(OBJ) $(LDFLAGS)
 
 .c.o:
-	$(CC) $(INCLUDES) $(CCFLAGS) -c $< -o $@
+	$(CC) $(INCLUDES) $(CCFLAGS) -c $< -o $@ 
 
 .cpp.o:
 	$(CPP) $(INCLUDES) $(CPPFLAGS) -c $< -o $@

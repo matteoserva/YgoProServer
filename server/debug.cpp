@@ -1,5 +1,6 @@
 #include "debug.h"
 #include <unistd.h>
+#include <signal.h>
 char* log_type_str[]={"VERBOSE","INFO","WARN","BUG"};
 void log(log_type lt, const char *format, ...)
 {
@@ -17,4 +18,13 @@ void log(log_type lt, const char *format, ...)
     vprintf(format, args);
     va_end(args);
 #endif /* DEBUG */
+}
+
+void blocca_sigsegv()
+{
+   sigset_t set;
+   sigemptyset(&set);
+    sigaddset(&set, SIGSEGV);
+    sigaddset(&set, SIGALRM);
+    pthread_sigmask(SIG_BLOCK, &set, NULL);
 }

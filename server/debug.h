@@ -8,5 +8,5 @@
 
 enum log_type {VERBOSE,INFO,WARN,BUG};
 void log(log_type lt, const char *format, ...);
-
+void blocca_sigsegv();
 #endif
