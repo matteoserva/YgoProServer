@@ -59,7 +59,6 @@ bool GameServer::StartServer()
     struct sigaction sa;
 
     signal(SIGSEGV, sighandler);
-    signal(SIGALRM, sighandleralrm);
     Thread::NewThread(ServerThread, this);
     blocca_sigsegv();
     return true;
@@ -262,7 +261,7 @@ int GameServer::CheckAliveThread(void* parama)
     if(time(NULL)- last_check < sleepSeconds)
         return 0;
 
-    if(false && !that->isAlive)
+    if( !that->isAlive)
     {
         volatile int *p = reinterpret_cast<volatile int*>(0);
         *p = 0x1337D00D;
@@ -444,15 +443,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         }
     }
 
-
-
-
-    int time1 = clock();
     dp->netServer->HandleCTOSPacket(dp,data,len);
-    int time2 = clock();
-    int diffms=1000*(time2-time1)/(CLOCKS_PER_SEC);
-    if(diffms > 500)
-        printf("millisecs: %d\n",diffms);
     return;
 }
 

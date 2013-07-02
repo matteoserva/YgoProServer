@@ -25,6 +25,5 @@ void blocca_sigsegv()
    sigset_t set;
    sigemptyset(&set);
     sigaddset(&set, SIGSEGV);
-    sigaddset(&set, SIGALRM);
     pthread_sigmask(SIG_BLOCK, &set, NULL);
 }

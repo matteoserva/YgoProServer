@@ -724,7 +724,6 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(!dp->game || !duel_mode->pduel)
             return;
 
-        alarm(10);
 
         try
         {
@@ -745,7 +744,6 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             kill(SIGTERM,getpid());
 
         }
-        alarm(0);
 
 
         break;
