@@ -256,15 +256,14 @@ int GameServer::CheckAliveThread(void* parama)
         return 0;
 
     static time_t last_check = time(NULL);
-    int sleepSeconds = 60;
+    int sleepSeconds = 20;
 
     if(time(NULL)- last_check < sleepSeconds)
         return 0;
 
     if( !that->isAlive)
     {
-        volatile int *p = reinterpret_cast<volatile int*>(0);
-        *p = 0x1337D00D;
+        abort();
         exit(EXIT_FAILURE);
     }
     that->isAlive=false;
@@ -310,7 +309,7 @@ int GameServer::ServerThread(void* parama)
 
     //std::thread checkAlive(CheckAliveThread, that);
     event* keepAliveEvent = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, that);
-    timeval timeout = {5, 0};
+    timeval timeout = {4, 0};
     event_add(keepAliveEvent, &timeout);
 
     event* cicle_injected = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, checkInjectedMessages_cb, parama);
