@@ -278,7 +278,7 @@ void GameServer::keepAlive(evutil_socket_t fd, short events, void* arg)
     that->isAlive = true;
 
     static time_t last_check = time(NULL);
-    if(time(NULL)- last_check < 300)
+    if(time(NULL)- last_check < 600)
         return;
     last_check = time(NULL);
     that->roomManager.BroadcastMessage(L"www.ygopro.it <-- Here you can see your score and ranking",true,true);
