@@ -1,6 +1,8 @@
 #include "debug.h"
 #include <unistd.h>
 #include <signal.h>
+#include <iostream>
+
 char* log_type_str[]={"VERBOSE","INFO","WARN","BUG"};
 void log(log_type lt, const char *format, ...)
 {
@@ -20,10 +22,48 @@ void log(log_type lt, const char *format, ...)
 #endif /* DEBUG */
 }
 
-void blocca_sigsegv()
+static void sighandleralarm(int sig)
 {
-   sigset_t set;
-   sigemptyset(&set);
+
+    std::cout << "alarm"<<std::endl;
+    kill(getpid(),SIGSEGV);
+    //throw std::string ("corretto");
+}
+
+static void sighandler(int sig)
+{
+
+    std::cout << "segfault"<<std::endl;
+    throw std::string ("corretto");
+}
+
+
+
+void prepara_segnali()
+{
+    signal(SIGALRM, sighandleralarm);
+    signal(SIGSEGV, sighandler);
+    sigset_t set;
+    sigemptyset(&set);
     sigaddset(&set, SIGSEGV);
+    sigaddset(&set, SIGALRM);
+    pthread_sigmask(SIG_BLOCK, &set, NULL);
+}
+
+void sblocca_segnali()
+{
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGSEGV);
+    sigaddset(&set, SIGALRM);
+    pthread_sigmask(SIG_UNBLOCK, &set, NULL);
+}
+
+void blocca_segnali()
+{
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGSEGV);
+    sigaddset(&set, SIGALRM);
     pthread_sigmask(SIG_BLOCK, &set, NULL);
 }

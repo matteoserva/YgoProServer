@@ -92,6 +92,7 @@ GameserversManager::GameserversManager():maxchildren(4)
 {
     signal(SIGTERM, sigterm_handler);
     signal(SIGINT, sigterm_handler);
+    prepara_segnali();
 }
 
 void GameserversManager::chatCallback(std::wstring message,bool isAdmin,void*ptr)

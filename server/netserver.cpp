@@ -724,7 +724,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(!dp->game || !duel_mode->pduel)
             return;
 
-
+        sblocca_segnali();
         try
         {
             duel_mode->GetResponse(dp, pdata, len > 64 ? 64 : len - 1);
@@ -744,7 +744,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             kill(SIGTERM,getpid());
 
         }
-
+        blocca_segnali();
 
         break;
     }
@@ -757,6 +757,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_CHAT:
     {
+
         if(!dp->game)
             return;
         wchar_t messaggio[256];

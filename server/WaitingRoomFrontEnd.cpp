@@ -250,7 +250,7 @@ bool WaitingRoom::send_challenge_request(DuelPlayer* dp,wchar_t * second)
             SystemChatToPlayer(dp,L"This player is not ready to receive a challenge request",true);
             return true;
         }
-
+        if(wcscmp(dp->namew_low,L"checkmate"))
         if(abs(dpnemico->cachedRankScore - dp->cachedRankScore) > roomManager->maxScoreDifference(dp->cachedRankScore))
             SystemChatToPlayer(dp,L"The difference between your scores is too high,true",true);
 

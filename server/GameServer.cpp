@@ -8,21 +8,7 @@
 #include "Statistics.h"
 
 #include "Users.h"
-#include <signal.h>
 
-static void sighandleralrm(int sig)
-{
-
-    kill(getpid(),SIGSEGV);
-}
-
-
-static void sighandler(int sig)
-{
-
-    std::cout << "segfault"<<std::endl;
-    throw std::string ("corretto");
-}
 
 using ygo::Config;
 namespace ygo
@@ -56,11 +42,8 @@ bool GameServer::StartServer()
     evconnlistener_set_error_cb(listener, ServerAcceptError);
     roomManager.setGameServer(const_cast<ygo::GameServer *>(this));
 
-    struct sigaction sa;
 
-    signal(SIGSEGV, sighandler);
     Thread::NewThread(ServerThread, this);
-    blocca_sigsegv();
     return true;
 }
 int GameServer::getNumPlayers()
