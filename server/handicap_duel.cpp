@@ -305,7 +305,7 @@ void HandicapDuel::HandResult(DuelPlayer* dp, unsigned char res) {
 		schr.res1 = hand_result[0];
 		schr.res2 = hand_result[1];
 		netServer->SendPacketToPlayer(players[0], STOC_HAND_RESULT, schr);
-		netServer->ReSendToPlayer(players[1]);
+		//netServer->ReSendToPlayer(players[1]);
 		for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 			netServer->ReSendToPlayer(*oit);
 		schr.res1 = hand_result[1];
@@ -341,7 +341,7 @@ void HandicapDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	pplayer[1] = players[1];
 	pplayer[2] = players[2];
 	pplayer[3] = players[3];
-	if((tp && dp->type == 2) || (!tp && dp->type == 0)) {
+	/*if((tp && dp->type == 2) || (!tp && dp->type == 0)) {
 		std::swap(players[0], players[2]);
 		std::swap(players[1], players[3]);
 		players[0]->type = 0;
@@ -351,7 +351,7 @@ void HandicapDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 		std::swap(pdeck[0], pdeck[2]);
 		std::swap(pdeck[1], pdeck[3]);
 		swapped = true;
-	}
+	}*/
 	turn_count = 0;
 	cur_player[0] = players[0];
 	cur_player[1] = players[3];
@@ -365,10 +365,11 @@ void HandicapDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.BeginRecord();
 	last_replay.WriteHeader(rh);
 	rnd.reset(seed);
-	last_replay.WriteData(players[0]->name, 40, false);
+	last_replay.WriteData(L"-handicap match-", 40, false);
 	last_replay.WriteData(players[1]->name, 40, false);
 	last_replay.WriteData(players[2]->name, 40, false);
 	last_replay.WriteData(players[3]->name, 40, false);
+	pdeck[0] = pdeck[1];
 	if(!host_info.no_shuffle_deck) {
 		random_shuffle(pdeck[0].main.begin(),pdeck[0].main.end());
         random_shuffle(pdeck[1].main.begin(),pdeck[1].main.end());
@@ -450,7 +451,7 @@ void HandicapDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	BufferIO::WriteInt16(pbuf, query_field_count(pduel, 1, 0x1));
 	BufferIO::WriteInt16(pbuf, query_field_count(pduel, 1, 0x40));
 	netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, startbuf, 18);
-	netServer->ReSendToPlayer(players[1]);
+	//netServer->ReSendToPlayer(players[1]);
 	startbuf[1] = 1;
 	netServer->SendBufferToPlayer(players[2], STOC_GAME_MSG, startbuf, 18);
 	netServer->ReSendToPlayer(players[3]);
@@ -484,7 +485,7 @@ void HandicapDuel::Process() {
 }
 void HandicapDuel::DuelEndProc() {
 	netServer->SendPacketToPlayer(players[0], STOC_DUEL_END);
-	netServer->ReSendToPlayer(players[1]);
+	//netServer->ReSendToPlayer(players[1]);
 	netServer->ReSendToPlayer(players[2]);
 	netServer->ReSendToPlayer(players[3]);
 	for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -524,7 +525,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			case 7:
 			case 8:
 			case 9: {
-				for(int i = 0; i < 4; ++i)
+				for(int i = 1; i < 4; ++i)
 					if(players[i] != cur_player[player])
 						netServer->SendBufferToPlayer(players[i], STOC_GAME_MSG, offset, pbuf - offset);
 				for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -538,7 +539,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			player = BufferIO::ReadInt8(pbuf);
 			type = BufferIO::ReadInt8(pbuf);
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -683,7 +684,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			count = BufferIO::ReadInt8(pbuf);
 			pbuf += count * 7;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -696,7 +697,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			if(pbuf[5] == LOCATION_HAND) {
 				pbuf += count * 7;
 				netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-				netServer->ReSendToPlayer(players[1]);
+				//netServer->ReSendToPlayer(players[1]);
 				netServer->ReSendToPlayer(players[2]);
 				netServer->ReSendToPlayer(players[3]);
 				for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -710,7 +711,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_SHUFFLE_DECK: {
 			player = BufferIO::ReadInt8(pbuf);
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -723,7 +724,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			netServer->SendBufferToPlayer(cur_player[player], STOC_GAME_MSG, offset, (pbuf - offset) + count * 4);
 			for(int i = 0; i < count; ++i)
 				BufferIO::WriteInt32(pbuf, 0);
-			for(int i = 0; i < 4; ++i)
+			for(int i = 1; i < 4; ++i)
 				if(players[i] != cur_player[player])
 					netServer->SendBufferToPlayer(players[i], STOC_GAME_MSG, offset, pbuf - offset);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -734,7 +735,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_REFRESH_DECK: {
 			pbuf++;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -744,7 +745,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_SWAP_GRAVE_DECK: {
 			player = BufferIO::ReadInt8(pbuf);
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -754,7 +755,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		}
 		case MSG_REVERSE_DECK: {
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -764,7 +765,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_DECK_TOP: {
 			pbuf += 6;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -775,7 +776,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			count = BufferIO::ReadInt8(pbuf);
 			pbuf += count * 8;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -789,7 +790,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			time_limit[0] = host_info.time_limit;
 			time_limit[1] = host_info.time_limit;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -813,7 +814,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_NEW_PHASE: {
 			pbuf++;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -849,7 +850,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 				netServer->SendBufferToPlayer(cur_player[cc], STOC_GAME_MSG, offset, pbuf - offset);
 				if (!(cl & 0xb0) && !((cl & 0xc) && (cp & POS_FACEUP)))
 					BufferIO::WriteInt32(pbufw, 0);
-				for(int i = 0; i < 4; ++i)
+				for(int i = 1; i < 4; ++i)
 					if(players[i] != cur_player[cc])
 						netServer->SendBufferToPlayer(players[i], STOC_GAME_MSG, offset, pbuf - offset);
 				for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -867,7 +868,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			int cp = pbuf[8];
 			pbuf += 9;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -880,7 +881,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			BufferIO::WriteInt32(pbuf, 0);
 			pbuf += 4;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -890,7 +891,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_SWAP: {
 			pbuf += 16;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -900,7 +901,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_FIELD_DISABLED: {
 			pbuf += 4;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -910,7 +911,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_SUMMONING: {
 			pbuf += 8;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -919,7 +920,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		}
 		case MSG_SUMMONED: {
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -933,7 +934,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_SPSUMMONING: {
 			pbuf += 8;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -942,7 +943,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		}
 		case MSG_SPSUMMONED: {
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -957,7 +958,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			RefreshSingle(pbuf[4], pbuf[5], pbuf[6]);
 			pbuf += 8;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -966,7 +967,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		}
 		case MSG_FLIPSUMMONED: {
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -980,7 +981,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_CHAINING: {
 			pbuf += 16;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -990,7 +991,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_CHAINED: {
 			pbuf++;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1006,7 +1007,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_CHAIN_SOLVING: {
 			pbuf++;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1016,7 +1017,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_CHAIN_SOLVED: {
 			pbuf++;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1031,7 +1032,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		}
 		case MSG_CHAIN_END: {
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1047,7 +1048,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_CHAIN_NEGATED: {
 			pbuf++;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1057,7 +1058,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_CHAIN_DISABLED: {
 			pbuf++;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1075,7 +1076,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			count = BufferIO::ReadInt8(pbuf);
 			pbuf += count * 4;
 			netServer->SendBufferToPlayer(players[player], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1086,7 +1087,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			count = BufferIO::ReadInt8(pbuf);
 			pbuf += count * 4;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1105,7 +1106,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 				else
 					pbufw += 4;
 			}
-			for(int i = 0; i < 4; ++i)
+			for(int i = 1; i < 4; ++i)
 				if(players[i] != cur_player[player])
 					netServer->SendBufferToPlayer(players[i], STOC_GAME_MSG, offset, pbuf - offset);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1115,7 +1116,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_DAMAGE: {
 			pbuf += 5;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1125,7 +1126,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_RECOVER: {
 			pbuf += 5;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1135,7 +1136,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_EQUIP: {
 			pbuf += 8;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1145,7 +1146,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_LPUPDATE: {
 			pbuf += 5;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1155,7 +1156,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_UNEQUIP: {
 			pbuf += 4;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1165,7 +1166,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_CARD_TARGET: {
 			pbuf += 8;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1175,7 +1176,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_CANCEL_TARGET: {
 			pbuf += 8;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1185,7 +1186,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_PAY_LPCOST: {
 			pbuf += 5;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1195,7 +1196,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_ADD_COUNTER: {
 			pbuf += 6;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1205,7 +1206,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_REMOVE_COUNTER: {
 			pbuf += 6;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1215,7 +1216,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_ATTACK: {
 			pbuf += 8;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1225,7 +1226,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_BATTLE: {
 			pbuf += 26;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1234,7 +1235,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		}
 		case MSG_ATTACK_DISABLED: {
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1243,7 +1244,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		}
 		case MSG_DAMAGE_STEP_START: {
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1254,7 +1255,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		}
 		case MSG_DAMAGE_STEP_END: {
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1274,7 +1275,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			count = BufferIO::ReadInt8(pbuf);
 			pbuf += count;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1286,7 +1287,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 			count = BufferIO::ReadInt8(pbuf);
 			pbuf += count;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1324,7 +1325,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		case MSG_CARD_HINT: {
 			pbuf += 9;
 			netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, offset, pbuf - offset);
-			netServer->ReSendToPlayer(players[1]);
+			//netServer->ReSendToPlayer(players[1]);
 			netServer->ReSendToPlayer(players[2]);
 			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1345,7 +1346,7 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 				else
 					pbufw += 4;
 			}
-			for(int i = 0; i < 4; ++i)
+			for(int i = 1; i < 4; ++i)
 				if(players[i] != cur_player[player])
 					netServer->SendBufferToPlayer(players[i], STOC_GAME_MSG, offset, pbuf - offset);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1392,7 +1393,7 @@ void HandicapDuel::EndDuel() {
 	pbuf += sizeof(ReplayHeader);
 	memcpy(pbuf, last_replay.comp_data, last_replay.comp_size);
 	netServer->SendBufferToPlayer(players[0], STOC_REPLAY, replaybuf, sizeof(ReplayHeader) + last_replay.comp_size);
-	netServer->ReSendToPlayer(players[1]);
+	//netServer->ReSendToPlayer(players[1]);
 	netServer->ReSendToPlayer(players[2]);
 	netServer->ReSendToPlayer(players[3]);
 	for(auto oit = observers.begin(); oit != observers.end(); ++oit)
@@ -1403,7 +1404,7 @@ void HandicapDuel::EndDuel() {
 void HandicapDuel::WaitforResponse(int playerid) {
 	last_response = playerid;
 	unsigned char msg = MSG_WAITING;
-	for(int i = 0; i < 4; ++i)
+	for(int i = 1; i < 4; ++i)
 		if(players[i] != cur_player[playerid])
 			netServer->SendPacketToPlayer(players[i], STOC_GAME_MSG, msg);
 	if(host_info.time_limit) {
@@ -1411,7 +1412,7 @@ void HandicapDuel::WaitforResponse(int playerid) {
 		sctl.player = playerid;
 		sctl.left_time = time_limit[playerid];
 		netServer->SendPacketToPlayer(players[0], STOC_TIME_LIMIT, sctl);
-		netServer->ReSendToPlayer(players[1]);
+		//netServer->ReSendToPlayer(players[1]);
 		netServer->ReSendToPlayer(players[2]);
 		netServer->ReSendToPlayer(players[3]);
 		cur_player[playerid]->state = CTOS_TIME_CONFIRM;
@@ -1493,7 +1494,7 @@ void HandicapDuel::RefreshHand(int player, int flag, int use_cache) {
 		qbuf += slen - 4;
 		qlen += slen;
 	}
-	for(int i = 0; i < 4; ++i)
+	for(int i = 1; i < 4; ++i)
 		if(players[i] != cur_player[player])
 			netServer->SendBufferToPlayer(players[i], STOC_GAME_MSG, query_buffer, len + 3);
 	for(auto pit = observers.begin(); pit != observers.end(); ++pit)
@@ -1507,7 +1508,7 @@ void HandicapDuel::RefreshGrave(int player, int flag, int use_cache) {
 	BufferIO::WriteInt8(qbuf, LOCATION_GRAVE);
 	int len = query_field_card(pduel, player, LOCATION_GRAVE, flag, (unsigned char*)qbuf, use_cache);
 	netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, query_buffer, len + 3);
-	netServer->ReSendToPlayer(players[1]);
+	//netServer->ReSendToPlayer(players[1]);
 	netServer->ReSendToPlayer(players[2]);
 	netServer->ReSendToPlayer(players[3]);
 	for(auto pit = observers.begin(); pit != observers.end(); ++pit)
@@ -1544,7 +1545,7 @@ void HandicapDuel::RefreshSingle(int player, int location, int sequence, int fla
 	} else {
 		netServer->SendBufferToPlayer(cur_player[player], STOC_GAME_MSG, query_buffer, len + 4);
 		if (location & 0x90) {
-			for(int i = 0; i < 4; ++i)
+			for(int i = 1; i < 4; ++i)
 				if(players[i] != cur_player[player])
 					netServer->ReSendToPlayer(players[i]);
 			for(auto pit = observers.begin(); pit != observers.end(); ++pit)
@@ -1579,7 +1580,7 @@ void HandicapDuel::TagTimer(evutil_socket_t fd, short events, void* arg) {
 		wbuf[1] = 1 - player;
 		wbuf[2] = 0x3;
 		sd->netServer->SendBufferToPlayer(sd->players[0], STOC_GAME_MSG, wbuf, 3);
-		sd->netServer->ReSendToPlayer(sd->players[1]);
+		//sd->netServer->ReSendToPlayer(sd->players[1]);
 		sd->netServer->ReSendToPlayer(sd->players[2]);
 		sd->netServer->ReSendToPlayer(sd->players[3]);
 		sd->EndDuel();
