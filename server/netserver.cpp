@@ -1,6 +1,7 @@
 #include "netserver.h"
 #include "single_duel.h"
 #include "tag_duel.h"
+#include "handicap_duel.h"
 #include "GameServer.h"
 #include "RoomManager.h"
 #include "debug.h"
@@ -55,26 +56,7 @@ void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_Ty
     CMNetServerInterface::SendPacketToPlayer(dp,proto,sctc);
 }
 
-/*
-void CMNetServer::EverybodyIsPlaying()
-{
 
-
-    if(mode != MODE_TAG)
-        for(auto it = players.cbegin(); it!=players.cend(); ++it)
-        {
-            if(it->first->type == NETPLAYER_TYPE_OBSERVER)
-                continue;
-            char buffer[256],name[20];
-            BufferIO::CopyWStr(it->first->name, name,20);
-            int score = Users::getInstance()->getScore(std::string(name));
-            sprintf(buffer, "%s has %d points",name,score);
-            /* people keep complaining about the match maker
-            //SendMessageToPlayer(dp,buffer);
-        }
-
-}
-*/
 void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
     CMNetServerInterface::SendBufferToPlayer(dp,proto,buffer,len);
@@ -164,7 +146,7 @@ void CMNetServer::ShowPlayerOdds()
 
 
 
-    if(mode == MODE_TAG)
+    if(mode != MODE_SINGLE && mode != MODE_MATCH)
         return;
     DuelPlayer* _players[2];
     for(int i = 0; i<2; i++)
@@ -265,6 +247,8 @@ int CMNetServer::getMaxDuelPlayers()
     int maxplayers = 2;
     if(mode == MODE_TAG)
         maxplayers=4;
+    else if(mode == MODE_HANDICAP)
+        maxplayers=3;
     return maxplayers;
 }
 
@@ -340,6 +324,8 @@ void CMNetServer::DuelTimer(evutil_socket_t fd, short events, void* arg)
         SingleDuel::SingleTimer(fd,events,that->duel_mode);
     else if(that->mode == MODE_TAG)
         TagDuel::TagTimer(fd,events,that->duel_mode);
+    else if(that->mode == MODE_HANDICAP)
+        HandicapDuel::TagTimer(fd,events,that->duel_mode);
 
 }
 
@@ -365,6 +351,8 @@ void CMNetServer::createGame()
         duel_mode = new SingleDuel(true);
     else if(mode == MODE_TAG)
         duel_mode = new TagDuel();
+    else if(mode == MODE_HANDICAP)
+        duel_mode = new HandicapDuel();
 
     duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, DuelTimer, this);
 
@@ -373,7 +361,7 @@ void CMNetServer::createGame()
 
     HostInfo info;
     info.rule=2;
-    info.mode=mode;
+    info.mode=mode==MODE_HANDICAP?MODE_TAG:mode;
     info.draw_count=1;
     info.no_check_deck=false;
     info.start_hand=5;
