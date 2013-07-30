@@ -183,6 +183,7 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
         case DuelPlayerStatus::CUSTOMMODE:
         ExtractPlayer(dp);
         if(pos == 1)
+            if(wcscmp(dp->namew_low,L"checkmate"))
             roomManager->InsertPlayer(dp,MODE_HANDICAP);
 
         break;
