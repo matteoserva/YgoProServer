@@ -133,7 +133,7 @@ void WaitingRoom::ShowCustomMode(DuelPlayer* dp)
 {
     SendNameToPlayer(dp,0,"-Custom duel mode-");
     SendNameToPlayer(dp,1,"[HANDICAP MATCH]");
-    SendNameToPlayer(dp,2,"not working yet");
+    SendNameToPlayer(dp,2,"");
     SendNameToPlayer(dp,3,"");
     changePlayerStatus(dp,DuelPlayerStatus::CUSTOMMODE);
 }
@@ -183,7 +183,7 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
         case DuelPlayerStatus::CUSTOMMODE:
         ExtractPlayer(dp);
         if(pos == 1)
-            if(wcscmp(dp->namew_low,L"checkmate")==0)
+            //if(wcscmp(dp->namew_low,L"checkmate")==0)
             roomManager->InsertPlayer(dp,MODE_HANDICAP);
 
         break;
