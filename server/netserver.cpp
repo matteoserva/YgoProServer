@@ -501,7 +501,7 @@ void CMNetServer::Victory(char winner)
         if(it->first->type <= NETPLAYER_TYPE_PLAYER4 && it->first->type >= NETPLAYER_TYPE_PLAYER1)
             _players[it->first->type] = it->first;
     }
-    if(!_players[0])
+    if(!_players[0] && mode != MODE_HANDICAP)
         return;
     if(!_players[1])
         return;
@@ -515,12 +515,12 @@ void CMNetServer::Victory(char winner)
         return;
 
     //anti cheat
-    if(mode!= MODE_TAG && !strcmp(_players[NETPLAYER_TYPE_PLAYER1]->ip,_players[NETPLAYER_TYPE_PLAYER2]->ip))
+    if((mode== MODE_SINGLE || mode == MODE_MATCH) && !strcmp(_players[NETPLAYER_TYPE_PLAYER1]->ip,_players[NETPLAYER_TYPE_PLAYER2]->ip))
         winner = -1;
 
     if(winner < 0 || winner == 2)
     {
-        if(mode != MODE_TAG)
+        if(mode == MODE_SINGLE || mode == MODE_HANDICAP)
         {
             char win[20], lose[20];
 
@@ -530,7 +530,7 @@ void CMNetServer::Victory(char winner)
             std::string wins(win), loses(lose);
             Users::getInstance()->Draw(wins,loses);
         }
-        else
+        else if (mode == MODE_TAG)
         {
             char win1[20], win2[20], lose1[20],lose2[20];
 
@@ -541,6 +541,20 @@ void CMNetServer::Victory(char winner)
 
             Users::getInstance()->Draw(std::string(win1),std::string(win2),std::string(lose1),std::string(lose2));
             log(INFO,"Tagduel finished: winners %s and %s, losers: %s and %s\n",win1,win2,lose1,lose2);
+        }
+        else if (mode == MODE_HANDICAP)
+        {
+            char win2[20], lose1[20],lose2[20];
+
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,win2,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER3]->name,lose1,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER4]->name,lose2,20);
+
+            Users::getInstance()->Draw(std::string(win2),std::string(win2),std::string(lose1),std::string(lose2));
+            log(INFO,"Handicapduel finshed, draw: %s VS %s and %s\n",win2,win2,lose1,lose2);
+
+
+
         }
         return;
     }
@@ -576,6 +590,30 @@ void CMNetServer::Victory(char winner)
         }
         Users::getInstance()->Victory(std::string(win1),std::string(win2),std::string(lose1),std::string(lose2));
         log(INFO,"Tagduel finished: winners %s and %s, losers: %s and %s\n",win1,win2,lose1,lose2);
+    }
+    else if (mode == MODE_HANDICAP)
+    {
+        char win1[20], win2[20], lose1[20],lose2[20];
+
+        if(winner != 1)
+        {
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,win1,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,win2,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER3]->name,lose1,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER4]->name,lose2,20);
+        }
+        else
+        {
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER3]->name,win1,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER4]->name,win2,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,lose1,20);
+            BufferIO::CopyWStr(_players[NETPLAYER_TYPE_PLAYER2]->name,lose2,20);
+
+        }
+        Users::getInstance()->Victory(std::string(win1),std::string(win2),std::string(lose1),std::string(lose2));
+        log(INFO,"Handicap duel finished: winners %s and %s, losers: %s and %s\n",win1,win2,lose1,lose2);
+
+
     }
 }
 
