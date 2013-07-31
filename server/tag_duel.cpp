@@ -444,10 +444,10 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	BufferIO::WriteInt16(pbuf, query_field_count(pduel, 1, 0x1));
 	BufferIO::WriteInt16(pbuf, query_field_count(pduel, 1, 0x40));
 	netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, startbuf, 18);
-	netServer->ReSendToPlayer(players[1]);
+	netServer->SendBufferToPlayer(players[1], STOC_GAME_MSG, startbuf, 18);
 	startbuf[1] = 1;
 	netServer->SendBufferToPlayer(players[2], STOC_GAME_MSG, startbuf, 18);
-	netServer->ReSendToPlayer(players[3]);
+	netServer->SendBufferToPlayer(players[3], STOC_GAME_MSG, startbuf, 18);
 	if(!swapped)
 		startbuf[1] = 0x10;
 	else startbuf[1] = 0x11;
