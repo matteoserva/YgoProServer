@@ -285,6 +285,7 @@ void HandicapDuel::StartDuel(DuelPlayer* dp) {
 		netServer->ReSendToPlayer(*oit);
 	}
 	players[0] = players[1];
+	/* IL PRIMO GIOCATORE INIZIA SEMPRE
 	netServer->SendPacketToPlayer(players[0], STOC_SELECT_HAND);
 	netServer->ReSendToPlayer(players[2]);
 	hand_result[0] = 0;
@@ -292,6 +293,9 @@ void HandicapDuel::StartDuel(DuelPlayer* dp) {
 
 	players[0]->state = CTOS_HAND_RESULT;
 	players[2]->state = CTOS_HAND_RESULT;
+	*/
+	players[0]->state = CTOS_TP_RESULT;
+	TPResult(players[0],false);
 }
 void HandicapDuel::HandResult(DuelPlayer* dp, unsigned char res) {
 	if(res > 3 || dp->state != CTOS_HAND_RESULT)
