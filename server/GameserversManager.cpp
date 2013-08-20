@@ -82,8 +82,8 @@ void GameserversManager::ShowStats()
                 printf("  *dying*");
             printf("\n");
         }
-        printf("children: %2d, alive %2d, rooms: %3d, players: %3d,in alive servers:%3d\n",
-               (int)children.size(),getNumAliveChildren(),getNumRooms(),getNumPlayers(),getNumPlayersInAliveChildren());
+        printf("children: %2d, alive %2d, rooms: %3d, players alive:%3d, players: %3d\n",
+               (int)children.size(),getNumAliveChildren(),getNumRooms(),getNumPlayersInAliveChildren(),getNumPlayers());
         last_update = time(NULL);
     }
 }
