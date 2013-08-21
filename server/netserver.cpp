@@ -65,7 +65,7 @@ void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_HS
     if(dp->type == (scpc.status >>4) && ((scpc.status&0x0f) == PLAYERCHANGE_READY) != players[dp].isReady)
     {
        playerReadinessChange(dp,!players[dp].isReady);
-       printf("bug in readiness\n\n\n\n\n");
+       log(BUG,"bug in readiness\n");
     }
     CMNetServerInterface::SendPacketToPlayer(dp,proto,scpc);
 
