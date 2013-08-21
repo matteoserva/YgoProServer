@@ -6,13 +6,13 @@ namespace ygo
 
 void WaitingRoom::ReadyFlagPressed(DuelPlayer* dp,bool readyFlag)
 {
-    if(player_status[dp].status!=DuelPlayerStatus::STATS)
+    /*if(player_status[dp].status!=DuelPlayerStatus::STATS)
     {
         STOC_HS_PlayerChange scpc;
         scpc.status = (NETPLAYER_TYPE_PLAYER1 << 4) | PLAYERCHANGE_READY;
         SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
     }
-    else
+    else*/
         playerReadinessChange(dp,readyFlag);
 
 }
@@ -90,7 +90,7 @@ void WaitingRoom::EnableCrosses(DuelPlayer* dp)
     STOC_HS_PlayerChange scpc;
     for(int i=0; i<4; i++)
     {
-        scpc.status = (i << 4) | PLAYERCHANGE_READY;
+        scpc.status = (i << 4) | PLAYERCHANGE_NOTREADY;
         SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
     }
 }
@@ -160,6 +160,16 @@ void WaitingRoom::changePlayerStatus(DuelPlayer* dp,DuelPlayerStatus::Status new
 {
     if(player_status[dp].status==DuelPlayerStatus::CHALLENGERECEIVED)
         refuse_challenge(dp);
+
+    if(player_status[dp].status!=newstatus && players[dp].isReady == true)
+    {
+        playerReadinessChange(dp,false);
+
+        STOC_HS_PlayerChange scpc;
+        scpc.status = 0 | PLAYERCHANGE_NOTREADY;
+        SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+    }
+
     player_status[dp].status=newstatus;
 
 

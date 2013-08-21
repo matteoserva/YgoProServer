@@ -469,6 +469,7 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
 
     duel_mode->host_player=NULL;
     players[dp].last_state_in_timeout = dp->state;
+    reCheckLfList();
 }
 
 
@@ -762,15 +763,25 @@ void CMNetServer::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
 
 bool CMNetServer::reCheckLfList()
 {
-            int lflist_intersection=3;
+ /*           int lflist_intersection=3;
             for(auto it = players.cbegin(); it!=players.cend(); ++it)
             {
                 if(it->first->type <= NETPLAYER_TYPE_PLAYER4 && it->second.isReady)
                     lflist_intersection &= it->first->lflist;
             }
             printf("intersezione %d\n",lflist_intersection);
+
+
             bool prosegui = lflist==3 && lflist_intersection <3 && lflist_intersection > 0;
              prosegui = prosegui || (lflist <3 && lflist_intersection == 3);
+*/
+            int lflist_intersection=3;
+            for(auto it = players.cbegin(); it!=players.cend(); ++it)
+            {
+                    lflist_intersection &= it->first->lflist;
+            }
+            bool prosegui = (lflist ==3) && lflist_intersection < 3 && lflist_intersection > 0;
+
             if(!duel_mode)
                 prosegui = false;
             if(!prosegui)

@@ -75,7 +75,7 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
     {
         char nome[30];
         BufferIO::CopyWStr(it->first->name,nome,30);
-        if(!that->players[it->first].isReady)
+        if(!that->players[it->first].isReady || (that->player_status[it->first].status!=DuelPlayerStatus::STATS))
             continue;
         //log(INFO,"%s aspetta da %d secondi\n",nome,it->second.secondsWaiting);
         if(it->second.secondsWaiting>= maxSecondsWaiting)
@@ -195,7 +195,7 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
     updateObserversNum();
 
-    playerReadinessChange(dp,true);
+    //playerReadinessChange(dp,true);
 
 
 
@@ -251,7 +251,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(int referenceScore)
         if(it->second.secondsWaiting >= minSecondsWaiting)
         {
             DuelPlayer* dp = it->first;
-            if(!players[dp].isReady)
+            if(!players[dp].isReady || (player_status[dp].status!=DuelPlayerStatus::STATS))
                 continue;
 
             char opname[20];
