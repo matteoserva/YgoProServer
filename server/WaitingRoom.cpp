@@ -38,8 +38,10 @@ void WaitingRoom::periodic_updates(evutil_socket_t fd, short events, void* arg)
     WaitingRoom*that = (WaitingRoom*)arg;
     for(auto it=that->players.begin(); it!=that->players.end(); ++it)
     {
-        it->second.secondsWaiting+= 0.1;
+        if(it->second.isReady)
+            it->second.secondsWaiting+= 0.1;
 
+/*
         if(it->second.secondsWaiting< 1.5)
             continue;
         int cycle = 10 * (it->second.secondsWaiting-1.5);
@@ -51,7 +53,7 @@ void WaitingRoom::periodic_updates(evutil_socket_t fd, short events, void* arg)
         STOC_HS_PlayerEnter scpe;
         BufferIO::CopyWStr(newstr.c_str(), scpe.name, 20);
 
-        scpe.pos = 1;
+        scpe.pos = 1;*/
         //that->SendPacketToPlayer(it->first, STOC_HS_PLAYER_ENTER, scpe);
 
 
@@ -155,23 +157,12 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     info.draw_count=1;
     info.no_check_deck=false;
     info.start_hand=5;
-    info.lflist=1;
+    info.lflist=0;
     info.time_limit=0;
     info.start_lp=0;
     info.enable_priority=false;
     info.no_shuffle_deck=false;
 
-    unsigned int hash = 1;
-    for(auto lfit = deckManager._lfList.begin(); lfit != deckManager._lfList.end(); ++lfit)
-    {
-        if(info.lflist == lfit->hash)
-        {
-            hash = info.lflist;
-            break;
-        }
-    }
-    if(hash == 1)
-        info.lflist = deckManager._lfList[0].hash;
     dp->type = NETPLAYER_TYPE_PLAYER1;
 
     STOC_JoinGame scjg;
@@ -238,9 +229,12 @@ void WaitingRoom::LeaveGame(DuelPlayer* dp)
     gameServer->DisconnectPlayer(dp);
 }
 
-DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(int referenceScore)
+
+
+DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer,int lflist)
 {
-    if(!players.size())
+    int referenceScore = referencePlayer->cachedRankScore;
+       if(!players.size())
         return nullptr;
 
     int qdifference = 0;
@@ -251,7 +245,9 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(int referenceScore)
         if(it->second.secondsWaiting >= minSecondsWaiting)
         {
             DuelPlayer* dp = it->first;
-            if(!players[dp].isReady || (player_status[dp].status!=DuelPlayerStatus::STATS))
+            if(!players[dp].isReady || (player_status[dp].status!=DuelPlayerStatus::STATS) )
+                continue;
+            if(!(lflist ==3 || dp->lflist == 3 || dp->lflist == lflist))
                 continue;
 
             char opname[20];
@@ -278,12 +274,6 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(int referenceScore)
         log(INFO,"qdifference = %d\n",qdifference);
     }
     return chosenOne;
-}
-
-DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer)
-{
-    int score = referencePlayer->cachedRankScore;
-    return ExtractBestMatchPlayer(score);
 }
 
 bool WaitingRoom::ChatMessageReceived(DuelPlayer* dp,unsigned short* msg)
@@ -351,8 +341,21 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         break;
     }
     case CTOS_HS_READY:
+    if(dp->lflist <=0)
+        {
+            STOC_HS_PlayerChange scpc;
+			scpc.status = (dp->type << 4) | PLAYERCHANGE_NOTREADY;
+			SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+			STOC_ErrorMsg scem;
+			scem.msg = ERRMSG_DECKERROR;
+			scem.code = -dp->lflist;
+			SendPacketToPlayer(dp, STOC_ERROR_MSG, scem);
+            dp->lflist = 0;
+            break;
+        }
     case CTOS_HS_NOTREADY:
     {
+
         ReadyFlagPressed(dp,CTOS_HS_NOTREADY - pktType);
         break;
     }

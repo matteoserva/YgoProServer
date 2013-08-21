@@ -1020,6 +1020,25 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         break;
     }
     case CTOS_HS_READY:
+        if(dp->lflist <=0)
+        {
+            STOC_HS_PlayerChange scpc;
+			scpc.status = (dp->type << 4) | PLAYERCHANGE_NOTREADY;
+			SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+			STOC_ErrorMsg scem;
+			scem.msg = ERRMSG_DECKERROR;
+			scem.code = -dp->lflist;
+			SendPacketToPlayer(dp, STOC_ERROR_MSG, scem);
+            dp->lflist = 0;
+            break;
+        }
+        if((dp->lflist == 2 && lflist ==1) || (dp->lflist == 1 && lflist ==2))
+        {
+            ExtractPlayer(dp);
+            roomManager->InsertPlayer(dp,mode);
+            break;
+        }
+
     case CTOS_HS_NOTREADY:
     {
         if(!duel_mode || duel_mode->pduel || state ==PLAYING)

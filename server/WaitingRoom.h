@@ -40,8 +40,8 @@ private:
     void player_erase_cb(DuelPlayer* );
 
 public:
-    DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*);
-    DuelPlayer* ExtractBestMatchPlayer(int referenceScore);
+    DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*,int);
+    //DuelPlayer* ExtractBestMatchPlayer(int referenceScore);
     WaitingRoom(RoomManager*roomManager,GameServer*);
     ~WaitingRoom();
     void ChatWithPlayer(DuelPlayer*dp, std::string sender,std::wstring message);

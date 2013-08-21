@@ -187,7 +187,12 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
         ShowStats(dp);
         return;
     }
+    if(dp->lflist<=0)
+    {
+        SendNameToPlayer(dp,0,L">=check the box ==>");
 
+        return;
+    }
     switch(player_status[dp].status)
     {
         case DuelPlayerStatus::CUSTOMMODE:

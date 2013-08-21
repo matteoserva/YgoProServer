@@ -119,7 +119,7 @@ int RoomManager::getNumPlayers()
     return risultato;
 }
 
-CMNetServer* RoomManager::getFirstAvailableServer(int lflist, int referenceScore, unsigned char mode,bool ignoreMode=false)
+CMNetServer* RoomManager::getFirstAvailableServer(int lflist, int referenceScore, unsigned char mode,bool ignoreMode)
 {
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
@@ -168,7 +168,7 @@ bool RoomManager::FillRoom(CMNetServer* room)
 
     for(DuelPlayer* base = room->getFirstPlayer(); room->state!= CMNetServer::State::FULL;)
     {
-        DuelPlayer* dp = waitingRoom->ExtractBestMatchPlayer(base);
+        DuelPlayer* dp = waitingRoom->ExtractBestMatchPlayer(base,room->getLfList());
         if(dp == nullptr)
             return false;
         dp->netServer=room;
@@ -239,7 +239,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 {
 
     //true is success
-    CMNetServer* netServer = getFirstAvailableServer(dp->cachedRankScore,mode);
+    CMNetServer* netServer = getFirstAvailableServer(dp->lflist,dp->cachedRankScore,mode,false);
     if(netServer == nullptr)
     {
         waitingRoom->InsertPlayer(dp);
