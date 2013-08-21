@@ -381,6 +381,7 @@ void CMNetServer::createGame()
     }
     if(hash == 1)
         info.lflist = deckManager._lfList[0].hash;
+
     duel_mode->host_info = info;
     duel_mode->setNetServer(this);
     setState(WAITING);
@@ -805,11 +806,44 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_CHAT:
     {
+        wchar_t messaggio[256];
+        int msglen = BufferIO::CopyWStr((unsigned short*) pdata,messaggio, 256);
+
+        /*inizio parte prova*/
+        if(!wcsncmp(messaggio,L"!test",5) )
+        {
+            STOC_JoinGame scjg;
+            HostInfo info;
+            info.rule=2;
+            info.mode=MODE_SINGLE;
+            info.draw_count=1;
+            info.no_check_deck=false;
+            info.start_hand=5;
+            info.lflist=1;
+            info.time_limit=60;
+            info.start_lp=8000;
+            info.enable_priority=false;
+            info.no_shuffle_deck=false;
+            unsigned int hash = 1;
+            for(auto lfit = deckManager._lfList.begin(); lfit != deckManager._lfList.end(); ++lfit)
+            {
+                if(info.lflist == lfit->hash)
+                {
+                    hash = info.lflist;
+                    break;
+                }
+            }
+            if(hash == 1)
+                info.lflist = deckManager._lfList[0].hash;
+            scjg.info = info;
+            SendPacketToPlayer(dp, STOC_JOIN_GAME, scjg);
+
+        }
+        /*fine parte prova*/
 
         if(!dp->game)
             return;
-        wchar_t messaggio[256];
-        int msglen = BufferIO::CopyWStr((unsigned short*) pdata,messaggio, 256);
+
         if(msglen != 0 && handleChatCommand(dp,messaggio))
             break;
 
@@ -821,6 +855,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_UPDATE_DECK:
     {
+        detectDeckCompatibleLflist(pdata);
         if(!dp->game)
             return;
         duel_mode->UpdateDeck(dp, pdata);

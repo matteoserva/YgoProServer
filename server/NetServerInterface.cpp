@@ -145,6 +145,28 @@ void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char prot
     if(dp)
         bufferevent_write(dp->bev, net_server_write, last_sent);
 }
+
+int CMNetServerInterface::detectDeckCompatibleLflist(void* pdata)
+{
+    //ocg = 1, tcg =2, both = 3, none = 0
+
+    char* deckbuf = (char*)pdata;
+    Deck deck;
+	int mainc = BufferIO::ReadInt32(deckbuf);
+	int sidec = BufferIO::ReadInt32(deckbuf);
+		deckManager.LoadDeck(deck, (int*)deckbuf, mainc, sidec);
+
+    int compatible =0;
+
+    int err = deckManager.CheckLFList(deck, deckManager._lfList[0].hash, true, true);
+    compatible += (err)?0:1;
+    wchar_t buffer[200];
+    swprintf(buffer,200,L"compatible %d err:%d",compatible,err);
+
+    BroadcastSystemChat(buffer,true);
+    return compatible;
+}
+
 void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
 {
     if(players.find(dp) == players.end())

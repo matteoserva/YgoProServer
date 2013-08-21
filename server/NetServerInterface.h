@@ -73,6 +73,7 @@ public:
     void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
     void ReSendToPlayer(DuelPlayer* dp);
     int getNumPlayers();
+    int detectDeckCompatibleLflist(void* pdata);
 };
 }
 #endif

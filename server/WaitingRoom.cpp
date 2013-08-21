@@ -172,7 +172,6 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     }
     if(hash == 1)
         info.lflist = deckManager._lfList[0].hash;
-
     dp->type = NETPLAYER_TYPE_PLAYER1;
 
     STOC_JoinGame scjg;
@@ -325,7 +324,11 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
     switch(pktType)
     {
-
+    case CTOS_UPDATE_DECK:
+    {
+            detectDeckCompatibleLflist(pdata);
+            break;
+    }
     case CTOS_PLAYER_INFO:
     {
 
