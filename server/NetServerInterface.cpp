@@ -165,10 +165,7 @@ int CMNetServerInterface::detectDeckCompatibleLflist(void* pdata)
 
     if(compatible==0)
         return -err;
-    wchar_t buffer[200];
-    swprintf(buffer,200,L"compatible %d err:%d",compatible,err);
 
-    BroadcastSystemChat(buffer,true);
     return compatible;
 }
 
