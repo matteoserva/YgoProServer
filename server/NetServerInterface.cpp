@@ -160,6 +160,9 @@ int CMNetServerInterface::detectDeckCompatibleLflist(void* pdata)
 
     int err = deckManager.CheckLFList(deck, deckManager._lfList[0].hash, true, true);
     compatible += (err)?0:1;
+    err = deckManager.CheckLFList(deck, deckManager._lfList[1].hash, true, true);
+    compatible += (err)?0:2;
+
     wchar_t buffer[200];
     swprintf(buffer,200,L"compatible %d err:%d",compatible,err);
 

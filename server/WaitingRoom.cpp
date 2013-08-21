@@ -326,7 +326,7 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
     case CTOS_UPDATE_DECK:
     {
-            detectDeckCompatibleLflist(pdata);
+            dp->lflist = detectDeckCompatibleLflist(pdata);
             break;
     }
     case CTOS_PLAYER_INFO:

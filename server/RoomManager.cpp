@@ -119,13 +119,22 @@ int RoomManager::getNumPlayers()
     return risultato;
 }
 
-CMNetServer* RoomManager::getFirstAvailableServer(int referenceScore, unsigned char mode,bool ignoreMode=false)
+CMNetServer* RoomManager::getFirstAvailableServer(int lflist, int referenceScore, unsigned char mode,bool ignoreMode=false)
 {
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
         bool serverOk = (*it)->state == CMNetServer::State::WAITING &&
                         abs(referenceScore - (*it)->getFirstPlayer()->cachedRankScore) < maxScoreDifference(referenceScore) &&
-                        (ignoreMode || (*it)->mode == mode);
+                        (ignoreMode || (*it)->mode == mode) && (*it)->getLfList() == lflist;
+
+        if(serverOk )
+            return *it;
+    }
+    for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
+    {
+        bool serverOk = (*it)->state == CMNetServer::State::WAITING &&
+                        abs(referenceScore - (*it)->getFirstPlayer()->cachedRankScore) < maxScoreDifference(referenceScore) &&
+                        (ignoreMode || (*it)->mode == mode) && ((*it)->getLfList() == 3 || lflist == 3);
 
         if(serverOk )
             return *it;
@@ -137,7 +146,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp)
 {
 
     //tfirst room
-    CMNetServer* netServer = getFirstAvailableServer(dp->cachedRankScore);
+    CMNetServer* netServer = getFirstAvailableServer(dp->lflist,dp->cachedRankScore);
     if(netServer == nullptr)
     {
         waitingRoom->InsertPlayer(dp);
@@ -244,9 +253,9 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
     return true;
 }
 
-CMNetServer* RoomManager::getFirstAvailableServer(int referenceScore)
+CMNetServer* RoomManager::getFirstAvailableServer(int lflist, int referenceScore)
 {
-    return getFirstAvailableServer(referenceScore, MODE_SINGLE,true);
+    return getFirstAvailableServer(lflist, referenceScore, MODE_SINGLE,true);
 }
 CMNetServer* RoomManager::createServer(unsigned char mode)
 {

@@ -14,7 +14,7 @@ static const int TIMEOUT_INTERVAL=2;
 namespace ygo
 {
 CMNetServer::CMNetServer(RoomManager*roomManager,GameServer*gameServer,unsigned char mode)
-    :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0),last_winner(-1),user_timeout(nullptr)
+    :CMNetServerInterface(roomManager,gameServer),mode(mode),duel_mode(0),last_winner(-1),user_timeout(nullptr),lflist(3)
 {
     createGame();
 }
@@ -56,6 +56,20 @@ void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_Ty
     CMNetServerInterface::SendPacketToPlayer(dp,proto,sctc);
 }
 
+void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_HS_PlayerChange scpc)
+{
+
+
+    /* BUG, fixato, se l'utente si readyzza con un deck invalido gli altri non si accorgono che non e' ready
+*/
+    if(dp->type == (scpc.status >>4) && ((scpc.status&0x0f) == PLAYERCHANGE_READY) != players[dp].isReady)
+    {
+       playerReadinessChange(dp,!players[dp].isReady);
+       printf("bug in readiness\n\n\n\n\n");
+    }
+    CMNetServerInterface::SendPacketToPlayer(dp,proto,scpc);
+
+}
 
 void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
@@ -186,6 +200,11 @@ void CMNetServer::ShowPlayerOdds()
     std::string temp(message);
     BroadcastSystemChat(std::wstring(temp.begin(),temp.end()),true);
     BroadcastSystemChat(L"View the full statistics at http://www.ygopro.it",true);
+}
+
+int CMNetServer::getLfList()
+{
+   return lflist;
 }
 
 void CMNetServer::clientStarted()
@@ -365,7 +384,7 @@ void CMNetServer::createGame()
     info.draw_count=1;
     info.no_check_deck=false;
     info.start_hand=5;
-    info.lflist=1;
+    info.lflist=0;
     info.time_limit=60;
     info.start_lp=(getNumDayOfWeek() == 6)?8000:8000;
     info.enable_priority=false;
@@ -683,11 +702,14 @@ void CMNetServer::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg,bool 
 
 void CMNetServer::toObserver(DuelPlayer* dp)
 {
-
+    bool wasReady = players[dp].isReady;
     log(INFO,"to observer\n");
     duel_mode->ToObserver(dp);
+
     playerReadinessChange(dp,false);
     updateServerState();
+    if(wasReady)
+        reCheckLfList();
 }
 
 void CMNetServer::updateUserTimeout(DuelPlayer* dp)
@@ -738,7 +760,91 @@ void CMNetServer::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
     }
 }
 
+bool CMNetServer::reCheckLfList()
+{
+            int lflist_intersection=3;
+            for(auto it = players.cbegin(); it!=players.cend(); ++it)
+            {
+                if(it->first->type <= NETPLAYER_TYPE_PLAYER4 && it->second.isReady)
+                    lflist_intersection &= it->first->lflist;
+            }
+            printf("intersezione %d\n",lflist_intersection);
+            bool prosegui = lflist==3 && lflist_intersection <3 && lflist_intersection > 0;
+             prosegui = prosegui || (lflist <3 && lflist_intersection == 3);
+            if(!duel_mode)
+                prosegui = false;
+            if(!prosegui)
+                return false;
+            lflist = lflist_intersection;
 
+            unsigned int list_hash=0;
+            if(lflist_intersection <3)
+                list_hash=deckManager._lfList[lflist-1].hash;
+
+
+            STOC_JoinGame scjg;
+            HostInfo info;
+            info.rule=2;
+            info.mode=mode==MODE_HANDICAP?MODE_TAG:mode;
+            info.draw_count=1;
+            info.no_check_deck=false;
+            info.start_hand=5;
+            info.lflist=list_hash;
+            info.time_limit=60;
+            info.start_lp=8000;
+            info.enable_priority=false;
+            info.no_shuffle_deck=false;
+
+            duel_mode->host_info = info;
+            scjg.info = info;
+
+            /*for(auto it = players.cbegin(); it!=players.cend(); ++it)
+            {
+                SendPacketToPlayer(it->first, STOC_JOIN_GAME, scjg);
+            }*/
+
+            for(auto it = players.cbegin(); it!=players.cend(); ++it)
+            {
+                SendPacketToPlayer(it->first, STOC_JOIN_GAME, scjg);
+
+                    STOC_TypeChange sctc;
+                    sctc.type = 0;
+                    sctc.type |= it->first->type;
+                    SendPacketToPlayer(it->first, STOC_TYPE_CHANGE, sctc);
+
+
+                for(auto iit = players.cbegin(); iit!=players.cend(); ++iit)
+                {
+                    if(iit->first->type <= NETPLAYER_TYPE_PLAYER4)
+                    {
+                        STOC_HS_PlayerEnter scpe;
+                        scpe.pos = iit->first->type;
+                        BufferIO::CopyWStr(iit->first->name, scpe.name, 20);
+                        SendPacketToPlayer(it->first, STOC_HS_PLAYER_ENTER, scpe);
+
+                        STOC_HS_PlayerChange scpc;
+                        scpc.status = iit->second.isReady? PLAYERCHANGE_READY:PLAYERCHANGE_NOTREADY;
+                        scpc.status |= (iit->first->type << 4);
+                        SendPacketToPlayer(it->first, STOC_HS_PLAYER_CHANGE, scpc);
+                    }
+
+
+
+
+                }
+
+
+
+            }
+
+
+
+
+
+
+return true;
+
+}
 
 void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
@@ -809,37 +915,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         wchar_t messaggio[256];
         int msglen = BufferIO::CopyWStr((unsigned short*) pdata,messaggio, 256);
 
-        /*inizio parte prova*/
-        if(!wcsncmp(messaggio,L"!test",5) )
-        {
-            STOC_JoinGame scjg;
-            HostInfo info;
-            info.rule=2;
-            info.mode=MODE_SINGLE;
-            info.draw_count=1;
-            info.no_check_deck=false;
-            info.start_hand=5;
-            info.lflist=1;
-            info.time_limit=60;
-            info.start_lp=8000;
-            info.enable_priority=false;
-            info.no_shuffle_deck=false;
-            unsigned int hash = 1;
-            for(auto lfit = deckManager._lfList.begin(); lfit != deckManager._lfList.end(); ++lfit)
-            {
-                if(info.lflist == lfit->hash)
-                {
-                    hash = info.lflist;
-                    break;
-                }
-            }
-            if(hash == 1)
-                info.lflist = deckManager._lfList[0].hash;
-            scjg.info = info;
-            SendPacketToPlayer(dp, STOC_JOIN_GAME, scjg);
 
-        }
-        /*fine parte prova*/
 
         if(!dp->game)
             return;
@@ -855,7 +931,8 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_UPDATE_DECK:
     {
-        detectDeckCompatibleLflist(pdata);
+        dp->lflist = detectDeckCompatibleLflist(pdata);
+
         if(!dp->game)
             return;
         duel_mode->UpdateDeck(dp, pdata);
@@ -939,13 +1016,24 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         playerReadinessChange(dp,CTOS_HS_NOTREADY - pktType);
 
         duel_mode->PlayerReady(dp, CTOS_HS_NOTREADY - pktType);
+
+           /*     if(reCheckLfList())
+        {
+                    STOC_HS_PlayerChange scpc;
+                        scpc.status =  PLAYERCHANGE_READY;
+                        scpc.status |= (dp->type<< 4);
+                        SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+        }*/
+
+
         if(pktType == CTOS_HS_READY)
         {
             duel_mode->host_player = dp;
             duel_mode->StartDuel(dp);
             duel_mode->host_player=NULL;
         }
-
+        if(state != PLAYING)
+            reCheckLfList();
         break;
     }
     case CTOS_HS_KICK:

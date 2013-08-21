@@ -25,7 +25,10 @@ class CMNetServer:public CMNetServerInterface
     unsigned char mode;
     enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};
     State state;
+    int getLfList();
 private:
+    bool reCheckLfList();
+    int lflist;
     static void DuelTimer(evutil_socket_t fd, short events, void* arg);
     void updateUserTimeout(DuelPlayer* dp);
     void Victory(char winner);
@@ -72,6 +75,7 @@ public:
     using CMNetServerInterface::SendPacketToPlayer;
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_TypeChange);
+    void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_HS_PlayerChange);
     void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
     int CheckLFList(Deck &deck);
 };
