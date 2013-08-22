@@ -187,7 +187,7 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
         ShowStats(dp);
         return;
     }
-    if(dp->lflist<=0)
+    if(dp->lflist<=0 && DuelPlayerStatus::CHOOSEBANLIST != player_status[dp].status)
     {
         SendNameToPlayer(dp,0,L">=check the box ==>");
 
@@ -201,6 +201,15 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
             //if(wcscmp(dp->namew_low,L"checkmate")==0)
             roomManager->InsertPlayer(dp,MODE_HANDICAP);
 
+        break;
+
+    case DuelPlayerStatus::CHOOSEBANLIST:
+        dp->lflist=pos;
+        ShowStats(dp);
+        ReadyFlagPressed(dp,true);
+        STOC_HS_PlayerChange scpc;
+        scpc.status = 0 | PLAYERCHANGE_READY;
+        SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
         break;
 
 
@@ -308,6 +317,23 @@ void WaitingRoom::refuse_challenge(DuelPlayer* dp)
             SystemChatToPlayer(dp,L"the player refused your challenge request",true);
     player_status[dp].challenger = nullptr;
 
+
+
+}
+
+void WaitingRoom::ShowChooseBanlist(DuelPlayer* dp)
+{
+    SendNameToPlayer(dp,0,L"Select banlist?");
+    SendNameToPlayer(dp,1,"OCG");
+    SendNameToPlayer(dp,2,"TCG");
+    SendNameToPlayer(dp,3,"RANDOM");
+    EnableCrosses(dp);
+
+    changePlayerStatus(dp,DuelPlayerStatus::CHOOSEBANLIST);
+    STOC_HS_PlayerChange scpc;
+
+        scpc.status = (0 << 4) | PLAYERCHANGE_READY;
+        SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
 
 
 }

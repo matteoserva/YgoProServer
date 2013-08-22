@@ -77,7 +77,7 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
     {
         char nome[30];
         BufferIO::CopyWStr(it->first->name,nome,30);
-        if(!that->players[it->first].isReady || (that->player_status[it->first].status!=DuelPlayerStatus::STATS))
+        if( !that->ReadyToDuel(it->first))
             continue;
         //log(INFO,"%s aspetta da %d secondi\n",nome,it->second.secondsWaiting);
         if(it->second.secondsWaiting>= maxSecondsWaiting)
@@ -229,7 +229,11 @@ void WaitingRoom::LeaveGame(DuelPlayer* dp)
     gameServer->DisconnectPlayer(dp);
 }
 
+bool WaitingRoom::ReadyToDuel(DuelPlayer* dp)
+{
 
+    return players[dp].isReady && (player_status[dp].status==DuelPlayerStatus::STATS || player_status[dp].status==DuelPlayerStatus::CHOOSEBANLIST);
+}
 
 DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer,int lflist)
 {
@@ -245,7 +249,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer,int 
         if(it->second.secondsWaiting >= minSecondsWaiting)
         {
             DuelPlayer* dp = it->first;
-            if(!players[dp].isReady || (player_status[dp].status!=DuelPlayerStatus::STATS) )
+            if(!ReadyToDuel(dp))
                 continue;
             if(!(lflist ==3 || dp->lflist == 3 || dp->lflist == lflist))
                 continue;
@@ -358,7 +362,12 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(dp->lflist == 2)
             SystemChatToPlayer(dp,L"Your deck is compatible with the TCG banlist only.",true);
         if(dp->lflist == 3)
+        {
             SystemChatToPlayer(dp,L"Your deck is compatible with both OCG and TCG banlists.",true);
+            ShowChooseBanlist(dp);
+
+        }
+
     case CTOS_HS_NOTREADY:
     {
 

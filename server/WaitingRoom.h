@@ -8,7 +8,7 @@ namespace ygo
 
 struct DuelPlayerStatus
 {
-    enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER,CUSTOMMODE,CHALLENGERECEIVED};
+    enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER,CUSTOMMODE,CHALLENGERECEIVED,CHOOSEBANLIST};
     Status status;
     std::vector<CMNetServer *> listaStanzeCompatibili;
     std::wstring lastName0;
@@ -25,6 +25,7 @@ private:
     bool handleChatCommand(DuelPlayer* dp,wchar_t* msg);
 
     bool ChatMessageReceived(DuelPlayer* dp,unsigned short* msg);
+    bool ReadyToDuel(DuelPlayer *dp);
     static int minSecondsWaiting;
     static int maxSecondsWaiting;
     event* cicle_users;
@@ -60,6 +61,7 @@ private:
     void EnableCrosses(DuelPlayer* dp);
     void ShowStats(DuelPlayer* dp);
     void ShowCustomMode(DuelPlayer* dp);
+    void ShowChooseBanlist(DuelPlayer* dp);
     void ButtonKickPressed(DuelPlayer* dp,int pos);
     void ReadyFlagPressed(DuelPlayer* dp,bool readyFlag);
     void changePlayerStatus(DuelPlayer* dp,DuelPlayerStatus::Status);
