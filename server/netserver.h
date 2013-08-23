@@ -77,7 +77,6 @@ public:
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_TypeChange);
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_HS_PlayerChange);
     void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
-    int CheckLFList(Deck &deck);
 };
 
 }

@@ -409,28 +409,7 @@ void CMNetServer::createGame()
     ReadyMessagesSent = 0;
     chatReady=true;
 }
-int CMNetServer::CheckLFList(Deck &deck)
-{
 
-    for(size_t i = 0; i < deck.main.size(); ++i) {
-            code_pointer cit = deck.main[i];
-            if(cit->second.ot>0x3)
-                return cit->first;
-    }
-    for(size_t i = 0; i < deck.side.size(); ++i) {
-            code_pointer cit = deck.side[i];
-            if(cit->second.ot>0x3)
-                return cit->first;
-    }
-    for(size_t i = 0; i < deck.extra.size(); ++i) {
-            code_pointer cit = deck.extra[i];
-            if(cit->second.ot>0x3)
-                return cit->first;
-    }
-
-return 0;
-
-}
 void CMNetServer::DisconnectPlayer(DuelPlayer* dp)
 {
     log(VERBOSE,"DisconnectPlayer called\n");

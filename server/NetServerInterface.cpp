@@ -158,13 +158,39 @@ int CMNetServerInterface::detectDeckCompatibleLflist(void* pdata)
 
     int compatible =0;
 
-    int err = deckManager.CheckLFList(deck, deckManager._lfList[0].hash, true, true);
-    compatible += (err)?0:1;
-    err = deckManager.CheckLFList(deck, deckManager._lfList[1].hash, true, true);
-    compatible += (err)?0:2;
+    int err1 = deckManager.CheckLFList(deck, deckManager._lfList[0].hash, true, true);
+    compatible += (err1)?0:1;
+    int err2 = deckManager.CheckLFList(deck, deckManager._lfList[1].hash, true, true);
+    compatible += (err2)?0:2;
 
+    int err3=0;
+
+    for(size_t i = 0; i < deck.main.size(); ++i) {
+            code_pointer cit = deck.main[i];
+            if(cit->second.ot>0x3)
+                err3 =cit->first;
+    }
+    for(size_t i = 0; i < deck.side.size(); ++i) {
+            code_pointer cit = deck.side[i];
+            if(cit->second.ot>0x3)
+                err3= cit->first;
+    }
+    for(size_t i = 0; i < deck.extra.size(); ++i) {
+            code_pointer cit = deck.extra[i];
+            if(cit->second.ot>0x3)
+                err3 = cit->first;
+    }
+
+    printf("valori: %d %d %d\n",err1,err2,err3);
+    if(err3)
+        return -err3;
     if(compatible==0)
-        return -err;
+    {
+        if(err1)
+            return -err1;
+        else
+            return  -err2;
+    }
 
     return compatible;
 }
