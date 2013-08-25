@@ -358,9 +358,9 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             break;
         }
         if(dp->lflist == 1)
-            SystemChatToPlayer(dp,L"Your deck is compatible with the OCG banlist only.",true);
-        if(dp->lflist == 2)
             SystemChatToPlayer(dp,L"Your deck is compatible with the TCG banlist only.",true);
+        if(dp->lflist == 2)
+            SystemChatToPlayer(dp,L"Your deck is compatible with the OCG banlist only.",true);
         if(dp->lflist == 3)
         {
             SystemChatToPlayer(dp,L"Your deck is compatible with both OCG and TCG banlists.",true);
