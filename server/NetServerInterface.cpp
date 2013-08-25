@@ -181,7 +181,7 @@ int CMNetServerInterface::detectDeckCompatibleLflist(void* pdata)
                 err3 = cit->first;
     }
 
-    printf("valori: %d %d %d\n",err1,err2,err3);
+    //printf("valori: %d %d %d\n",err1,err2,err3);
     if(err3)
         return -err3;
     if(compatible==0)
