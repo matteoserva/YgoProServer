@@ -21,9 +21,11 @@ void sigterm_handler(int signum)
     static int timesPressed = 0;
     needsReboot=true;
     ++timesPressed;
+
+    printf("SIGTERM received: now %d\n",timesPressed);
     if(timesPressed ==10)
         kill(getpid(),SIGKILL);
-    else if(++timesPressed >= 5)
+    else if(timesPressed >= 5)
         kill(getpid(),SIGQUIT);
 }
 
@@ -395,6 +397,19 @@ void GameserversManager::parent_loop()
 
 
         ShowStats();
+
+        static time_t lastDeadCheck = 0;
+        if(time(NULL) - lastDeadCheck > 5)
+        {
+            for(auto it = children.cbegin(); it != children.cend(); ++it)
+            {
+                ChildInfo gss = it->second;
+                if(!gss.isAlive && gss.rooms == 0)
+                    kill(gss.pid,SIGTERM);
+            }
+            lastDeadCheck = time(NULL);
+        }
+
         if(needsReboot)
             continue;
         if(!needsReboot && serversAlmostFull() && getNumAliveChildren()<maxchildren)
@@ -420,7 +435,6 @@ void GameserversManager::parent_loop()
             if(children.size()-getNumAliveChildren() > Config::getInstance()->max_processes)
                 killOneTerminatingServer();
         }
-
     }
 
     exit(0);
