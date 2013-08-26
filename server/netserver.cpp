@@ -910,8 +910,10 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         unsigned short* msgbuf = (unsigned short*)pdata;
         bool noShout=false;
         if(msglen > 0 and msgbuf[0]=='-')
+        {
             msgbuf++;
-
+            noShout=true;
+        }
         if(!dp->game)
             return;
 
