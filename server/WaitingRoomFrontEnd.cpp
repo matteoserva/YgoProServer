@@ -324,9 +324,9 @@ void WaitingRoom::refuse_challenge(DuelPlayer* dp)
 void WaitingRoom::ShowChooseBanlist(DuelPlayer* dp)
 {
     SendNameToPlayer(dp,0,L"Select banlist?");
-    SendNameToPlayer(dp,1,"TCG");
-    SendNameToPlayer(dp,2,"OCG");
-    SendNameToPlayer(dp,3,"RANDOM");
+    SendNameToPlayer(dp,1,"[TCG] *");
+    SendNameToPlayer(dp,2,"[OCG]");
+    SendNameToPlayer(dp,3,"[RANDOM]");
     EnableCrosses(dp);
 
     changePlayerStatus(dp,DuelPlayerStatus::CHOOSEBANLIST);
