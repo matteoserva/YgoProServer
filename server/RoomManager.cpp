@@ -151,6 +151,12 @@ CMNetServer* RoomManager::getFirstAvailableServer(DuelPlayer* referencePlayer, u
                         abs(referenceScore - (*it)->getFirstPlayer()->cachedRankScore) < maxScoreDifference(referenceScore) &&
                         (ignoreMode || (*it)->mode == mode) && ((*it)->getLfList() == 3 || lflist == 3);
 
+        if(serverOk && referencePlayer->loginStatus == Users::LoginResult::AUTHENTICATED &&
+           (*it)->getFirstPlayer()->loginStatus == Users::LoginResult::AUTHENTICATED && !wcscmp(referencePlayer->namew_low,(*it)->getFirstPlayer()->namew_low))
+        {
+            serverOk = false;
+        }
+
         if(serverOk )
             return *it;
     }
