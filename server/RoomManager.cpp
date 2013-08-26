@@ -119,18 +119,28 @@ int RoomManager::getNumPlayers()
     return risultato;
 }
 
-CMNetServer* RoomManager::getFirstAvailableServer(int lflist, int referenceScore)
+CMNetServer* RoomManager::getFirstAvailableServer(DuelPlayer* referencePlayer)
 {
-    return getFirstAvailableServer(lflist, referenceScore, MODE_SINGLE,true);
+    return getFirstAvailableServer(referencePlayer, MODE_SINGLE,true);
 }
 
-CMNetServer* RoomManager::getFirstAvailableServer(int lflist, int referenceScore, unsigned char mode,bool ignoreMode)
+CMNetServer* RoomManager::getFirstAvailableServer(DuelPlayer* referencePlayer, unsigned char mode,bool ignoreMode)
 {
+    int lflist = referencePlayer ->lflist;
+    int referenceScore = referencePlayer->cachedRankScore;
+
+
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
         bool serverOk = (*it)->state == CMNetServer::State::WAITING &&
                         abs(referenceScore - (*it)->getFirstPlayer()->cachedRankScore) < maxScoreDifference(referenceScore) &&
                         (ignoreMode || (*it)->mode == mode) && (*it)->getLfList() == lflist;
+
+        if(serverOk && referencePlayer->loginStatus == Users::LoginResult::AUTHENTICATED &&
+           (*it)->getFirstPlayer()->loginStatus == Users::LoginResult::AUTHENTICATED && !wcscmp(referencePlayer->namew_low,(*it)->getFirstPlayer()->namew_low))
+        {
+            serverOk = false;
+        }
 
         if(serverOk )
             return *it;
@@ -151,7 +161,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp)
 {
 
     //tfirst room
-    CMNetServer* netServer = getFirstAvailableServer(dp->lflist,dp->cachedRankScore);
+    CMNetServer* netServer = getFirstAvailableServer(dp);
     if(netServer == nullptr)
     {
         waitingRoom->InsertPlayer(dp);
@@ -244,7 +254,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 {
 
     //true is success
-    CMNetServer* netServer = getFirstAvailableServer(dp->lflist,dp->cachedRankScore,mode,false);
+    CMNetServer* netServer = getFirstAvailableServer(dp,mode,false);
     if(netServer == nullptr)
     {
         waitingRoom->InsertPlayer(dp);

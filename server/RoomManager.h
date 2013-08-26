@@ -50,8 +50,8 @@ namespace ygo {
         bool InsertPlayerInWaitingRoom(DuelPlayer*dp);
         bool InsertPlayer(DuelPlayer*dp);
         bool InsertPlayer(DuelPlayer*dp,unsigned char mode);
-        CMNetServer* getFirstAvailableServer(int lflist,int referenceScore);
-        CMNetServer* getFirstAvailableServer(int lflist, int referenceScore,unsigned char mode,bool);
+        CMNetServer* getFirstAvailableServer(DuelPlayer* referencePlayer);
+        CMNetServer* getFirstAvailableServer(DuelPlayer* referencePlayer,unsigned char mode,bool);
         int getNumPlayers();
         int getNumRooms();
         std::vector<CMNetServer *> getCompatibleRoomsList(int referenceScore);
