@@ -119,6 +119,11 @@ int RoomManager::getNumPlayers()
     return risultato;
 }
 
+CMNetServer* RoomManager::getFirstAvailableServer(int lflist, int referenceScore)
+{
+    return getFirstAvailableServer(lflist, referenceScore, MODE_SINGLE,true);
+}
+
 CMNetServer* RoomManager::getFirstAvailableServer(int lflist, int referenceScore, unsigned char mode,bool ignoreMode)
 {
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
@@ -253,10 +258,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
     return true;
 }
 
-CMNetServer* RoomManager::getFirstAvailableServer(int lflist, int referenceScore)
-{
-    return getFirstAvailableServer(lflist, referenceScore, MODE_SINGLE,true);
-}
+
 CMNetServer* RoomManager::createServer(unsigned char mode)
 {
     if(getNumRooms() >= 500)
