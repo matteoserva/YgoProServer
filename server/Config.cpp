@@ -72,6 +72,8 @@ void Config::LoadConfig()
     signal(SIGPIPE, SIG_IGN);
 
     deckManager.LoadLFList();
+    std::swap(deckManager._lfList[0],deckManager._lfList[1]);
+
     if(!dataManager.LoadDB("cards.cdb"))
         return;
     //if(!dataManager.LoadStrings("strings.conf"))
