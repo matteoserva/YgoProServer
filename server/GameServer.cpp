@@ -263,7 +263,7 @@ void GameServer::keepAlive(evutil_socket_t fd, short events, void* arg)
     if(time(NULL)- last_check < 600)
         return;
     last_check = time(NULL);
-    that->roomManager.BroadcastMessage(L"to get 100 bonus points: go to www.ygopro.it and click on \"instant +100 score\"",true,true);
+    that->roomManager.BroadcastMessage(Config::getInstance()->spam_string,true,true);
 }
 
 void GameServer::checkInjectedMessages_cb(evutil_socket_t fd, short events, void* arg)

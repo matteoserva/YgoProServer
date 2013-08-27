@@ -46,6 +46,8 @@ namespace ygo {
         RoomManager();
         ~RoomManager();
         void BroadcastMessage(std::wstring, bool, bool crossServer = false);
+        void BroadcastMessage(std::string, bool, bool crossServer = false);
+
         void notifyStateChange(CMNetServer* room,CMNetServer::State oldstate,CMNetServer::State newstate);
         bool InsertPlayerInWaitingRoom(DuelPlayer*dp);
         bool InsertPlayer(DuelPlayer*dp);

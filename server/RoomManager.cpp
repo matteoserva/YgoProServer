@@ -198,6 +198,11 @@ bool RoomManager::FillRoom(CMNetServer* room)
     }
     return true;
 }
+void RoomManager::BroadcastMessage(std::string message, bool isAdmin,bool crossServer)
+{
+    BroadcastMessage(std::wstring(message.begin(),message.end()), isAdmin, crossServer);
+}
+
 
 void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,bool crossServer)
 {

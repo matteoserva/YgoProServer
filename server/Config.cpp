@@ -61,6 +61,22 @@ bool Config::parseCommandLine(int argc, char**argv)
     }
     return false;
 }
+
+void Config::check_variable(int &var,std::string value,std::string name)
+{
+    var=stoi(value);
+    printf("caricata la variabile %s con il valore %d\n",name.c_str(),var);
+
+}
+
+void Config::check_variable(std::string &var,std::string value,std::string name)
+{
+    var = value;
+    printf("caricata la variabile %s con il valore %s\n",name.c_str(),value.c_str());
+
+
+}
+
 void Config::LoadConfig()
 {
 #ifdef _WIN32
@@ -94,13 +110,13 @@ void Config::LoadConfig()
         size_t fsize = ftell(fp);
         fseek(fp, 0, SEEK_SET);
         int linenum=0;
-        #define CHECK_NUMERIC_VARIABLE(VAR) else if(!strcmp(strbuf,#VAR)) VAR = stoi(valbuf)
-        #define CHECK_STRING_VARIABLE(VAR) else if(!strcmp(strbuf,#VAR)) VAR = valbuf
+
+        #define CHECK_VARIABLE(VAR) else if(!strcmp(strbuf,#VAR)) check_variable(VAR,valbuf,#VAR)
 
         for(int linenum=0; ftell(fp) < fsize; linenum++)
         {
             fgets(linebuf, 250, fp);
-            int scanfSuccess = sscanf(linebuf, "%s = %s", strbuf, valbuf);
+            int scanfSuccess = sscanf(linebuf, "%s = %[^\n]s", strbuf, valbuf);
             if(scanfSuccess <= 0 || strbuf[0] == '#')
             {
                 //ignored line
@@ -121,20 +137,21 @@ void Config::LoadConfig()
                 //istringstream ss(valbuf)>>
             }
 
-            CHECK_STRING_VARIABLE(mysql_username);
-            CHECK_STRING_VARIABLE(mysql_password);
-            CHECK_STRING_VARIABLE(mysql_database);
-            CHECK_STRING_VARIABLE(mysql_host);
-            CHECK_NUMERIC_VARIABLE(max_users_per_process);
-            CHECK_NUMERIC_VARIABLE(max_processes);
-            CHECK_NUMERIC_VARIABLE(waitingroom_min_waiting);
-            CHECK_NUMERIC_VARIABLE(waitingroom_max_waiting);
+            CHECK_VARIABLE(mysql_username);
+            CHECK_VARIABLE(mysql_password);
+            CHECK_VARIABLE(mysql_database);
+            CHECK_VARIABLE(mysql_host);
+            CHECK_VARIABLE(spam_string);
+            CHECK_VARIABLE(max_users_per_process);
+            CHECK_VARIABLE(max_processes);
+            CHECK_VARIABLE(waitingroom_min_waiting);
+            CHECK_VARIABLE(waitingroom_max_waiting);
 
             else
                 cerr<<"Could not understand the keyword at line"<<linenum<<": "<<strbuf<<endl;
         }
-        #undef CHECK_STRING_VARIABLE
-        #undef CHECK_NUMERIC_VARIABLE
+        #undef CHECK_VARIABLE
+
         fclose(fp);
     }
     if(!serverport)
@@ -147,8 +164,9 @@ Config::Config():configFile("server.conf"),serverport(0)
 {
     max_users_per_process = 150;
     max_processes = 3;
-    int waitingroom_min_waiting = 4;
-    int waitingroom_max_waiting = 8;
+    waitingroom_min_waiting = 4;
+    waitingroom_max_waiting = 8;
+    spam_string = "www.ygopro.it <-- this is the official website of this server";
 }
 
 }
