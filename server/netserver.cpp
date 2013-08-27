@@ -759,22 +759,28 @@ bool CMNetServer::reCheckLfList()
             {
                     lflist_intersection &= it->first->lflist;
             }
-            bool prosegui = (lflist ==3) && lflist_intersection < 3 && lflist_intersection > 0;
+            bool prosegui = (lflist ==3) && lflist_intersection > 0;
 
             if(!duel_mode)
                 prosegui = false;
             if(!prosegui)
                 return false;
+
+            //non resettare la stanza allo stato iniziale
+            if(lflist_intersection ==3)
+                return false;
+
+            //ora iniziamo a salvare lo stato della stanza
             lflist = lflist_intersection;
 
             unsigned int list_hash=0;
-            if(lflist_intersection <3)
-                list_hash=deckManager._lfList[lflist-1].hash;
+
+            list_hash=deckManager._lfList[lflist-1].hash;
 
 
             STOC_JoinGame scjg;
             HostInfo info;
-            info.rule=2;
+            info.rule=lflist-1;
             info.mode=mode==MODE_HANDICAP?MODE_TAG:mode;
             info.draw_count=1;
             info.no_check_deck=false;
