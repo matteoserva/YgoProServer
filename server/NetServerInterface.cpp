@@ -158,9 +158,9 @@ int CMNetServerInterface::detectDeckCompatibleLflist(void* pdata)
 
     int compatible =0;
 
-    int err1 = deckManager.CheckLFList(deck, deckManager._lfList[0].hash, true, false);
+    int err1 = deckManager.CheckLFList(deck, deckManager._lfList[0].hash, true, true);
     compatible += (err1)?0:1;
-    int err2 = deckManager.CheckLFList(deck, deckManager._lfList[1].hash, false, true);
+    int err2 = deckManager.CheckLFList(deck, deckManager._lfList[1].hash, true, true);
     compatible += (err2)?0:2;
 
     int err3=0;
