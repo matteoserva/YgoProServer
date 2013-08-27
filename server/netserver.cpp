@@ -780,7 +780,7 @@ bool CMNetServer::reCheckLfList()
 
             STOC_JoinGame scjg;
             HostInfo info;
-            info.rule=lflist-1;
+            info.rule=2;
             info.mode=mode==MODE_HANDICAP?MODE_TAG:mode;
             info.draw_count=1;
             info.no_check_deck=false;
