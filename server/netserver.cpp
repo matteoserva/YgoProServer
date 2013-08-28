@@ -1026,6 +1026,10 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         }
         if((dp->lflist == 2 && lflist ==1) || (dp->lflist == 1 && lflist ==2))
         {
+            STOC_ErrorMsg scem;
+            scem.msg = ERRMSG_DECKERROR;
+			scem.code = 1;
+			SendPacketToPlayer(dp, STOC_ERROR_MSG, scem);
             ExtractPlayer(dp);
             roomManager->InsertPlayer(dp,mode);
             break;
