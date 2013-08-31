@@ -61,7 +61,7 @@ private:
     void EnableCrosses(DuelPlayer* dp);
     void ShowStats(DuelPlayer* dp);
     void ShowCustomMode(DuelPlayer* dp);
-    void ShowChooseBanlist(DuelPlayer* dp);
+    void ShowChooseBanlist(DuelPlayer* dp,int selected,bool showCrosses);
     void ButtonKickPressed(DuelPlayer* dp,int pos);
     void ReadyFlagPressed(DuelPlayer* dp,bool readyFlag);
     void changePlayerStatus(DuelPlayer* dp,DuelPlayerStatus::Status);

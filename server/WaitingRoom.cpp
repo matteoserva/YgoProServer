@@ -364,10 +364,12 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(dp->lflist == 3)
         {
             SystemChatToPlayer(dp,L"Your deck is compatible with both both banlists. TCG chosen",true);
-            if(DuelPlayerStatus::STATS == player_status[dp].status)
-                ShowChooseBanlist(dp);
-           dp->lflist=2;
+            dp->lflist=2;
+                ShowChooseBanlist(dp,dp->lflist,true);
         }
+        else
+                ShowChooseBanlist(dp,dp->lflist,false);
+
 
     case CTOS_HS_NOTREADY:
     {

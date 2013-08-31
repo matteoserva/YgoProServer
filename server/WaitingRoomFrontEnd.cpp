@@ -205,7 +205,7 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
 
     case DuelPlayerStatus::CHOOSEBANLIST:
         dp->lflist=pos;
-        ShowStats(dp);
+        ShowChooseBanlist(dp,dp->lflist,false);
         ReadyFlagPressed(dp,true);
         STOC_HS_PlayerChange scpc;
         scpc.status = 0 | PLAYERCHANGE_READY;
@@ -321,13 +321,33 @@ void WaitingRoom::refuse_challenge(DuelPlayer* dp)
 
 }
 
-void WaitingRoom::ShowChooseBanlist(DuelPlayer* dp)
+void WaitingRoom::ShowChooseBanlist(DuelPlayer* dp,int selected,bool showCrosses)
 {
-    SendNameToPlayer(dp,0,L"Select banlist?");
-    SendNameToPlayer(dp,1,"[OCG]");
-    SendNameToPlayer(dp,2,"[TCG] *");
-    SendNameToPlayer(dp,3,"[RANDOM]");
-    EnableCrosses(dp);
+    if(showCrosses)
+        SendNameToPlayer(dp,0,L"Select banlist?");
+    else
+        SendNameToPlayer(dp,0,L"Banlist chosen:");
+    if(selected == 1)
+        SendNameToPlayer(dp,1,"[OCG] *");
+    else
+        SendNameToPlayer(dp,1,"[OCG]");
+    if(selected == 2)
+        SendNameToPlayer(dp,2,"[TCG] *");
+    else
+        SendNameToPlayer(dp,2,"[TCG]");
+    if(selected == 3)
+        SendNameToPlayer(dp,3,"[RANDOM] *");
+    else
+        SendNameToPlayer(dp,3,"[RANDOM]");
+    if(showCrosses)
+        EnableCrosses(dp);
+    else
+    {
+        STOC_TypeChange sctc;
+        sctc.type =  0x00 | NETPLAYER_TYPE_PLAYER1;
+        SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
+    }
+
 
     changePlayerStatus(dp,DuelPlayerStatus::CHOOSEBANLIST);
     STOC_HS_PlayerChange scpc;
