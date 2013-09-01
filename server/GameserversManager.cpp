@@ -428,6 +428,7 @@ void GameserversManager::parent_loop()
                 {
                     chosen_one = it->first;
                     chosen_pid=it->second.pid;
+                    chosen_one_players = it->second.players;
                 }
 
             children[chosen_one].isAlive = false;
