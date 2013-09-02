@@ -187,7 +187,7 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
         ShowStats(dp);
         return;
     }
-    if(dp->lflist<=0 && DuelPlayerStatus::CHOOSEBANLIST != player_status[dp].status)
+    if(dp->lflist<=0 && DuelPlayerStatus::CHOOSEBANLIST != player_status[dp].status && DuelPlayerStatus::CHALLENGERECEIVED != player_status[dp].status)
     {
         SendNameToPlayer(dp,0,L">=check the box ==>");
 
