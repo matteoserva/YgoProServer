@@ -37,10 +37,12 @@ void WaitingRoom::ShowDuelSettings(DuelPlayer* dp)
     }
     else
     {
-        if(dp->lflist ==0 )
+        if(dp->lflist ==1 )
         SendNameToPlayer(dp,3,"Banlist: [OCG]");
-        else
+        else if(dp->lflist == 2)
         SendNameToPlayer(dp,3,"Banlist: [TCG]");
+        else
+            SendNameToPlayer(dp,3,"Banlist: [   ]");
     }
 
     if(player_status[dp].modeScelto == MODE_SINGLE )
