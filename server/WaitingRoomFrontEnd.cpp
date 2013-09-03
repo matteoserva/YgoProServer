@@ -30,17 +30,17 @@ void WaitingRoom::ShowDuelSettings(DuelPlayer* dp)
 
     if(player_status[dp].banlistCompatibili == 3)
     {
-        if(dp->lflist ==1 )
+        if(dp->lflist ==2 )
              SendNameToPlayer(dp,3,"Banlist: [TCG] [  ]");
         else
             SendNameToPlayer(dp,3,"Banlist: [  ] [OCG]");
     }
     else
     {
-        if(dp->lflist ==1 )
-        SendNameToPlayer(dp,3,"Banlist: [OCG]");
+        if(dp->lflist ==2 )
+            SendNameToPlayer(dp,3,"Banlist: [TCG]");
         else if(dp->lflist == 2)
-        SendNameToPlayer(dp,3,"Banlist: [TCG]");
+            SendNameToPlayer(dp,3,"Banlist: [OCG]");
         else
             SendNameToPlayer(dp,3,"Banlist: [   ]");
     }
@@ -308,10 +308,10 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
         }
         if(pos == 3)
         {
-            if(dp->lflist == 0 && player_status[dp].banlistCompatibili==3)
+            if(dp->lflist == 1 && player_status[dp].banlistCompatibili==3)
+                dp->lflist =2;
+            else if(dp->lflist == 2 && player_status[dp].banlistCompatibili==3)
                 dp->lflist =1;
-            else if(dp->lflist == 1 && player_status[dp].banlistCompatibili==3)
-                dp->lflist =0;
 
         }
         ShowDuelSettings(dp);
