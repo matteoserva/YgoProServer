@@ -337,7 +337,6 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             else if (player_status[dp].banlistCompatibili != 3)
                 dp->lflist =player_status[dp].banlistCompatibili;
 
-            printf("lista %d\n",dp->lflist);
             if(player_status[dp].banlistCompatibili == 1)
                 SystemChatToPlayer(dp,L"Your deck is compatible with the OCG banlist only.",true);
             if(player_status[dp].banlistCompatibili == 2)

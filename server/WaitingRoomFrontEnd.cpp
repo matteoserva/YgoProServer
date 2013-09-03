@@ -242,7 +242,6 @@ void WaitingRoom::player_erase_cb(DuelPlayer* dp)
 
 void WaitingRoom::ButtonStartPressed(DuelPlayer* dp)
     {
-        printf("buttonstart\n");
         if(player_status[dp].status == DuelPlayerStatus::DUELSETTINGS)
             if(players[dp].isReady)
             {
