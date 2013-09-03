@@ -8,13 +8,17 @@ namespace ygo
 
 struct DuelPlayerStatus
 {
-    enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER,CUSTOMMODE,CHALLENGERECEIVED,CHOOSEBANLIST};
+    enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER,CUSTOMMODE,CHALLENGERECEIVED,CHOOSEBANLIST,DUELSETTINGS};
     Status status;
     std::vector<CMNetServer *> listaStanzeCompatibili;
     std::wstring lastName0;
     DuelPlayer *challenger;
+    int banlistCompatibili;
+    int modeScelto;
+    int spamScelto;
 
-    DuelPlayerStatus():status(Status::STATS),challenger(nullptr) {};
+
+    DuelPlayerStatus():status(Status::STATS),challenger(nullptr),banlistCompatibili(3),spamScelto(0),modeScelto(MODE_SINGLE) {};
 };
 
 class WaitingRoom:public CMNetServerInterface
@@ -41,7 +45,7 @@ private:
     void player_erase_cb(DuelPlayer* );
 
 public:
-    DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*,int);
+    DuelPlayer* ExtractBestMatchPlayer(DuelPlayer*,int,unsigned char);
     //DuelPlayer* ExtractBestMatchPlayer(int referenceScore);
     WaitingRoom(RoomManager*roomManager,GameServer*);
     ~WaitingRoom();
@@ -57,9 +61,11 @@ public:
     void ToObserverPressed(DuelPlayer* dp);
 private:
     void ToDuelistPressed(DuelPlayer* dp);
+    void ButtonStartPressed(DuelPlayer* dp);
 
     void EnableCrosses(DuelPlayer* dp);
     void ShowStats(DuelPlayer* dp);
+    void ShowDuelSettings(DuelPlayer* dp);
     void ShowCustomMode(DuelPlayer* dp);
     void ShowChooseBanlist(DuelPlayer* dp,int selected,bool showCrosses);
     void ButtonKickPressed(DuelPlayer* dp,int pos);

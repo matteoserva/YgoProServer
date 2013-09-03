@@ -17,6 +17,61 @@ void WaitingRoom::ReadyFlagPressed(DuelPlayer* dp,bool readyFlag)
 
 }
 
+void WaitingRoom::ShowDuelSettings(DuelPlayer* dp)
+{
+    bool isReady =players[dp].isReady;
+
+    SendNameToPlayer(dp,0,"-Duel Settings-");
+
+    if(player_status[dp].spamScelto == 0)
+        SendNameToPlayer(dp,1,"[CheckMate Server!]");
+    else
+        SendNameToPlayer(dp,1,"www.ygopro.it");
+
+    if(player_status[dp].banlistCompatibili == 3)
+    {
+        if(dp->lflist ==1 )
+             SendNameToPlayer(dp,3,"Banlist: [TCG] [  ]");
+        else
+            SendNameToPlayer(dp,3,"Banlist: [  ] [OCG]");
+    }
+    else
+    {
+        if(dp->lflist ==0 )
+        SendNameToPlayer(dp,3,"Banlist: [OCG]");
+        else
+        SendNameToPlayer(dp,3,"Banlist: [TCG]");
+    }
+
+    if(player_status[dp].modeScelto == MODE_SINGLE )
+        SendNameToPlayer(dp,2,"mode: [SINGLE]");
+    else if(player_status[dp].modeScelto == MODE_TAG )
+        SendNameToPlayer(dp,2,"mode: [TAG]");
+    else if(player_status[dp].modeScelto == MODE_MATCH )
+        SendNameToPlayer(dp,2,"mode: [MATCH]");
+    else if(player_status[dp].modeScelto == MODE_HANDICAP)
+        SendNameToPlayer(dp,2,"mode: [HANDICAP]");
+
+
+    STOC_TypeChange sctc;
+    sctc.type =  0x10 | NETPLAYER_TYPE_PLAYER1;
+    SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
+    //playerReadinessChange(dp,false);
+    STOC_HS_PlayerChange scpc;
+    for(int i=1; i<4; i++)
+    {
+        scpc.status = (i << 4) | PLAYERCHANGE_READY;
+        SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+    }
+
+
+
+    changePlayerStatus(dp,DuelPlayerStatus::DUELSETTINGS);
+
+
+}
+
+
 void WaitingRoom::ShowStats(DuelPlayer* dp)
 {
     char name[20],message[256];
@@ -139,6 +194,8 @@ void WaitingRoom::ShowCustomMode(DuelPlayer* dp)
 }
 void WaitingRoom::ToDuelistPressed(DuelPlayer* dp)
 {
+            ShowDuelSettings(dp);
+return;
     if(player_status[dp].status==DuelPlayerStatus::CHOOSEGAMETYPE)
     {
         ShowCustomMode(dp);
@@ -161,14 +218,17 @@ void WaitingRoom::changePlayerStatus(DuelPlayer* dp,DuelPlayerStatus::Status new
     if(player_status[dp].status==DuelPlayerStatus::CHALLENGERECEIVED)
         refuse_challenge(dp);
 
-    if(player_status[dp].status!=newstatus && players[dp].isReady == true)
-    {
-        playerReadinessChange(dp,false);
+    if(newstatus != DuelPlayerStatus::DUELSETTINGS)
+        if(player_status[dp].status!=newstatus && players[dp].isReady == true)
+        {
+            playerReadinessChange(dp,false);
 
-        STOC_HS_PlayerChange scpc;
-        scpc.status = 0 | PLAYERCHANGE_NOTREADY;
-        SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
-    }
+        }
+
+
+            STOC_HS_PlayerChange scpc;
+            scpc.status = (players[dp].isReady)?PLAYERCHANGE_READY:PLAYERCHANGE_NOTREADY;
+            SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
 
     player_status[dp].status=newstatus;
 
@@ -180,6 +240,22 @@ void WaitingRoom::player_erase_cb(DuelPlayer* dp)
 
 }
 
+void WaitingRoom::ButtonStartPressed(DuelPlayer* dp)
+    {
+        printf("buttonstart\n");
+        if(player_status[dp].status == DuelPlayerStatus::DUELSETTINGS)
+            if(players[dp].isReady)
+            {
+                unsigned char mode = player_status[dp].modeScelto;
+                ExtractPlayer(dp);
+                roomManager->InsertPlayer(dp,mode);
+            }
+
+
+
+
+    }
+
 void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
 {
     if(pos == 0)
@@ -187,12 +263,13 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
         ShowStats(dp);
         return;
     }
-    if(dp->lflist<=0 && DuelPlayerStatus::CHOOSEBANLIST != player_status[dp].status && DuelPlayerStatus::CHALLENGERECEIVED != player_status[dp].status)
+    /*if(dp->lflist<=0 && DuelPlayerStatus::CHOOSEBANLIST != player_status[dp].status && DuelPlayerStatus::CHALLENGERECEIVED != player_status[dp].status)
     {
         SendNameToPlayer(dp,0,L">=check the box ==>");
 
         return;
-    }
+    }*/
+
     switch(player_status[dp].status)
     {
         case DuelPlayerStatus::CUSTOMMODE:
@@ -210,6 +287,33 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
         STOC_HS_PlayerChange scpc;
         scpc.status = 0 | PLAYERCHANGE_READY;
         SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
+        break;
+
+    case DuelPlayerStatus::DUELSETTINGS:
+        if(pos == 1)
+        {
+            player_status[dp].spamScelto = (player_status[dp].spamScelto==0)?1:0;
+        }
+        if(pos == 2)
+        {
+            if(player_status[dp].modeScelto == MODE_SINGLE)
+                player_status[dp].modeScelto = MODE_TAG;
+            else if(player_status[dp].modeScelto == MODE_TAG)
+                player_status[dp].modeScelto = MODE_MATCH;
+            else if(player_status[dp].modeScelto == MODE_MATCH)
+                player_status[dp].modeScelto = MODE_HANDICAP;
+            else if(player_status[dp].modeScelto == MODE_HANDICAP)
+                player_status[dp].modeScelto = MODE_SINGLE;
+        }
+        if(pos == 3)
+        {
+            if(dp->lflist == 0 && player_status[dp].banlistCompatibili==3)
+                dp->lflist =1;
+            else if(dp->lflist == 1 && player_status[dp].banlistCompatibili==3)
+                dp->lflist =0;
+
+        }
+        ShowDuelSettings(dp);
         break;
 
 

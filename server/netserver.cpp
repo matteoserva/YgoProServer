@@ -449,6 +449,15 @@ void CMNetServer::InsertPlayer(DuelPlayer* dp)
     duel_mode->host_player=NULL;
     players[dp].last_state_in_timeout = dp->state;
     reCheckLfList();
+
+    if(mode == MODE_HANDICAP)
+    {
+        STOC_HS_PlayerEnter scpe;
+        BufferIO::CopyWStr(L"[HANDICAP MATCH]", scpe.name, 20);
+        scpe.pos = 0;
+        SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);
+    }
+
 }
 
 

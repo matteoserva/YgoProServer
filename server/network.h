@@ -118,7 +118,7 @@ struct DuelPlayer {
 		state = 0;
 		bev = 0;
         netServer=0;
-        lflist=0;
+        lflist=1;
 	}
     int lflist;
     std::string countryCode;

@@ -91,9 +91,9 @@ void WaitingRoom::cicle_users_cb(evutil_socket_t fd, short events, void* arg)
         {
             if(that->players.find(*it) != that->players.end())
             {
-
+                unsigned char mode = that->player_status[*it].modeScelto;
                 that->ExtractPlayer(*it);
-                that->roomManager->InsertPlayer(*it);
+                that->roomManager->InsertPlayer(*it,mode);
             }
         }
 }
@@ -232,10 +232,10 @@ void WaitingRoom::LeaveGame(DuelPlayer* dp)
 bool WaitingRoom::ReadyToDuel(DuelPlayer* dp)
 {
 
-    return players[dp].isReady && (player_status[dp].status==DuelPlayerStatus::STATS || player_status[dp].status==DuelPlayerStatus::CHOOSEBANLIST);
+    return players[dp].isReady;// && (player_status[dp].status==DuelPlayerStatus::STATS || player_status[dp].status==DuelPlayerStatus::CHOOSEBANLIST);
 }
 
-DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer,int lflist)
+DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer,int lflist,unsigned char mode)
 {
     int referenceScore = referencePlayer->cachedRankScore;
        if(!players.size())
@@ -243,16 +243,27 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer,int 
 
     int qdifference = 0;
     DuelPlayer *chosenOne = nullptr;
-
     for(auto it=players.cbegin(); it!=players.cend(); ++it)
     {
         if(it->second.secondsWaiting >= minSecondsWaiting)
         {
+
             DuelPlayer* dp = it->first;
             if(!ReadyToDuel(dp))
                 continue;
+
             if(!(lflist ==3 || dp->lflist == 3 || dp->lflist == lflist))
+             {
+                 continue;
+             }
+
+
+            if(player_status[dp].modeScelto != mode)
+            {
+
                 continue;
+            }
+
 
             char opname[20];
             BufferIO::CopyWStr(dp->name,opname,20);
@@ -320,7 +331,20 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     {
     case CTOS_UPDATE_DECK:
     {
-            dp->lflist = detectDeckCompatibleLflist(pdata);
+            player_status[dp].banlistCompatibili = detectDeckCompatibleLflist(pdata);
+            if(player_status[dp].banlistCompatibili == 3 && dp->lflist == 3)
+                dp->lflist = 1;
+            else if (player_status[dp].banlistCompatibili != 3)
+                dp->lflist =player_status[dp].banlistCompatibili;
+
+            printf("lista %d\n",dp->lflist);
+            if(player_status[dp].banlistCompatibili == 1)
+                SystemChatToPlayer(dp,L"Your deck is compatible with the OCG banlist only.",true);
+            if(player_status[dp].banlistCompatibili == 2)
+                SystemChatToPlayer(dp,L"Your deck is compatible with the TCG banlist only.",true);
+            if(player_status[dp].banlistCompatibili == 3)
+                SystemChatToPlayer(dp,L"Your deck is compatible with both both banlists.",true);
+
             break;
     }
     case CTOS_PLAYER_INFO:
@@ -345,7 +369,7 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         break;
     }
     case CTOS_HS_READY:
-    if(dp->lflist <=0)
+    /*if(dp->lflist <=0)
         {
             STOC_HS_PlayerChange scpc;
 			scpc.status = (dp->type << 4) | PLAYERCHANGE_NOTREADY;
@@ -368,9 +392,11 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
                 ShowChooseBanlist(dp,dp->lflist,true);
         }
         else
-                ShowChooseBanlist(dp,dp->lflist,false);
+                ShowChooseBanlist(dp,dp->lflist,false);*/
 
-
+        ReadyFlagPressed(dp,CTOS_HS_NOTREADY - pktType);
+        ShowDuelSettings(dp);
+        break;
     case CTOS_HS_NOTREADY:
     {
 
@@ -398,8 +424,7 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
     case CTOS_HS_START:
     {
-        printf("start premuto\n");
-        ShowStats(dp);
+        ButtonStartPressed(dp);
         break;
     }
 

@@ -189,7 +189,7 @@ bool RoomManager::FillRoom(CMNetServer* room)
 
     for(DuelPlayer* base = room->getFirstPlayer(); room->state!= CMNetServer::State::FULL;)
     {
-        DuelPlayer* dp = waitingRoom->ExtractBestMatchPlayer(base,room->getLfList());
+        DuelPlayer* dp = waitingRoom->ExtractBestMatchPlayer(base,room->getLfList(),room->mode);
         if(dp == nullptr)
             return false;
         dp->netServer=room;
