@@ -342,7 +342,7 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             if(player_status[dp].banlistCompatibili == 2)
                 SystemChatToPlayer(dp,L"Your deck is compatible with the TCG banlist only.",true);
             if(player_status[dp].banlistCompatibili == 3)
-                SystemChatToPlayer(dp,L"Your deck is compatible with both both banlists.",true);
+                SystemChatToPlayer(dp,L"Your deck is compatible with both banlists.",true);
 
             break;
     }

@@ -39,7 +39,7 @@ void WaitingRoom::ShowDuelSettings(DuelPlayer* dp)
     {
         if(dp->lflist ==2 )
             SendNameToPlayer(dp,3,"Banlist: [TCG]");
-        else if(dp->lflist == 2)
+        else if(dp->lflist == 1)
             SendNameToPlayer(dp,3,"Banlist: [OCG]");
         else
             SendNameToPlayer(dp,3,"Banlist: [   ]");
