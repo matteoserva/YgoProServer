@@ -22,7 +22,7 @@ namespace ygo
         int max_users_per_process;
         int waitingroom_min_waiting;
         int waitingroom_max_waiting;
-
+        bool debugSql;
         private:
         Config();
         std::string configFile;

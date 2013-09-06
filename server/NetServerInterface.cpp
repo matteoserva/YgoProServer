@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "RoomManager.h"
 #include "GameServer.h"
+#include "DuelLogger.h"
 namespace ygo
 {
 
@@ -142,8 +143,7 @@ void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char prot
     if(len > 0)
         memcpy(p, buffer, std::min(len,(size_t) 0x20000));
     last_sent = len + 3;
-    if(dp)
-        bufferevent_write(dp->bev, net_server_write, last_sent);
+    ReSendToPlayer(dp);
 }
 
 int CMNetServerInterface::detectDeckCompatibleLflist(void* pdata)
@@ -203,7 +203,11 @@ void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
         return;
     }
     if(dp)
+    {
         bufferevent_write(dp->bev, net_server_write, last_sent);
+        DuelLogger::getInstance()->logServerPacket(dp,net_server_write,last_sent);
+    }
+
 }
 
 bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
