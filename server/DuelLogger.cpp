@@ -38,7 +38,7 @@ namespace ygo
         char* pdata = data;
         BufferIO::ReadInt16(pdata);
         unsigned char pktType = BufferIO::ReadUInt8(pdata);
-        printf ("STOCpkt: %d\n",(int)pktType);
+        //printf ("STOCpkt: %d\n",(int)pktType);
 
         switch(pktType)
         {

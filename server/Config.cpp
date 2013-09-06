@@ -162,7 +162,7 @@ void Config::LoadConfig()
 }
 Config::Config():configFile("server.conf"),serverport(0)
 {
-    debugSql = false;
+    debugSql = true;
     max_users_per_process = 150;
     max_processes = 3;
     waitingroom_min_waiting = 4;
