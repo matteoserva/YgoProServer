@@ -63,7 +63,7 @@ public:
         memcpy(p, &st, sizeof(ST));
         last_sent = sizeof(ST) + 3;
         if(dp)
-            bufferevent_write(dp->bev, net_server_write, last_sent);
+            ReSendToPlayer(dp);
 
     }
     bool isShouting;
