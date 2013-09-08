@@ -1,6 +1,7 @@
 #include "WaitingRoom.h"
 #include "RoomManager.h"
 #include "netserver.h"
+#include <time.h>
 namespace ygo
 {
 

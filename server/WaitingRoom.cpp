@@ -368,32 +368,26 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         break;
     }
     case CTOS_HS_READY:
-    /*if(dp->lflist <=0)
-        {
-            STOC_HS_PlayerChange scpc;
-			scpc.status = (dp->type << 4) | PLAYERCHANGE_NOTREADY;
-			SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
-			STOC_ErrorMsg scem;
-			scem.msg = ERRMSG_DECKERROR;
-			scem.code = -dp->lflist;
-			SendPacketToPlayer(dp, STOC_ERROR_MSG, scem);
-            dp->lflist = 0;
-            break;
-        }
-        if(dp->lflist == 1)
-            SystemChatToPlayer(dp,L"Your deck is compatible with the OCG banlist only.",true);
-        if(dp->lflist == 2)
-            SystemChatToPlayer(dp,L"Your deck is compatible with the TCG banlist only.",true);
-        if(dp->lflist == 3)
-        {
-            SystemChatToPlayer(dp,L"Your deck is compatible with both both banlists. TCG chosen",true);
-            dp->lflist=2;
-                ShowChooseBanlist(dp,dp->lflist,true);
-        }
-        else
-                ShowChooseBanlist(dp,dp->lflist,false);*/
-
         ReadyFlagPressed(dp,CTOS_HS_NOTREADY - pktType);
+            if(player_status[dp].status!=DuelPlayerStatus::DUELSETTINGS)
+            {
+                int time4 = time(NULL) % 4;
+                switch (time4)
+                {
+                    case 0:
+                        player_status[dp].modeScelto = MODE_SINGLE;
+                        break;
+                    case 1:
+                        player_status[dp].modeScelto = MODE_TAG;
+                        break;
+                    case 2:
+                        player_status[dp].modeScelto = MODE_HANDICAP;
+                        break;
+                    case 3:
+                        player_status[dp].modeScelto = MODE_MATCH;
+                        break;
+                }
+            }
         ShowDuelSettings(dp);
         break;
     case CTOS_HS_NOTREADY:
