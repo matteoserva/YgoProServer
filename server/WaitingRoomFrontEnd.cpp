@@ -340,7 +340,7 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
         if(pos ==2 && player_status.find(player_status[dp].challenger) != player_status.end() && player_status[player_status[dp].challenger].challenger== dp)
         {
             DuelPlayer* dpnemico = player_status[dp].challenger;
-            CMNetServer* netserver = roomManager->createServer(MODE_SINGLE);
+            CMNetServer* netserver = roomManager->createServer(player_status[dp].challenge_mode);
             player_status[dp].challenger = nullptr;
             player_status[dpnemico].challenger = nullptr;
 
@@ -360,7 +360,7 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
 
 }
 
-bool WaitingRoom::send_challenge_request(DuelPlayer* dp,wchar_t * second)
+bool WaitingRoom::send_challenge_request(DuelPlayer* dp,wchar_t * second,unsigned char mode)
 {
         std::wstring nomenemico(second);
 
@@ -398,6 +398,7 @@ bool WaitingRoom::send_challenge_request(DuelPlayer* dp,wchar_t * second)
         ShowChallengeReceived(dpnemico,dpname);
         player_status[dp].challenger = dpnemico;
                 player_status[dpnemico].challenger = dp;
+                player_status[dpnemico].challenge_mode = mode;
 
         SystemChatToPlayer(dp,L"Challenge request sent!",true);
         return true;
@@ -527,8 +528,45 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
             SystemChatToPlayer(dp,L"I need a username",true);
             return true;
         }
-        wchar_t *second = &messaggio[11];
-        send_challenge_request(dp,second);
+
+        wchar_t word1[25];
+        wchar_t word2[25];
+        word2[0] = word1[0] = 0;
+        swscanf(&messaggio[11], L"%24ls %24ls",word1,word2);
+
+        printf("mode %ls name %ls\n",word1,word2);
+        if(wcslen(word2) == 0)
+        {
+                wchar_t *second = &messaggio[11];
+                send_challenge_request(dp,word1,MODE_SINGLE);
+
+        }
+        else if( !wcsncmp(word1,L"SINGLE",6))
+        {
+                wchar_t *second = &messaggio[11];
+                send_challenge_request(dp,word2,MODE_SINGLE);
+        }
+        else if( !wcsncmp(word1,L"TAG",3))
+        {
+                wchar_t *second = &messaggio[11];
+                send_challenge_request(dp,word2,MODE_TAG);
+        }
+        else if( !wcsncmp(word1,L"MATCH",5))
+        {
+                wchar_t *second = &messaggio[11];
+                send_challenge_request(dp,word2,MODE_MATCH);
+        }
+        else if( !wcsncmp(word1,L"HANDICAP",8))
+        {
+                wchar_t *second = &messaggio[11];
+                send_challenge_request(dp,word2,MODE_HANDICAP);
+        }
+        else
+        {
+                SystemChatToPlayer(dp,L"Error, invalid duel mode",true);
+
+        }
+
 
 
 

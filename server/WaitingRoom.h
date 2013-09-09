@@ -13,6 +13,7 @@ struct DuelPlayerStatus
     std::vector<CMNetServer *> listaStanzeCompatibili;
     std::wstring lastName0;
     DuelPlayer *challenger;
+    unsigned char challenge_mode;
     int banlistCompatibili;
     int modeScelto;
     int spamScelto;
@@ -72,7 +73,7 @@ private:
     void ReadyFlagPressed(DuelPlayer* dp,bool readyFlag);
     void changePlayerStatus(DuelPlayer* dp,DuelPlayerStatus::Status);
     void ShowChallengeReceived(DuelPlayer* dp,wchar_t * opponent);
-    bool send_challenge_request(DuelPlayer* dp,wchar_t * opponent);
+    bool send_challenge_request(DuelPlayer* dp,wchar_t * opponent,unsigned char mode);
     void refuse_challenge(DuelPlayer* dp);
 };
 
