@@ -563,8 +563,7 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
         }
         else
         {
-                SystemChatToPlayer(dp,L"Error, invalid duel mode",true);
-
+                SystemChatToPlayer(dp,L"Error, invalid duel mode. example:  !challenge SINGLE username",true);
         }
 
 
