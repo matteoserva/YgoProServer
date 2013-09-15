@@ -389,7 +389,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
             return;
         }
-        else if(pktType == CTOS_JOIN_GAME && dp->name[0] != 0)
+        else if(pktType == CTOS_JOIN_GAME && dp->name[0] != 0 && dp->loginStatus != Users::LoginResult::NOTENTERED)
         {
             if(roomManager.InsertPlayerInWaitingRoom(dp))
             {
