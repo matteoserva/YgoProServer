@@ -371,7 +371,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
     if(dp->netServer == NULL)
     {
-        if(pktType==CTOS_PLAYER_INFO)
+        if(pktType==CTOS_PLAYER_INFO && dp->loginStatus == Users::LoginResult::NOTENTERED)
         {
             CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
             char name[20];
