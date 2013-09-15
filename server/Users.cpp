@@ -90,7 +90,7 @@ std::pair<std::string,Users::LoginResult> Users::login(std::string loginString,c
 
 std::pair<std::string,Users::LoginResult> Users::login(std::string username, std::string password,char* ip)
 {
-    log(INFO,"Tento il login con %s e %s\n",username.c_str(),password.c_str());
+    log(INFO,"Tento il login con %s e %s, ip %s\n",username.c_str(),password.c_str(),ip);
     std::string usernamel=username;
     std::transform(usernamel.begin(), usernamel.end(), usernamel.begin(), ::tolower);
     if(username[0] == '-')
