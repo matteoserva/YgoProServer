@@ -41,6 +41,7 @@ static void sighandler(int sig)
 
 void prepara_segnali()
 {
+    return;
     signal(SIGALRM, sighandleralarm);
     signal(SIGSEGV, sighandler);
     sigset_t set;
@@ -52,6 +53,7 @@ void prepara_segnali()
 
 void sblocca_segnali()
 {
+    return;
     sigset_t set;
     sigemptyset(&set);
     sigaddset(&set, SIGSEGV);
@@ -61,6 +63,7 @@ void sblocca_segnali()
 
 void blocca_segnali()
 {
+    return;
     sigset_t set;
     sigemptyset(&set);
     sigaddset(&set, SIGSEGV);
