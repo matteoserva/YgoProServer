@@ -104,7 +104,7 @@ bool UsersDatabase::setUserStats(UserStats &us)
                     sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
 
             std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("UPDATE stats SET score = ?, wins = ?, losses = ?, draws = ?,tags = ? WHERE username = ?"));
-            stmt->setQueryTimeout(5);
+            //stmt->setQueryTimeout(5);
             stmt->setString(6, us.username);
             stmt->setInt(1, us.score);
             stmt->setInt(2, us.wins);
