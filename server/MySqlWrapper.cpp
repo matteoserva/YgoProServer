@@ -47,8 +47,10 @@ void MySqlWrapper::connect()
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
         con = driver->connect(host, config->mysql_username, config->mysql_password);
         bool myTrue = true;
+        unsigned int timeout = 5;
         con->setClientOption("OPT_RECONNECT", &myTrue);
 
+        con->setClientOption("MYSQL_OPT_READ_TIMEOUT", &timeout);
         /* Connect to the MySQL database */
         con->setSchema(config->mysql_database);
 
