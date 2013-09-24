@@ -83,6 +83,10 @@ void GameserversManager::ShowStats()
             if(!it->second.isAlive)
                 printf("  *dying*");
             printf("\n");
+//Statistics::ServerStats(
+            Statistics::ServerStats serverStats(gss.pid,gss.players,gss.rooms,Config::getInstance()->max_users_per_process,it->second.isAlive?std::string("ALIVE"):std::string("DYING"));
+            Statistics::getInstance()->SendStatisticsRow(serverStats);
+
         }
         printf("children: %2d, alive %2d, rooms: %3d, players alive:%3d, players: %3d\n",
                (int)children.size(),getNumAliveChildren(),getNumRooms(),getNumPlayersInAliveChildren(),getNumPlayers());

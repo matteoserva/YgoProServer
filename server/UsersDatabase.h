@@ -4,7 +4,7 @@
 #include <cppconn/exception.h>
 #include <cppconn/resultset.h>
 #include <exception>      // std::exception
-#include <cppconn/statement.h>
+
 namespace ygo
 {
 

@@ -2,7 +2,7 @@
 #define MYSQLWRAPPER_CPP
 
 #include <mysql_connection.h>
-
+#include <cppconn/statement.h>
 namespace ygo
 {
 class MySqlWrapper
