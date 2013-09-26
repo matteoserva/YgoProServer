@@ -83,12 +83,12 @@ void WaitingRoom::ShowStats(DuelPlayer* dp)
     SendNameToPlayer(dp,0,name);
     std::string username(name);
     int rank = Users::getInstance()->getRank(username);
-    int score = dp->cachedRankScore;
+    int score = dp->cachedGameScore;
 
     switch (dp->loginStatus)
     {
     case Users::LoginResult::AUTHENTICATED:
-        swprintf(wmessage,20, L"Rank: %d, score:",rank);
+        swprintf(wmessage,20, L"Score: %d:",score);
         SendNameToPlayer(dp,2,wmessage);
         sprintf(message, "www.ygopro.it");
         //sprintf(message, "Score: %d(%+d)",score,dp->cachedGameScore-score);
