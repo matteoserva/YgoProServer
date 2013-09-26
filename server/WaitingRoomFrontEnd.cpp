@@ -88,7 +88,7 @@ void WaitingRoom::ShowStats(DuelPlayer* dp)
     switch (dp->loginStatus)
     {
     case Users::LoginResult::AUTHENTICATED:
-        swprintf(wmessage,20, L"Score: %d:",score);
+        swprintf(wmessage,20, L"Score: %d, rank:?",score);
         SendNameToPlayer(dp,2,wmessage);
         sprintf(message, "www.ygopro.it");
         //sprintf(message, "Score: %d(%+d)",score,dp->cachedGameScore-score);
