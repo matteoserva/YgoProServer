@@ -45,12 +45,24 @@ void MySqlWrapper::connect()
     {
         /* Create a connection */
         sql::mysql::MySQL_Driver *driver = sql::mysql::get_mysql_driver_instance();
-        con = driver->connect(host, config->mysql_username, config->mysql_password);
+
+
+
+        sql::ConnectOptionsMap connection_properties;
+
+        connection_properties["hostName"]=host;
+        connection_properties["userName"]=config->mysql_username;
+        connection_properties["password"]=config->mysql_password;
+        connection_properties["MYSQL_OPT_READ_TIMEOUT"]=5;
+        con = driver->connect(connection_properties);
+        //con = driver->connect(host, config->mysql_username, config->mysql_password);
+        /*
         bool myTrue = true;
         unsigned int timeout = 5;
         con->setClientOption("OPT_RECONNECT", &myTrue);
 
         con->setClientOption("MYSQL_OPT_READ_TIMEOUT", &timeout);
+        */
         /* Connect to the MySQL database */
         con->setSchema(config->mysql_database);
 
