@@ -121,6 +121,8 @@ bool UsersDatabase::setUserStats(UserStats &us)
             std::cout << "# ERR: " << e.what();
             std::cout << " (MySQL error code: " << e.getErrorCode();
             std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+            if(e.getErrorCode()  == 1205)
+                break;
         }
     }
     while (--retries > 0);

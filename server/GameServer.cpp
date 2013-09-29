@@ -238,7 +238,7 @@ int GameServer::CheckAliveThread(void* parama)
         return 0;
 
     static time_t last_check = time(NULL);
-    int sleepSeconds = 20;
+    int sleepSeconds = 30;
 
     if(time(NULL)- last_check < sleepSeconds)
         return 0;
