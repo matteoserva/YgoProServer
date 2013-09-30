@@ -2,7 +2,7 @@
 #include "Config.h"
 #include <cppconn/driver.h>
 #include "mysql_driver.h"
-#include <cppconn/exception.h>
+
 
 namespace ygo
 {
@@ -27,6 +27,22 @@ bool MySqlWrapper::connectionEstablished()
 {
     return con && (!con->isClosed());
 }
+
+void MySqlWrapper::notifyException(sql::SQLException &e)
+{
+            if(Config::getInstance()->debugSql)
+        {
+            std::cout<<"errore nella connessione\n";
+            std::cout << "# ERR: SQLException in " << __FILE__;
+            std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
+            std::cout << "# ERR: " << e.what();
+            std::cout << " (MySQL error code: " << e.getErrorCode();
+            std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+        }
+
+
+}
+
 
 void MySqlWrapper::connect()
 {
@@ -69,15 +85,8 @@ void MySqlWrapper::connect()
     }
     catch (sql::SQLException &e)
     {
-        if(Config::getInstance()->debugSql)
-        {
-            std::cout<<"errore nella connessione\n";
-            std::cout << "# ERR: SQLException in " << __FILE__;
-            std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
-            std::cout << "# ERR: " << e.what();
-            std::cout << " (MySQL error code: " << e.getErrorCode();
-            std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-        }
+        MySqlWrapper::getInstance()->notifyException(e);
+
     }
 
 }

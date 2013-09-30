@@ -3,6 +3,7 @@
 
 #include <mysql_connection.h>
 #include <cppconn/statement.h>
+#include <cppconn/exception.h>
 namespace ygo
 {
 class MySqlWrapper
@@ -13,7 +14,7 @@ class MySqlWrapper
     void connect();
     void disconnect();
     sql::Connection * getConnection();
-
+    void notifyException(sql::SQLException &e);
 
     private:
 
