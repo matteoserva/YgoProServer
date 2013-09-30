@@ -9,7 +9,7 @@ namespace ygo
 
 
 
-MySqlWrapper::MySqlWrapper():con(nullptr),connectRequested(false)
+MySqlWrapper::MySqlWrapper():con(nullptr),connectRequested(false),backoff(0)
 {
 
 }
@@ -94,6 +94,14 @@ void MySqlWrapper::connect()
 
 sql::Connection * MySqlWrapper::getConnection()
 {
+    if(backoff)
+    {
+        if(time(NULL) - backoff > 60)
+            backoff = 0;
+        else
+            throw sql::SQLException();
+    }
+
     if(Config::getInstance()->disableMysql)
         throw sql::SQLException();
     if(!connectRequested)
