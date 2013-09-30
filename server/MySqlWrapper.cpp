@@ -30,7 +30,7 @@ bool MySqlWrapper::connectionEstablished()
 
 void MySqlWrapper::notifyException(sql::SQLException &e)
 {
-            if(Config::getInstance()->debugSql)
+        if(Config::getInstance()->debugSql)
         {
             std::cout<<"errore nella connessione\n";
             std::cout << "# ERR: SQLException in " << __FILE__;
@@ -39,7 +39,8 @@ void MySqlWrapper::notifyException(sql::SQLException &e)
             std::cout << " (MySQL error code: " << e.getErrorCode();
             std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
         }
-
+        if(1205 == e.getErrorCode() )
+            backoff = time(NULL);
 
 }
 

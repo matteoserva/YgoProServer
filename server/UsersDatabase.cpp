@@ -116,13 +116,7 @@ bool UsersDatabase::setUserStats(UserStats &us)
         }
         catch (sql::SQLException &e)
         {
-            std::cout << "# ERR: SQLException in " << __FILE__;
-            std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
-            std::cout << "# ERR: " << e.what();
-            std::cout << " (MySQL error code: " << e.getErrorCode();
-            std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
-            if(e.getErrorCode()  == 1205)
-                break;
+            MySqlWrapper::getInstance()->notifyException(e);
         }
     }
     while (--retries > 0);
@@ -155,11 +149,7 @@ UserStats UsersDatabase::getUserStats(std::string username)
     }
     catch (sql::SQLException &e)
     {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+        MySqlWrapper::getInstance()->notifyException(e);
         throw std::exception();
     }
 
@@ -188,11 +178,7 @@ bool UsersDatabase::createUser(std::string username, std::string password, int s
     }
     catch (sql::SQLException &e)
     {
-        std::cout << "# ERR: SQLException in " << __FILE__;
-        std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
-        std::cout << "# ERR: " << e.what();
-        std::cout << " (MySQL error code: " << e.getErrorCode();
-        std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+        MySqlWrapper::getInstance()->notifyException(e);
         return false;
     }
     return true;
@@ -254,6 +240,7 @@ bool UsersDatabase::login(std::string username,std::string password,char*ip)
     }
     catch (sql::SQLException &e)
     {
+        MySqlWrapper::getInstance()->notifyException(e);
         std::cout<<"errore in userexists\n";
         return false;
     }

@@ -17,7 +17,7 @@ class MySqlWrapper
     void notifyException(sql::SQLException &e);
 
     private:
-
+    time_t backoff;
     sql::Connection *con;
     bool connectRequested;
 
