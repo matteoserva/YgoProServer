@@ -160,14 +160,37 @@ void Config::LoadConfig()
         serverport = 9999;
     }
 }
+
+void disMysql(int)
+{
+    Config::getInstance()->disableMysql=true;
+
+
+}
+
+void enMysql(int)
+{
+    Config::getInstance()->disableMysql=false;
+
+}
+
 Config::Config():configFile("server.conf"),serverport(0)
 {
     debugSql = true;
+    disableMysql = false;
     max_users_per_process = 150;
     max_processes = 3;
     waitingroom_min_waiting = 4;
     waitingroom_max_waiting = 8;
     spam_string = "www.ygopro.it <-- this is the official website of this server";
+    signal(SIGUSR1,disMysql);
+    signal(SIGUSR2,enMysql);
 }
+
+
+
+
+
+
 
 }

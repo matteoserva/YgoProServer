@@ -84,6 +84,8 @@ void MySqlWrapper::connect()
 
 sql::Connection * MySqlWrapper::getConnection()
 {
+    if(Config::getInstance()->disableMysql)
+        throw sql::SQLException();
     if(!connectRequested)
         throw sql::SQLException();
     if(!connectionEstablished())

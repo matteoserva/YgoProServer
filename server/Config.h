@@ -23,6 +23,8 @@ namespace ygo
         int waitingroom_min_waiting;
         int waitingroom_max_waiting;
         bool debugSql;
+        bool disableMysql;
+
         private:
         Config();
         std::string configFile;
