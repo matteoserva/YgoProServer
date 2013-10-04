@@ -551,7 +551,7 @@ void CMNetServer::Victory(char winner)
 
     if(winner < 0 || winner == 2)
     {
-        if(mode == MODE_SINGLE || mode == MODE_HANDICAP)
+        if(mode == MODE_SINGLE || mode == MODE_MATCH)
         {
             char win[20], lose[20];
 
