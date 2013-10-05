@@ -60,7 +60,7 @@ std::list<GameServerChat> ExternalChat::getPendingMessages()
         sql::Connection* con = MySqlWrapper::getInstance()->getConnection();
 
         //std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from (SELECT username,score, @rownum := @rownum + 1 AS rank FROM stats, (SELECT @rownum := 0) r ORDER BY score DESC) z where username = ?"));
-        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select userName,text,id from ajax_chat_messages where text not like '/%' and id > ? and userID != 3 order by id desc limit 5"));
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select userName,LEFT(text,256),id from ajax_chat_messages where text not like '/%' and id > ? and userID != 3 order by id desc limit 5"));
 
         stmt->setInt(1, last_id);
 
