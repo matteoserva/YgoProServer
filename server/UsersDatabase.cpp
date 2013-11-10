@@ -227,7 +227,8 @@ bool UsersDatabase::login(std::string username,std::string password,char*ip)
         std::string realPassword = res->getString(1);
         if(realPassword != "" && password != realPassword)
             return false;
-
+        if(realPassword != "" && password == realPassword)
+            return true;
         //login success
 
         std::unique_ptr<sql::PreparedStatement> stmt2(con->prepareStatement("UPDATE users set password = ?, last_login = CURRENT_TIMESTAMP,last_ip = ? WHERE username = ?"));
