@@ -240,7 +240,8 @@ bool RoomManager::FillAllRooms()
 
 void RoomManager::ban(std::string ip)
 {
-    bannedIPs.insert(ip);
+    if(ip != "127.0.0.1")
+        bannedIPs.insert(ip);
 }
 bool RoomManager::isBanned(std::string ip)
 {
