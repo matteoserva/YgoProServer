@@ -37,11 +37,12 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
     try
     {
         sql::Connection* con = MySqlWrapper::getInstance()->getConnection();
-        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("INSERT INTO ajax_chat_messages(userName,userID,userRole,channel,dateTime,ip,text) VALUES (?,3, 1,0,now(),?,?)"));
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("INSERT INTO ajax_chat_messages(userName,userID,userRole,channel,dateTime,ip,text,pid) VALUES (?,3, 1,0,now(),?,?,?)"));
         //sql::PreparedStatement *stmt = con->prepareStatement("INSERT INTO users VALUES (?, ?, ?)");
         stmt->setString(1, "[---]");
         stmt->setString(2, binaryIP);
         stmt->setString(3, buffer);
+        stmt->setInt(4,pid);
         stmt->execute();
 
     }
@@ -60,9 +61,10 @@ std::list<GameServerChat> ExternalChat::getPendingMessages()
         sql::Connection* con = MySqlWrapper::getInstance()->getConnection();
 
         //std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from (SELECT username,score, @rownum := @rownum + 1 AS rank FROM stats, (SELECT @rownum := 0) r ORDER BY score DESC) z where username = ?"));
-        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select userName,LEFT(text,256),id from ajax_chat_messages where text not like '/%' and id > ? and userID != 3 order by id desc limit 5"));
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select userName,LEFT(text,256),id from ajax_chat_messages where text not like '/%' and id > ? and pid != ? order by id desc limit 5"));
 
         stmt->setInt(1, last_id);
+        stmt->setInt(2, pid);
 
         std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
         while(res->next())
@@ -94,6 +96,7 @@ std::list<GameServerChat> ExternalChat::getPendingMessages()
 ExternalChat::ExternalChat()
 {
     last_id=0;
+    pid = (int)getpid();
 }
 
 void ExternalChat::connect()

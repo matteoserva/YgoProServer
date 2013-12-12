@@ -20,7 +20,7 @@ class ExternalChat
 
     private:
     int last_id;
-
+    int pid;
     ExternalChat();
     void gen_random(char *s, const int len);
 
