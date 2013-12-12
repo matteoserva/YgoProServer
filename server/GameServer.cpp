@@ -421,6 +421,11 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             //DisconnectPlayer(dp);
             return;
         }
+        else if(!strncmp(data,"ipchange",8))
+        {
+            inet_ntop(AF_INET, &data[8], dp->ip, INET_ADDRSTRLEN);
+        }
+
         else
         {
             log(WARN,"player info is not the first packet\n");
