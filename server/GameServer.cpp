@@ -423,7 +423,9 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         }
         else if(!strncmp(data,"ipchange",8))
         {
+
             inet_ntop(AF_INET, &data[8], dp->ip, INET_ADDRSTRLEN);
+            return;
         }
 
         else
