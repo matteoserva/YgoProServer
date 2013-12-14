@@ -5,7 +5,7 @@
 #include <signal.h>
 #include <event2/thread.h>
 
-const unsigned short PRO_VERSION = 0x1300;
+const unsigned short PRO_VERSION = 0x1321;
 extern const unsigned int BUILD_NUMBER = VERSION;
 int enable_log = 2;
 
