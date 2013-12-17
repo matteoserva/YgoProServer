@@ -42,7 +42,6 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
         BufferIO::EncodeUTF8(msg->messaggio + ago + 3,buffer);
         std::wstring temp = messaggio.substr(1,ago-1);
         BufferIO::CopyWStr(temp.c_str(),nome,25);
-        printf("chat splittata\n");
 
 
     }
@@ -50,7 +49,6 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
     {
         strcpy(nome,"[---]");
         BufferIO::EncodeUTF8(msg->messaggio,buffer);
-        printf("chat non splittata\n");
         std::cout << buffer <<std::endl;
     }
 
