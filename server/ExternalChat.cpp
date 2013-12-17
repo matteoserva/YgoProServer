@@ -26,20 +26,44 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
 {
 
     char buffer[1024];
+    char nome[25];
     const char* localIP = "127.0.0.1";
     std::string binaryIP = "";
     binaryIP.resize(4);
     if(inet_pton(AF_INET,localIP,&binaryIP[0]) != 1)
         return ;
 
-    BufferIO::EncodeUTF8(msg->messaggio,buffer);
+    std::wstring messaggio = msg->messaggio;
+
+
+    auto ago = messaggio.find(L"]: ",1);
+    if(ago != std::wstring::npos and ago < 28)
+    {
+        BufferIO::EncodeUTF8(msg->messaggio + ago + 3,buffer);
+        std::wstring temp = messaggio.substr(1,ago-1);
+        BufferIO::CopyWStr(temp.c_str(),nome,25);
+        printf("chat splittata\n");
+
+
+    }
+    else
+    {
+        strcpy(nome,"[---]");
+        BufferIO::EncodeUTF8(msg->messaggio,buffer);
+        printf("chat non splittata\n");
+        std::cout << buffer <<std::endl;
+    }
+
 
     try
     {
         sql::Connection* con = MySqlWrapper::getInstance()->getConnection();
         std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("INSERT INTO ajax_chat_messages(userName,userID,userRole,channel,dateTime,ip,text,pid) VALUES (?,3, 1,0,now(),?,?,?)"));
         //sql::PreparedStatement *stmt = con->prepareStatement("INSERT INTO users VALUES (?, ?, ?)");
-        stmt->setString(1, "[---]");
+
+
+
+        stmt->setString(1, std::string(nome));
         stmt->setString(2, binaryIP);
         stmt->setString(3, buffer);
         stmt->setInt(4,pid);
