@@ -77,6 +77,7 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
     if(proto == STOC_GAME_MSG)
     {
         unsigned char* wbuf = (unsigned char*)buffer;
+        ultimo_game_message = wbuf[0];
         if(wbuf[0] == MSG_WIN && state == PLAYING)
         {
             log(VERBOSE,"---------vittoria per il giocatore\n");
@@ -346,6 +347,36 @@ void CMNetServer::DuelTimer(evutil_socket_t fd, short events, void* arg)
     else if(that->mode == MODE_HANDICAP)
         HandicapDuel::TagTimer(fd,events,that->duel_mode);
 
+
+/** inizio il codice per auto terminare al momento del bisogno **/
+    auto last_response = that->duel_mode->last_response;
+    int limite =  that->duel_mode->time_limit[last_response];
+    int trascorso = that->duel_mode->time_elapsed;
+    int rimanente = limite - trascorso ;
+    if(rimanente != 1)
+        return;
+    if(that->ultimo_game_message != MSG_SELECT_BATTLECMD && that->ultimo_game_message != MSG_SELECT_IDLECMD)
+            return;
+
+    DuelPlayer *dpattivo = nullptr;
+    for(auto it = that->players.cbegin(); it!=that->players.cend(); ++it)
+    {
+        if(it->first->state == CTOS_RESPONSE)
+            dpattivo = it->first;
+     }
+    if(dpattivo == nullptr)
+        return;
+    char buffer[5];
+    buffer[0] = CTOS_RESPONSE;
+    int *risposta =(int*) &buffer[1];
+    if(that->ultimo_game_message == MSG_SELECT_BATTLECMD) {
+		*risposta = 3;
+	} else if(that->ultimo_game_message == MSG_SELECT_IDLECMD) {
+		*risposta = 7;
+	}
+	else
+        return;
+    that->HandleCTOSPacket(dpattivo, buffer, 5);
 }
 
 static int getNumDayOfWeek()

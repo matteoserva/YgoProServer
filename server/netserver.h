@@ -27,6 +27,7 @@ class CMNetServer:public CMNetServerInterface
     State state;
     int getLfList();
 private:
+    char ultimo_game_message;
     bool reCheckLfList();
     int lflist;
     static void DuelTimer(evutil_socket_t fd, short events, void* arg);

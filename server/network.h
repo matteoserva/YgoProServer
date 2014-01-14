@@ -168,6 +168,7 @@ public:
 
 	unsigned short time_limit[2];
 	unsigned short time_elapsed;
+	unsigned char last_response;
 };
 
 }

@@ -49,7 +49,7 @@ protected:
 	bool ready[4];
 	Deck pdeck[4];
 	unsigned char hand_result[2];
-	unsigned char last_response;
+
 	Replay last_replay;
 	unsigned char turn_count;
 
