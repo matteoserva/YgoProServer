@@ -486,6 +486,18 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
             last_winner = (dp->type > 1)?0:1;
     }
 
+    if(state != ZOMBIE && dp->game == duel_mode && mode == MODE_TAG)
+    {
+         log(BUG,"player disconnected in tag, inform about duel result\n");
+         char buf[3];
+         buf[0] = MSG_WIN;
+         buf[1] = last_winner;
+         buf[2] = 0;
+         duel_mode->Analyze(buf,3);
+
+
+    }
+
     if(state != ZOMBIE && dp->game == duel_mode)
         duel_mode->LeaveGame(dp);
     else
