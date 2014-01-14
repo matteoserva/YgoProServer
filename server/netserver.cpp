@@ -353,7 +353,7 @@ void CMNetServer::DuelTimer(evutil_socket_t fd, short events, void* arg)
     int limite =  that->duel_mode->time_limit[last_response];
     int trascorso = that->duel_mode->time_elapsed;
     int rimanente = limite - trascorso ;
-    if(rimanente != 1)
+    if(rimanente != 4)
         return;
     if(that->ultimo_game_message != MSG_SELECT_BATTLECMD && that->ultimo_game_message != MSG_SELECT_IDLECMD)
             return;
