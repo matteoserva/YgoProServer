@@ -220,6 +220,28 @@ void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,bool cross
 
     if(!crossServer)
         gameServer->callChatCallback(message,isAdmin);
+
+}
+
+void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,CMNetServerInterface* origin)
+{
+    if(message.length() > 250)
+        return;
+    for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
+    {
+        if((*it) != origin)
+            (*it)->BroadcastSystemChat(message,isAdmin);
+    }
+    for(auto it =playingServer.begin(); it!=playingServer.end(); ++it)
+    {
+        if((*it) != origin)
+            (*it)->BroadcastSystemChat(message,isAdmin);
+    }
+    if(waitingRoom != origin)
+        waitingRoom->BroadcastSystemChat(message,isAdmin);
+
+    if(origin != nullptr)
+        gameServer->callChatCallback(message,isAdmin);
 }
 
 bool RoomManager::FillAllRooms()
@@ -321,5 +343,77 @@ void RoomManager::removeDeadRooms()
     Statistics::getInstance()->setNumRooms(getNumRooms());
 }
 
+void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
+{
+
+    dp->netServer->HandleCTOSPacket(dp,data,len);
+    char* pdata = data;
+    unsigned char pktType = BufferIO::ReadUInt8(pdata);
+
+    switch(pktType)
+    {
+    case CTOS_CHAT:
+    {
+        wchar_t messaggio[256];
+
+        int msglen = BufferIO::CopyWStr((unsigned short*) pdata,messaggio, 256);
+
+
+        unsigned short* msgbuf = (unsigned short*)pdata;
+        bool noShout=false;
+        if(msglen <= 1 || msgbuf[0]=='-' || msgbuf[0]=='!')
+        {
+            msgbuf++;
+            noShout=true;
+        }
+
+        if(noShout)
+            break;
+
+
+        /*
+            NON HA SENSO!
+        if(dp->netServer->last_chat_dp == dp && time(NULL) - dp->chatTimestamp.back() <5)
+            break;
+        dp->netServer->last_chat_dp = dp;
+        */
+
+        if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
+        {} else break;
+
+        dp->chatTimestamp.push_back(time(NULL));
+        if(dp->chatTimestamp.size() > 5)
+        {
+            if(dp->chatTimestamp.back() - dp->chatTimestamp.front() <5)
+            {
+                ban(std::string(dp->ip));
+                std::cout<<"banned: "<<std::string(dp->ip)<<std::endl;
+                dp->netServer->LeaveGame(dp);
+                break;
+            }
+
+            dp->chatTimestamp.pop_front();
+        }
+
+
+        wchar_t name[25];
+
+        BufferIO::CopyWStr(dp->name, name, 20);
+        std::wstring tmp(dp->countryCode.begin(),dp->countryCode.end());
+        tmp = L"<"+tmp+L">";
+        wcscat(name,tmp.c_str());
+
+        std::wstring sender(name);
+        std::wstring message(messaggio);
+        if(sender!=L"")
+            message = L"["+sender+L"]: "+message;
+        BroadcastMessage(message,false,dp->netServer);
+        printf("messaggio chat broadcast\n");
+
+        break;
+    }
+    }
+
+}
 
 }

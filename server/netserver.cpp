@@ -963,15 +963,7 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         wchar_t messaggio[256];
 
         int msglen = BufferIO::CopyWStr((unsigned short*) pdata,messaggio, 256);
-
-
         unsigned short* msgbuf = (unsigned short*)pdata;
-        bool noShout=false;
-        if(msglen > 1 and msgbuf[0]=='-')
-        {
-            msgbuf++;
-            noShout=true;
-        }
         if(!dp->game)
             return;
 
@@ -979,8 +971,6 @@ void CMNetServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             break;
 
         duel_mode->Chat(dp, msgbuf, len - 1);
-        if(!noShout)
-            shout(msgbuf,dp);
 
         break;
     }

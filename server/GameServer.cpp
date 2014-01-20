@@ -435,7 +435,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         }
     }
 
-    dp->netServer->HandleCTOSPacket(dp,data,len);
+    roomManager.HandleCTOSPacket(dp,data,len);
     return;
 }
 
