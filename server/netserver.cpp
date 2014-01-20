@@ -517,16 +517,21 @@ void CMNetServer::LeaveGame(DuelPlayer* dp)
             last_winner = (dp->type > 1)?0:1;
     }
 
-    if(state == PLAYING && dp->game == duel_mode && mode == MODE_TAG)
+    if(state == PLAYING && dp->game == duel_mode && mode == MODE_TAG && oldtype != NETPLAYER_TYPE_OBSERVER)
     {
          log(BUG,"player disconnected in tag, inform about duel result\n");
+         /*
          char buf[3];
          buf[0] = MSG_WIN;
-         buf[1] = last_winner;
-         buf[2] = 0;
+         buf[1] = oldtype;
+         buf[2] = 0x04;
          duel_mode->Analyze(buf,3);
-
-
+         */
+         /*wchar_t nome[40];
+         BufferIO::CopyWStr(dp->name,nome,40);
+         std::wstring messaggio = L"Lost connection with: " + std::wstring(nome);
+         BroadcastSystemChat(messaggio,true);
+        */
     }
 
     if(state != ZOMBIE && dp->game == duel_mode)
