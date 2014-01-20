@@ -80,7 +80,7 @@ void CMNetServerInterface::shout_internal(std::wstring message,bool isAdmin,std:
     //std::replace(message.begin(),message.end(),'e','3');
     if(sender!=L"")
         message = L"["+sender+L"]: "+message;
-    roomManager->BroadcastMessage(message,isAdmin);
+    roomManager->BroadcastMessage(message,isAdmin,false);
     isShouting=false;
 }
 
@@ -244,7 +244,7 @@ bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
             return false;
         wchar_t*msg2 = &messaggio[7];
         std::wstring tmp(msg2);
-        roomManager->BroadcastMessage(tmp,true);
+        roomManager->BroadcastMessage(tmp,true,false);
         return true;
     }
     else if(!wcsncmp(messaggio,L"!pm ",3) )
