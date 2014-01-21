@@ -408,7 +408,6 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(sender!=L"")
             message = L"["+sender+L"]: "+message;
         BroadcastMessage(message,false,dp->netServer);
-        printf("messaggio chat broadcast\n");
 
         break;
     }

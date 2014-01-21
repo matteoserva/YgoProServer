@@ -24,6 +24,7 @@ namespace ygo
         int waitingroom_max_waiting;
         bool debugSql;
         bool disableMysql;
+        bool strictAllowedList;
 
         private:
         Config();

@@ -160,6 +160,7 @@ void Config::LoadConfig()
         cout<<"serverport not set, using default value of 9999"<<endl;
         serverport = 9999;
     }
+    strictAllowedList = false;
 }
 
 void disMysql(int)
