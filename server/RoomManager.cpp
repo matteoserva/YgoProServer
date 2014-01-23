@@ -43,7 +43,7 @@ void RoomManager::keepAlive(evutil_socket_t fd, short events, void* arg)
     that->FillAllRooms();
 }
 
-void RoomManager::tryToInsertPlayerInServer(DuelPlayer*dp,CMNetServer* serv)
+void RoomManager::tryToInsertPlayerInServer(DuelPlayer*dp,DuelRoom* serv)
 {
     if(std::find(elencoServer.begin(), elencoServer.end(), serv) == elencoServer.end())
     {
@@ -51,7 +51,7 @@ void RoomManager::tryToInsertPlayerInServer(DuelPlayer*dp,CMNetServer* serv)
         waitingRoom->ToObserverPressed(dp);
         return;
     }
-    if(serv->state != CMNetServer::State::WAITING)
+    if(serv->state != DuelRoom::State::WAITING)
     {
         printf("serv pieno\n");
         waitingRoom->ToObserverPressed(dp);
@@ -70,16 +70,16 @@ void RoomManager::tryToInsertPlayerInServer(DuelPlayer*dp,CMNetServer* serv)
 
 }
 
-void RoomManager::notifyStateChange(CMNetServer* room,CMNetServer::State oldstate,CMNetServer::State newstate)
+void RoomManager::notifyStateChange(DuelRoom* room,DuelRoom::State oldstate,DuelRoom::State newstate)
 {
-    if(newstate == CMNetServer::PLAYING)
+    if(newstate == DuelRoom::PLAYING)
     {
         elencoServer.remove(room);
         playingServer.insert(room);
     }
-    else if(newstate == CMNetServer::ZOMBIE || newstate == CMNetServer::DEAD)
+    else if(newstate == DuelRoom::ZOMBIE || newstate == DuelRoom::DEAD)
     {
-        if(oldstate == CMNetServer::PLAYING)
+        if(oldstate == DuelRoom::PLAYING)
             playingServer.erase(room);
         else
             elencoServer.remove(room);
@@ -87,14 +87,14 @@ void RoomManager::notifyStateChange(CMNetServer* room,CMNetServer::State oldstat
     }
 }
 
-std::vector<CMNetServer *> RoomManager::getCompatibleRoomsList(int referenceScore)
+std::vector<DuelRoom *> RoomManager::getCompatibleRoomsList(int referenceScore)
 {
-    std::vector<CMNetServer *> lista;
+    std::vector<DuelRoom *> lista;
     int maxqdifference = maxScoreDifference(referenceScore);
 
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
-        if((*it)->state == CMNetServer::State::WAITING && abs(referenceScore - (*it)->getFirstPlayer()->cachedRankScore) < maxqdifference)
+        if((*it)->state == DuelRoom::State::WAITING && abs(referenceScore - (*it)->getFirstPlayer()->cachedRankScore) < maxqdifference)
         {
             lista.push_back(*it);
             log(VERBOSE,"roommanager, trovato server\n");
@@ -119,12 +119,12 @@ int RoomManager::getNumPlayers()
     return risultato;
 }
 
-CMNetServer* RoomManager::getFirstAvailableServer(DuelPlayer* referencePlayer)
+DuelRoom* RoomManager::getFirstAvailableServer(DuelPlayer* referencePlayer)
 {
     return getFirstAvailableServer(referencePlayer, MODE_SINGLE,true);
 }
 
-CMNetServer* RoomManager::getFirstAvailableServer(DuelPlayer* referencePlayer, unsigned char mode,bool ignoreMode)
+DuelRoom* RoomManager::getFirstAvailableServer(DuelPlayer* referencePlayer, unsigned char mode,bool ignoreMode)
 {
     /*int lflist = referencePlayer ->lflist;
     int referenceScore = referencePlayer->cachedRankScore;
@@ -171,7 +171,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp)
 {
 
     //tfirst room
-    CMNetServer* netServer = getFirstAvailableServer(dp);
+    DuelRoom* netServer = getFirstAvailableServer(dp);
     if(netServer == nullptr)
     {
         waitingRoom->InsertPlayer(dp);
@@ -185,13 +185,13 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp)
     return true;
 }
 
-bool RoomManager::FillRoom(CMNetServer* room)
+bool RoomManager::FillRoom(DuelRoom* room)
 {
 
-    if(room->state!= CMNetServer::State::WAITING)
+    if(room->state!= DuelRoom::State::WAITING)
         return true;
 
-    for(DuelPlayer* base = room->getFirstPlayer(); room->state!= CMNetServer::State::FULL;)
+    for(DuelPlayer* base = room->getFirstPlayer(); room->state!= DuelRoom::State::FULL;)
     {
         DuelPlayer* dp = waitingRoom->ExtractBestMatchPlayer(base,room->getLfList(),room->mode);
         if(dp == nullptr)
@@ -252,8 +252,8 @@ bool RoomManager::FillAllRooms()
 {
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
-        CMNetServer *p = *it;
-        if(p->state == CMNetServer::State::WAITING )
+        DuelRoom *p = *it;
+        if(p->state == DuelRoom::State::WAITING )
         {
             bool result = FillRoom(p);
             //if(!result)
@@ -292,7 +292,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 {
 
     //true is success
-    CMNetServer* netServer = getFirstAvailableServer(dp,mode,false);
+    DuelRoom* netServer = getFirstAvailableServer(dp,mode,false);
     if(netServer == nullptr)
     {
         waitingRoom->InsertPlayer(dp);
@@ -307,13 +307,13 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 }
 
 
-CMNetServer* RoomManager::createServer(unsigned char mode)
+DuelRoom* RoomManager::createServer(unsigned char mode)
 {
     if(getNumRooms() >= 500)
     {
         return nullptr;
     }
-    CMNetServer *netServer = new CMNetServer(this,gameServer,mode);
+    DuelRoom *netServer = new DuelRoom(this,gameServer,mode);
 
     elencoServer.push_back(netServer);
 
@@ -329,9 +329,9 @@ void RoomManager::removeDeadRooms()
     //log(INFO,"analizzo la lista server e cerco i morti\n");
     for(auto it =zombieServer.begin(); it!=zombieServer.end();)
     {
-        CMNetServer *p = *it;
+        DuelRoom *p = *it;
 
-        if(p->state == CMNetServer::State::DEAD)
+        if(p->state == DuelRoom::State::DEAD)
         {
             log(VERBOSE,"elimino il server %d\n",i);
             delete (*it);

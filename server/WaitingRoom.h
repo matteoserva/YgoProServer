@@ -10,7 +10,7 @@ struct DuelPlayerStatus
 {
     enum Status {STATS,CHOOSEGAMETYPE,CHOOSESERVER,CUSTOMMODE,CHALLENGERECEIVED,CHOOSEBANLIST,DUELSETTINGS};
     Status status;
-    std::vector<CMNetServer *> listaStanzeCompatibili;
+    std::vector<DuelRoom *> listaStanzeCompatibili;
     std::wstring lastName0;
     DuelPlayer *challenger;
     unsigned char challenge_mode;

@@ -1,6 +1,6 @@
 #include "WaitingRoom.h"
 #include "RoomManager.h"
-#include "netserver.h"
+#include "DuelRoom.h"
 #include <time.h>
 namespace ygo
 {
@@ -155,7 +155,7 @@ void WaitingRoom::EnableCrosses(DuelPlayer* dp)
 
 void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
 {
-    std::vector<CMNetServer *> lista = roomManager->getCompatibleRoomsList(dp->cachedRankScore);
+    std::vector<DuelRoom *> lista = roomManager->getCompatibleRoomsList(dp->cachedRankScore);
     EnableCrosses(dp);
     SendNameToPlayer(dp,0,"-Available rooms-");
     for(int i = 3; i>lista.size(); i--)
@@ -340,7 +340,7 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
         if(pos ==2 && player_status.find(player_status[dp].challenger) != player_status.end() && player_status[player_status[dp].challenger].challenger== dp)
         {
             DuelPlayer* dpnemico = player_status[dp].challenger;
-            CMNetServer* netserver = roomManager->createServer(player_status[dp].challenge_mode);
+            DuelRoom* netserver = roomManager->createServer(player_status[dp].challenge_mode);
             player_status[dp].challenger = nullptr;
             player_status[dpnemico].challenger = nullptr;
 

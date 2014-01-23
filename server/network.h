@@ -126,13 +126,13 @@ struct DuelPlayer {
 };
 
 
-class CMNetServer;
+class DuelRoom;
 class DuelMode {
 public:
 
-    CMNetServer* netServer;
+    DuelRoom* netServer;
 
-    void setNetServer(CMNetServer* net)
+    void setNetServer(DuelRoom* net)
     {
         netServer=net;
     }

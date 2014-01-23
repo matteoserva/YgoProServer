@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include "RoomManager.h"
 
-#include "netserver.h"
+#include "DuelRoom.h"
 namespace ygo
 {
 

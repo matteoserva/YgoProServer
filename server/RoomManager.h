@@ -4,7 +4,7 @@
 #include <list>
 #include <mutex>
 #include "WaitingRoom.h"
-#include "netserver.h"
+#include "DuelRoom.h"
 namespace ygo {
 
     class GameServer;
@@ -28,20 +28,20 @@ namespace ygo {
 
         WaitingRoom* waitingRoom;
         void removeDeadRooms();
-        bool FillRoom(CMNetServer* room);
+        bool FillRoom(DuelRoom* room);
         bool FillAllRooms();
 
         static void keepAlive(evutil_socket_t fd, short events, void* arg);
         public:
         event_base* net_evbase;
-        std::list<CMNetServer *> elencoServer;
-        std::set<CMNetServer *> playingServer;
-        std::set<CMNetServer *> zombieServer;
+        std::list<DuelRoom *> elencoServer;
+        std::set<DuelRoom *> playingServer;
+        std::set<DuelRoom *> zombieServer;
         GameServer* gameServer;
         void setGameServer(ygo::GameServer*);
 
         public:
-         CMNetServer* createServer(unsigned char mode);
+         DuelRoom* createServer(unsigned char mode);
 
         RoomManager();
         ~RoomManager();
@@ -49,18 +49,18 @@ namespace ygo {
         void BroadcastMessage(std::string, bool, bool crossServer = false);
         void BroadcastMessage(std::wstring message, bool isAdmin,CMNetServerInterface* origin = nullptr);
 
-        void notifyStateChange(CMNetServer* room,CMNetServer::State oldstate,CMNetServer::State newstate);
+        void notifyStateChange(DuelRoom* room,DuelRoom::State oldstate,DuelRoom::State newstate);
         bool InsertPlayerInWaitingRoom(DuelPlayer*dp);
         bool InsertPlayer(DuelPlayer*dp);
         bool InsertPlayer(DuelPlayer*dp,unsigned char mode);
-        CMNetServer* getFirstAvailableServer(DuelPlayer* referencePlayer);
-        CMNetServer* getFirstAvailableServer(DuelPlayer* referencePlayer,unsigned char mode,bool);
+        DuelRoom* getFirstAvailableServer(DuelPlayer* referencePlayer);
+        DuelRoom* getFirstAvailableServer(DuelPlayer* referencePlayer,unsigned char mode,bool);
         int getNumPlayers();
         int getNumRooms();
         void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
 
-        std::vector<CMNetServer *> getCompatibleRoomsList(int referenceScore);
-        void tryToInsertPlayerInServer(DuelPlayer*dp,CMNetServer* serv);
+        std::vector<DuelRoom *> getCompatibleRoomsList(int referenceScore);
+        void tryToInsertPlayerInServer(DuelPlayer*dp,DuelRoom* serv);
         static int maxScoreDifference(int referenceScore){return std::max(400,(referenceScore>3000)?(referenceScore/3):(referenceScore/4));}
     };
 

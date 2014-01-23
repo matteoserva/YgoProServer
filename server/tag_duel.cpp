@@ -1,5 +1,5 @@
 #include "tag_duel.h"
-#include "netserver.h"
+#include "DuelRoom.h"
 #include "game.h"
 #include "../ocgcore/ocgapi.h"
 #include "../ocgcore/card.h"
