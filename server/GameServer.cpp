@@ -334,7 +334,6 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
     {
         if(dp->loginStatus == Users::LoginResult::NOPASSWORD || dp->loginStatus == Users::LoginResult::AUTHENTICATED)
         {
-            std::lock_guard<std::mutex> lock(loggedUsers_mutex);
 
             wchar_t nome[25];
             BufferIO::CopyWStr(dp->name,nome,20);
@@ -399,9 +398,6 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
                 if(dp->loginStatus == Users::LoginResult::NOPASSWORD || dp->loginStatus == Users::LoginResult::AUTHENTICATED)
                 {
-
-                    std::lock_guard<std::mutex> lock(loggedUsers_mutex);
-
                     loggedUsers[nomes] = dp;
                 }
 

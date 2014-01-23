@@ -26,7 +26,6 @@ private:
     int MAXPLAYERS;
     std::unordered_map<bufferevent*, DuelPlayer> users;
     std::map<std::wstring,DuelPlayer*> loggedUsers;
-    std::mutex loggedUsers_mutex;
 
 
     unsigned short server_port;
