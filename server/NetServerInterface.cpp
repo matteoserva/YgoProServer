@@ -5,23 +5,23 @@
 namespace ygo
 {
 
-DuelPlayer* CMNetServerInterface::last_chat_dp = nullptr;
-char CMNetServerInterface::net_server_read[0x20000];
-char CMNetServerInterface::net_server_write[0x20000];
+DuelPlayer* RoomInterface::last_chat_dp = nullptr;
+char RoomInterface::net_server_read[0x20000];
+char RoomInterface::net_server_write[0x20000];
 
-CMNetServerInterface::CMNetServerInterface(RoomManager* roomManager,GameServer*gameServer):
+RoomInterface::RoomInterface(RoomManager* roomManager,GameServer*gameServer):
     roomManager(roomManager),gameServer(gameServer),last_sent(0),isShouting(false)
 {
 
 }
-DuelPlayer* CMNetServerInterface::getFirstPlayer()
+DuelPlayer* RoomInterface::getFirstPlayer()
 {
     if(players.begin()== players.end())
         return nullptr;
     return players.begin()->first;
 }
 
-void CMNetServerInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
+void RoomInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
 {
     STOC_Chat scc;
     scc.player = dp->type;
@@ -29,7 +29,7 @@ void CMNetServerInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
 }
 
-void CMNetServerInterface::BroadcastSystemChat(std::wstring msg,bool isAdmin)
+void RoomInterface::BroadcastSystemChat(std::wstring msg,bool isAdmin)
 {
     if(isShouting)
         return;
@@ -39,7 +39,7 @@ void CMNetServerInterface::BroadcastSystemChat(std::wstring msg,bool isAdmin)
     }
 
 }
-void CMNetServerInterface::shout(unsigned short* msg,DuelPlayer* dp)
+void RoomInterface::shout(unsigned short* msg,DuelPlayer* dp)
 {
     if(last_chat_dp == dp && time(NULL) - dp->chatTimestamp.back() <5)
         return;
@@ -73,7 +73,7 @@ void CMNetServerInterface::shout(unsigned short* msg,DuelPlayer* dp)
 
 #include <algorithm>
 
-void CMNetServerInterface::shout_internal(std::wstring message,bool isAdmin,std::wstring sender)
+void RoomInterface::shout_internal(std::wstring message,bool isAdmin,std::wstring sender)
 {
     isShouting=true;
     //std::replace(message.begin(),message.end(),'e','3');
@@ -83,7 +83,7 @@ void CMNetServerInterface::shout_internal(std::wstring message,bool isAdmin,std:
     isShouting=false;
 }
 
-void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, std::wstring msg,bool isAdmin)
+void RoomInterface::SystemChatToPlayer(DuelPlayer*dp, std::wstring msg,bool isAdmin)
 {
     if(msg.length() > 256)
         msg.resize(256);
@@ -102,16 +102,16 @@ void CMNetServerInterface::SystemChatToPlayer(DuelPlayer*dp, std::wstring msg,bo
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
 }
 
-int CMNetServerInterface::getNumPlayers()
+int RoomInterface::getNumPlayers()
 {
     return players.size();
 }
-void CMNetServerInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
+void RoomInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
 {
     SendBufferToPlayer(dp, proto, nullptr, 0);
 }
 
-DuelPlayer* CMNetServerInterface::findPlayerByName(std::wstring user)
+DuelPlayer* RoomInterface::findPlayerByName(std::wstring user)
 {
     std::transform(user.begin(), user.end(), user.begin(), ::tolower);
     for(auto it = players.cbegin();it != players.cend();++it)
@@ -123,13 +123,13 @@ DuelPlayer* CMNetServerInterface::findPlayerByName(std::wstring user)
 
 }
 
-void CMNetServerInterface::playerReadinessChange(DuelPlayer *dp, bool isReady)
+void RoomInterface::playerReadinessChange(DuelPlayer *dp, bool isReady)
 {
     players[dp].isReady = isReady;
     log(VERBOSE,"readiness change %d\n",isReady);
 }
 
-void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
+void RoomInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
     if( players.end() == players.find(dp))
     {
@@ -145,7 +145,7 @@ void CMNetServerInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char prot
     ReSendToPlayer(dp);
 }
 
-int CMNetServerInterface::detectDeckCompatibleLflist(void* pdata)
+int RoomInterface::detectDeckCompatibleLflist(void* pdata)
 {
     //ocg = 1, tcg =2, both = 3, none = 0
 
@@ -194,7 +194,7 @@ int CMNetServerInterface::detectDeckCompatibleLflist(void* pdata)
     return compatible;
 }
 
-void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
+void RoomInterface::ReSendToPlayer(DuelPlayer* dp)
 {
     if(players.find(dp) == players.end())
     {
@@ -208,7 +208,7 @@ void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
 
 }
 
-bool CMNetServerInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
+bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
 {
     wchar_t* messaggio=msg;
     wchar_t mittente[20];

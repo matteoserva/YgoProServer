@@ -22,7 +22,7 @@ struct DuelPlayerStatus
     DuelPlayerStatus():status(Status::STATS),challenger(nullptr),banlistCompatibili(3),spamScelto(0),modeScelto(MODE_SINGLE) {};
 };
 
-class WaitingRoom:public CMNetServerInterface
+class WaitingRoom:public RoomInterface
 {
 private:
     std::map<DuelPlayer*, DuelPlayerStatus> player_status;

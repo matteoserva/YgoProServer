@@ -227,7 +227,7 @@ void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,bool cross
 
 }
 
-void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,CMNetServerInterface* origin)
+void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,RoomInterface* origin)
 {
     if(message.length() > 250)
         return;
@@ -278,7 +278,7 @@ bool RoomManager::InsertPlayerInWaitingRoom(DuelPlayer*dp)
 {
     //true is success
 
-    CMNetServerInterface* netServer = waitingRoom;
+    RoomInterface* netServer = waitingRoom;
     if(netServer == nullptr || isBanned(std::string(dp->ip)))
     {
         gameServer->DisconnectPlayer(dp);

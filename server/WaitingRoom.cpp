@@ -14,7 +14,7 @@ int WaitingRoom::maxSecondsWaiting;
 const std::string WaitingRoom::banner = "[Checkmate Server!]";
 
 WaitingRoom::WaitingRoom(RoomManager*roomManager,GameServer*gameServer):
-    CMNetServerInterface(roomManager,gameServer),cicle_users(0)
+    RoomInterface(roomManager,gameServer),cicle_users(0)
 {
     WaitingRoom::minSecondsWaiting=Config::getInstance()->waitingroom_min_waiting;
     WaitingRoom::maxSecondsWaiting=Config::getInstance()->waitingroom_max_waiting;

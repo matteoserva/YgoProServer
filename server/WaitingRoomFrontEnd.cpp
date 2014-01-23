@@ -479,7 +479,7 @@ void WaitingRoom::ShowChallengeReceived(DuelPlayer* dp,wchar_t * opponent)
 
 bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
 {
-    if(CMNetServerInterface::handleChatCommand(dp,messaggio))
+    if(RoomInterface::handleChatCommand(dp,messaggio))
         return true;
 
 

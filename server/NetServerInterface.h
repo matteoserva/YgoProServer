@@ -24,7 +24,7 @@ std::list< std::pair<bool,std::wstring> > pendingMessages;
 
 class RoomManager;
 
-class CMNetServerInterface
+class RoomInterface
 {
 private:
     unsigned short last_sent;
@@ -40,8 +40,8 @@ protected:
 
 
 public:
-    CMNetServerInterface(RoomManager* roomManager,GameServer*gameServer);
-    virtual ~CMNetServerInterface() {};
+    RoomInterface(RoomManager* roomManager,GameServer*gameServer);
+    virtual ~RoomInterface() {};
     virtual void ExtractPlayer(DuelPlayer* dp)=0;
     virtual void InsertPlayer(DuelPlayer* dp)=0;
     virtual void LeaveGame(DuelPlayer* dp)=0;

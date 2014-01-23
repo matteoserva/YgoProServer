@@ -99,7 +99,7 @@ struct STOC_HS_WatchChange {
 };
 
 class DuelMode;
-class CMNetServerInterface;
+class RoomInterface;
 struct DuelPlayer {
 	unsigned short name[20];
 	wchar_t namew_low[20];
@@ -107,7 +107,7 @@ struct DuelPlayer {
 	unsigned char type;
 	unsigned char state;
 	bufferevent* bev;
-	CMNetServerInterface* netServer;
+	RoomInterface* netServer;
     char ip[INET_ADDRSTRLEN];
     unsigned int cachedRankScore;
     unsigned int cachedGameScore;
