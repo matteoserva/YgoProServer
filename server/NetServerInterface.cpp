@@ -2,7 +2,6 @@
 #include "debug.h"
 #include "RoomManager.h"
 #include "GameServer.h"
-#include "DuelLogger.h"
 namespace ygo
 {
 
@@ -205,7 +204,6 @@ void CMNetServerInterface::ReSendToPlayer(DuelPlayer* dp)
     if(dp)
     {
         bufferevent_write(dp->bev, net_server_write, last_sent);
-        DuelLogger::getInstance()->logServerPacket(dp,net_server_write,last_sent);
     }
 
 }

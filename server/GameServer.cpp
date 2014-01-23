@@ -8,7 +8,6 @@
 #include "Statistics.h"
 
 #include "Users.h"
-#include "DuelLogger.h"
 
 using ygo::Config;
 namespace ygo
@@ -351,7 +350,6 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
         bufferevent_disable(dp->bev, EV_READ);
         bufferevent_free(dp->bev);
         users.erase(bit);
-        DuelLogger::getInstance()->removePlayer(dp);
 
 
 
@@ -398,7 +396,6 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
                 std::wstring nomes(nome);
                 std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
                 BufferIO::CopyWStr(nomes.c_str(),dp->namew_low,20);
-                DuelLogger::getInstance()->addPlayer(dp);
 
                 if(dp->loginStatus == Users::LoginResult::NOPASSWORD || dp->loginStatus == Users::LoginResult::AUTHENTICATED)
                 {
