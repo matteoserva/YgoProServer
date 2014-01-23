@@ -363,23 +363,8 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
 
         unsigned short* msgbuf = (unsigned short*)pdata;
-        bool noShout=false;
         if(msglen <= 1 || msgbuf[0]=='-' || msgbuf[0]=='!')
-        {
-            msgbuf++;
-            noShout=true;
-        }
-
-        if(noShout)
             break;
-
-
-        /*
-            NON HA SENSO!
-        if(dp->netServer->last_chat_dp == dp && time(NULL) - dp->chatTimestamp.back() <5)
-            break;
-        dp->netServer->last_chat_dp = dp;
-        */
 
         if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
         {} else break;
