@@ -65,7 +65,8 @@ bool CMNetServer::isAvailableToPlayer(DuelPlayer* refdp, unsigned char refmode)
     if(abs(refScore - getFirstPlayer()->cachedRankScore) >= RoomManager::maxScoreDifference(refScore))
         return false;
 
-    if(refmode != MODE_ANY && mode != refmode && (refmode != MODE_TAG || getDpFromType(NETPLAYER_TYPE_PLAYER1) ==nullptr))
+    if(refmode != MODE_ANY && mode != refmode &&
+        !(refmode == MODE_TAG && mode ==MODE_HANDICAP && getDpFromType(NETPLAYER_TYPE_PLAYER1) !=nullptr))
         return false;
 
     if(!(getLfList() == reflflist || getLfList() == 3 || reflflist == 3))
