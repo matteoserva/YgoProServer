@@ -236,5 +236,5 @@ public:
 #define MODE_SINGLE		0x0
 #define MODE_MATCH		0x1
 #define MODE_TAG		0x2
-#define MODE_HANDICAP   0x10
+
 #endif //NETWORK_H

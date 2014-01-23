@@ -56,6 +56,29 @@ void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_Ty
     CMNetServerInterface::SendPacketToPlayer(dp,proto,sctc);
 }
 
+bool CMNetServer::isAvailableToPlayer(DuelPlayer* refdp, unsigned char refmode)
+{
+    if(state != CMNetServer::State::WAITING)
+        return false;
+    int reflflist = refdp->lflist;
+    int refScore = refdp->cachedRankScore;
+    if(abs(refScore - getFirstPlayer()->cachedRankScore) >= RoomManager::maxScoreDifference(refScore))
+        return false;
+
+    if(refmode != MODE_ANY && mode != refmode && (refmode != MODE_TAG || getDpFromType(NETPLAYER_TYPE_PLAYER1) ==nullptr))
+        return false;
+
+    if(!(getLfList() == reflflist || getLfList() == 3 || reflflist == 3))
+        return false;
+
+    if(refdp->loginStatus == Users::LoginResult::AUTHENTICATED &&
+        getFirstPlayer()->loginStatus == Users::LoginResult::AUTHENTICATED &&
+        !wcscmp(refdp->namew_low,getFirstPlayer()->namew_low))
+        return false;
+
+    return true;
+}
+
 void CMNetServer::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_HS_PlayerChange scpc)
 {
 
@@ -103,6 +126,17 @@ void CMNetServer::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* 
 
         ReadyMessagesSent=0;
     }
+}
+
+DuelPlayer * CMNetServer::getDpFromType(unsigned char type)
+{
+    for(auto it = players.cbegin(); it!=players.cend(); ++it)
+    {
+        if(it->first->type == type)
+            return it->first;
+    }
+    return nullptr;
+
 }
 
 void CMNetServer::auto_idle_cb(evutil_socket_t fd, short events, void* arg)

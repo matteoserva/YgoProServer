@@ -126,7 +126,7 @@ CMNetServer* RoomManager::getFirstAvailableServer(DuelPlayer* referencePlayer)
 
 CMNetServer* RoomManager::getFirstAvailableServer(DuelPlayer* referencePlayer, unsigned char mode,bool ignoreMode)
 {
-    int lflist = referencePlayer ->lflist;
+    /*int lflist = referencePlayer ->lflist;
     int referenceScore = referencePlayer->cachedRankScore;
 
 
@@ -159,7 +159,11 @@ CMNetServer* RoomManager::getFirstAvailableServer(DuelPlayer* referencePlayer, u
 
         if(serverOk )
             return *it;
-    }
+    }*/
+
+    for(auto riga:elencoServer)
+        if(riga->isAvailableToPlayer(referencePlayer, ignoreMode?MODE_ANY:mode))
+            return riga;
     return createServer(mode);
 }
 
@@ -349,7 +353,6 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     dp->netServer->HandleCTOSPacket(dp,data,len);
     char* pdata = data;
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
-
     switch(pktType)
     {
     case CTOS_CHAT:

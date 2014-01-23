@@ -9,6 +9,9 @@
 #include "NetServerInterface.h"
 #include "field.h"
 #include <mutex>
+
+#define MODE_HANDICAP   0x10
+#define MODE_ANY 0xFF
 namespace ygo
 {
 class GameServer;
@@ -57,6 +60,7 @@ private:
     void ShowPlayerOdds();
     void ShowPlayerScores();
     void flushPendingMessages();
+    DuelPlayer * getDpFromType(unsigned char);
 public:
     void SystemChatToPlayer(DuelPlayer*dp, const std::wstring,bool isAdmin=false);
     CMNetServer(RoomManager*roomManager,GameServer*,unsigned char mode);
@@ -72,7 +76,7 @@ public:
 
     void InsertPlayer(DuelPlayer* dp);
     void ExtractPlayer(DuelPlayer* dp);
-
+    bool isAvailableToPlayer(DuelPlayer* dp, unsigned char mode);
     using CMNetServerInterface::SendPacketToPlayer;
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_TypeChange);
