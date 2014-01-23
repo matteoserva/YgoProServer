@@ -87,10 +87,10 @@ void RoomManager::notifyStateChange(DuelRoom* room,DuelRoom::State oldstate,Duel
     }
 }
 
-std::vector<DuelRoom *> RoomManager::getCompatibleRoomsList(int referenceScore)
+std::vector<DuelRoom *> RoomManager::getCompatibleRoomsList(DuelPlayer *referencePlayer)
 {
     std::vector<DuelRoom *> lista;
-    int maxqdifference = maxScoreDifference(referenceScore);
+    /*int maxqdifference = maxScoreDifference(referenceScore);
 
     for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
     {
@@ -99,7 +99,12 @@ std::vector<DuelRoom *> RoomManager::getCompatibleRoomsList(int referenceScore)
             lista.push_back(*it);
             log(VERBOSE,"roommanager, trovato server\n");
         }
-    }
+    }*/
+
+    for(auto riga:elencoServer)
+        if(riga->isAvailableToPlayer(referencePlayer, MODE_ANY))
+            lista.push_back(riga);
+
     return lista;
 
 }

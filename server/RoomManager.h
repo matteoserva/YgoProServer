@@ -59,7 +59,7 @@ namespace ygo {
         int getNumRooms();
         void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
 
-        std::vector<DuelRoom *> getCompatibleRoomsList(int referenceScore);
+        std::vector<DuelRoom *> getCompatibleRoomsList(DuelPlayer* dp);
         void tryToInsertPlayerInServer(DuelPlayer*dp,DuelRoom* serv);
         static int maxScoreDifference(int referenceScore){return std::max(400,(referenceScore>3000)?(referenceScore/3):(referenceScore/4));}
     };

@@ -155,7 +155,7 @@ void WaitingRoom::EnableCrosses(DuelPlayer* dp)
 
 void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
 {
-    std::vector<DuelRoom *> lista = roomManager->getCompatibleRoomsList(dp->cachedRankScore);
+    std::vector<DuelRoom *> lista = roomManager->getCompatibleRoomsList(dp);
     EnableCrosses(dp);
     SendNameToPlayer(dp,0,"-Available rooms-");
     for(int i = 3; i>lista.size(); i--)
