@@ -24,7 +24,7 @@ private:
 
 
     int MAXPLAYERS;
-    std::unordered_map<bufferevent*, DuelPlayer *> users;
+    std::unordered_map<bufferevent*, DuelPlayer> users;
     std::map<std::wstring,DuelPlayer*> loggedUsers;
 
 

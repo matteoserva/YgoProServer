@@ -107,17 +107,17 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
 
 
     bufferevent* bev = bufferevent_socket_new(that->net_evbase, fd, BEV_OPT_CLOSE_ON_FREE);
-    DuelPlayer *dp = new DuelPlayer();
-    dp->name[0] = 0;
-    dp->type = 0xff;
-    dp->bev = bev;
-    dp->netServer=0;
-    dp->loginStatus = Users::LoginResult::NOTENTERED;
+    DuelPlayer dp;
+    dp.name[0] = 0;
+    dp.type = 0xff;
+    dp.bev = bev;
+    dp.netServer=0;
+    dp.loginStatus = Users::LoginResult::NOTENTERED;
     sockaddr_in* sa = (sockaddr_in*)address;
 
-    inet_ntop(AF_INET, &(sa->sin_addr), dp->ip, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, &(sa->sin_addr), dp.ip, INET_ADDRSTRLEN);
 
-    dp->countryCode = Users::getInstance()->getCountryCode(std::string(dp->ip));
+    dp.countryCode = Users::getInstance()->getCountryCode(std::string(dp.ip));
 
     /*
         //prendo il reverse hostname
@@ -196,7 +196,7 @@ void GameServer::ServerEchoRead(bufferevent *bev, void *ctx)
             return;
         evbuffer_remove(input, that->net_server_read, packet_len + 2);
         if(packet_len)
-            that->HandleCTOSPacket(that->users[bev], &(that->net_server_read[2]), packet_len);
+            that->HandleCTOSPacket(&(that->users[bev]), &(that->net_server_read[2]), packet_len);
         len -= packet_len + 2;
     }
 }
@@ -205,7 +205,7 @@ void GameServer::ServerEchoEvent(bufferevent* bev, short events, void* ctx)
     GameServer* that = (GameServer*)ctx;
     if (events & (BEV_EVENT_EOF | BEV_EVENT_ERROR))
     {
-        DuelPlayer* dp = that->users[bev];
+        DuelPlayer* dp = &(that->users[bev]);
         if(dp->netServer)
         {
             dp->netServer->LeaveGame(dp);
@@ -348,7 +348,6 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
         bufferevent_flush(dp->bev, EV_WRITE, BEV_FLUSH);
         bufferevent_disable(dp->bev, EV_READ);
         bufferevent_free(dp->bev);
-        delete bit->second;
         users.erase(bit);
 
 
