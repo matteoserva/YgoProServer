@@ -72,10 +72,11 @@ int GameserversManager::getNumPlayersInAliveChildren()
 
 void GameserversManager::ShowStats()
 {
-    static time_t last_update = 0;
+    static time_t last_showstats = 0;
 
-    if(time(NULL) - last_update > 5)
+    if(time(NULL) - last_showstats > 5)
     {
+        last_showstats = time(NULL);
         for(auto it = children.cbegin(); it != children.cend(); ++it)
         {
             ChildInfo gss = it->second;
@@ -83,14 +84,15 @@ void GameserversManager::ShowStats()
             if(!it->second.isAlive)
                 printf("  *dying*");
             printf("\n");
-//Statistics::ServerStats(
+            if(last_showstats-gss.last_update > 30)
+                kill(gss.pid,SIGTERM);
             Statistics::ServerStats serverStats(gss.pid,gss.players,gss.rooms,Config::getInstance()->max_users_per_process,it->second.isAlive?std::string("ALIVE"):std::string("DYING"));
             Statistics::getInstance()->SendStatisticsRow(serverStats);
 
         }
         printf("children: %2d, alive %2d, rooms: %3d, players alive:%3d, players: %3d\n",
                (int)children.size(),getNumAliveChildren(),getNumRooms(),getNumPlayersInAliveChildren(),getNumPlayers());
-        last_update = time(NULL);
+
     }
 }
 
@@ -105,11 +107,7 @@ void GameserversManager::chatCallback(std::wstring message,bool isAdmin,void*ptr
 {
     GameserversManager* that = (GameserversManager*)ptr;
 
-    GameServerChat gsc;
-    gsc.type = CHAT;
-    wcscpy(gsc.messaggio,message.c_str());
-    gsc.isAdmin = isAdmin;
-    write(that->parent_fd,&gsc,sizeof(GameServerChat));
+
     /*for(auto it = that->children.cbegin(); it != that->children.cend(); ++it)
     {
             if(it->first)
@@ -126,11 +124,10 @@ void GameserversManager::chatCallback(std::wstring message,bool isAdmin,void*ptr
 void GameserversManager::child_loop(int receive_fd)
 {
 
-    ygo::GameServer* gameServer = new ygo::GameServer(server_fd);
+    ygo::GameServer* gameServer = new ygo::GameServer();
     close(0);
-    gameServer->setChatCallback(GameserversManager::chatCallback,this);
 
-    if(!gameServer->StartServer())
+    if(!gameServer->StartServer(server_fd,receive_fd))
     {
         printf("cannot start the gameserver\n");
         exit(1);
@@ -140,37 +137,9 @@ void GameserversManager::child_loop(int receive_fd)
         bool isRebooting = false;
 
 
-        fd_set rfds;
-
-
-
-
-
-
         while(1)
         {
-            FD_ZERO(&rfds);
-            int max_fd=0;
-
-            FD_SET(receive_fd,&rfds);
-            timeval timeout = {1, 0};
-            auto retval = select(receive_fd + 1, &rfds, NULL, NULL, &timeout);
-
-
-            if(retval > 0)
-            {
-                GameServerChat gsc;
-                int bytesread = read(receive_fd,&gsc,sizeof(gsc));
-                gameServer->injectChatMessage(gsc.messaggio,gsc.isAdmin);
-            }
-            //printf("spedisco il messaggiofiglio\n");
-            GameServerStats gss;
-            gss.rooms = Statistics::getInstance()->getNumRooms();
-            gss.players = Statistics::getInstance()->getNumPlayers();
-            gss.isAlive = !needsReboot;
-            gss.type = STATS;
-            write(parent_fd,&gss,sizeof(GameServerStats));
-            GameServer::CheckAliveThread(gameServer);
+            sleep(1);
             if (needsReboot)
             {
                 if(!isRebooting)
@@ -197,19 +166,10 @@ void GameserversManager::child_loop(int receive_fd)
 int GameserversManager::spawn_gameserver()
 {
     int pid;
-    int pipefd[2];
-    int pipefd2[2];
 
-    if (pipe(pipefd) == -1)
-    {
-        perror("pipe");
-        exit(EXIT_FAILURE);
-    }
-    if (pipe(pipefd2) == -1)
-    {
-        perror("pipe");
-        exit(EXIT_FAILURE);
-    }
+
+    int s_pair[2];
+    socketpair(PF_LOCAL, SOCK_STREAM | SOCK_NONBLOCK, 0, s_pair);
 
     MySqlWrapper::getInstance()->disconnect();
     pid = fork();
@@ -217,13 +177,11 @@ int GameserversManager::spawn_gameserver()
 
     if(pid)
     {
-        close (pipefd[1]);
-        close (pipefd2[0]);
+        close (s_pair[1]);
         ChildInfo gss;
         gss.pid = pid;
-        gss.child_fd = pipefd2[1];
         gss.isAlive=true;
-        children[pipefd[0]] = gss;
+        children[s_pair[0]] = gss;
         //gss.players=0;
         //aliveChildren.insert(pipefd[0]);
         cout<<"child created "<<pid<<", now: "<<children.size()<<endl;
@@ -234,15 +192,13 @@ int GameserversManager::spawn_gameserver()
     Statistics::getInstance()->StopThread();
     Statistics::getInstance()->setNumPlayers(0);
     Statistics::getInstance()->setNumRooms(0);
-    close(pipefd[0]);
-    close(pipefd2[1]);
+    close (s_pair[0]);
     for(auto it = children.cbegin(); it != children.cend(); ++it)
         closeChild(it->first);
     children.clear();
 
     isFather = false;
-    parent_fd = pipefd[1];
-    child_loop(pipefd2[0]);
+    child_loop(s_pair[1]);
     return 0;
 
 }
@@ -298,7 +254,7 @@ bool GameserversManager::handleChildMessage(int child_fd)
         children[child_fd].players = gss->players;
         children[child_fd].rooms= gss->rooms;
         children[child_fd].isAlive= gss->isAlive;
-
+        children[child_fd].last_update = time(NULL);
         Statistics::getInstance()->setNumPlayers(getNumPlayers());
         Statistics::getInstance()->setNumRooms(getNumRooms());
     }
@@ -309,8 +265,8 @@ bool GameserversManager::handleChildMessage(int child_fd)
         for(auto it = children.cbegin(); it != children.cend(); ++it)
         {
             if(it->first == child_fd)
-               continue;
-            write(it->second.child_fd,buffer,sizeof(GameServerChat));
+                continue;
+            write(it->first,buffer,sizeof(GameServerChat));
         }
         ExternalChat::getInstance()->broadcastMessage((GameServerChat*) gss);
 
@@ -393,11 +349,11 @@ void GameserversManager::parent_loop()
         }
         std::list<GameServerChat> lista =  ExternalChat::getInstance()->getPendingMessages();
 
-        for(auto lit = lista.cbegin();lit!= lista.cend();++lit)
-        for(auto it = children.cbegin(); it != children.cend(); ++it)
-        {
-            write(it->second.child_fd,&(*lit),sizeof(GameServerChat));
-        }
+        for(auto lit = lista.cbegin(); lit!= lista.cend(); ++lit)
+            for(auto it = children.cbegin(); it != children.cend(); ++it)
+            {
+                write(it->first,&(*lit),sizeof(GameServerChat));
+            }
 
 
         ShowStats();
@@ -467,7 +423,7 @@ void GameserversManager::killOneTerminatingServer()
 void GameserversManager::closeChild(int child)
 {
     close(child);
-    close(children[child].child_fd);
+    //close(children[child].child_fd);
 
 }
 void GameserversManager::StartServer(int port)

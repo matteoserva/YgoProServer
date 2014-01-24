@@ -4,23 +4,7 @@
 #include "GameServer.h"
 namespace ygo
 {
-enum MessageType{STATS,CHAT};
-struct GameServerStats
-{
-    MessageType type;
-    int pid;
-    int rooms;
-    int players;
-    bool isAlive;
-    GameServerStats();
-};
 
-struct GameServerChat
-{
-    MessageType type;
-    bool isAdmin;
-    wchar_t messaggio[260];
-};
 
 struct ChildInfo
 {
@@ -28,7 +12,7 @@ struct ChildInfo
     int rooms;
     int players;
     bool isAlive;
-    int child_fd;
+    time_t last_update;
     ChildInfo():rooms(0),players(0),isAlive(true){};
 
 };

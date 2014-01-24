@@ -12,16 +12,15 @@
 using ygo::Config;
 namespace ygo
 {
-GameServer::GameServer(int server_fd):server_fd(server_fd),chat_cb(nullptr)
+GameServer::GameServer()
 {
-    server_port = 0;
     net_evbase = 0;
     listener = nullptr;
     last_sent = 0;
     MAXPLAYERS = Config::getInstance()->max_users_per_process;
 }
 
-bool GameServer::StartServer()
+bool GameServer::StartServer(int server_fd,int manager_fd)
 {
     if(net_evbase)
         return false;
@@ -42,9 +41,52 @@ bool GameServer::StartServer()
     roomManager.setGameServer(const_cast<ygo::GameServer *>(this));
 
 
+    manager_buf = bufferevent_socket_new(net_evbase, manager_fd, BEV_OPT_CLOSE_ON_FREE);
+    bufferevent_setcb(manager_buf, ManagerRead, NULL, ManagerEvent, this);
+    bufferevent_enable(manager_buf, EV_READ|EV_WRITE);
+
+
     Thread::NewThread(ServerThread, this);
     return true;
 }
+
+void GameServer::ManagerRead(bufferevent *bev, void *ctx)
+{
+
+    GameServer* that = (GameServer*)ctx;
+    evbuffer* input = bufferevent_get_input(bev);
+    size_t len = evbuffer_get_length(input);
+    unsigned short packet_len = 0;
+
+    while(true)
+    {
+        if(len < sizeof(MessageType))
+            return;
+        MessageType mt;
+        evbuffer_copyout(input, &mt, sizeof(mt));
+        if(mt == MessageType::CHAT && len >= sizeof(GameServerChat))
+        {
+            GameServerChat gsc;
+            evbuffer_remove(input, &gsc, sizeof(gsc));
+
+            len -= sizeof(gsc);
+            that->roomManager.BroadcastMessage(gsc.messaggio,gsc.isAdmin,true);
+        }
+        else
+            return;
+
+    }
+
+}
+void GameServer::ManagerEvent(bufferevent* bev, short events, void* ctx)
+{
+    if (events & (BEV_EVENT_EOF | BEV_EVENT_ERROR))
+    {
+        bufferevent_free(bev);
+    }
+}
+
+
 int GameServer::getNumPlayers()
 {
     return users.size();
@@ -150,17 +192,15 @@ void GameServer::ServerAcceptError(evconnlistener* listener, void* ctx)
     that->StopListen();
 }
 
-void GameServer::setChatCallback(ChatCallback ccb,void*ptr)
-{
-    chat_cb = ccb;
-    chat_cb_ptr=ptr;
-}
 
-void GameServer::callChatCallback(std::wstring a,bool b)
+
+void GameServer::callChatCallback(std::wstring message,bool isAdmin)
 {
-    if(chat_cb == nullptr)
-        return;
-    (*chat_cb)(a,b,chat_cb_ptr);
+    GameServerChat gsc;
+    gsc.type = CHAT;
+    wcscpy(gsc.messaggio,message.c_str());
+    gsc.isAdmin = isAdmin;
+    bufferevent_write(manager_buf,&gsc,sizeof(GameServerChat));
 }
 
 void GameServer::injectChatMessage(std::wstring a,bool b)
@@ -255,15 +295,20 @@ int GameServer::CheckAliveThread(void* parama)
 void GameServer::keepAlive(evutil_socket_t fd, short events, void* arg)
 {
     GameServer*that = (GameServer*) arg;
-    that->isAlive = true;
 
-    static time_t last_check = time(NULL);
-    if(time(NULL)- last_check < 600)
-        return;
-    last_check = time(NULL);
     that->roomManager.BroadcastMessage(Config::getInstance()->spam_string,true,true);
 }
 
+void GameServer::sendStats(evutil_socket_t fd, short events, void* arg)
+{
+    GameServer *that = (GameServer*) arg;
+    GameServerStats gss;
+    gss.rooms = Statistics::getInstance()->getNumRooms();
+    gss.players = Statistics::getInstance()->getNumPlayers();
+    gss.isAlive = that->listener != nullptr;
+    gss.type = STATS;
+    bufferevent_write(that->manager_buf, &gss,sizeof(GameServerStats));
+}
 void GameServer::checkInjectedMessages_cb(evutil_socket_t fd, short events, void* arg)
 {
     GameServer*that = (GameServer*) arg;
@@ -274,7 +319,7 @@ void GameServer::checkInjectedMessages_cb(evutil_socket_t fd, short events, void
     for(auto it = that->injectedMessages.begin(); it!=that->injectedMessages.end(); ++it)
     {
 
-        that->roomManager.BroadcastMessage(it->first,it->second,true);
+
 
 
     }
@@ -290,17 +335,22 @@ int GameServer::ServerThread(void* parama)
 
     //std::thread checkAlive(CheckAliveThread, that);
     event* keepAliveEvent = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, that);
-    timeval timeout = {4, 0};
+    timeval timeout = {600, 0};
     event_add(keepAliveEvent, &timeout);
 
-    event* cicle_injected = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, checkInjectedMessages_cb, parama);
+    event* statsEvent = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, sendStats, that);
+    timeval statstimeout = {5, 0};
+    event_add(statsEvent, &timeout);
+
+    /*event* cicle_injected = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, checkInjectedMessages_cb, parama);
     timeval timeout2 = {0, 200000};
     event_add(cicle_injected, &timeout2);
-
+    */
 
     event_base_dispatch(that->net_evbase);
     event_free(keepAliveEvent);
-    event_free(cicle_injected);
+    event_free(statsEvent);
+    //event_free(cicle_injected);
     event_base_free(that->net_evbase);
     that->net_evbase = 0;
     //checkAlive.join();
