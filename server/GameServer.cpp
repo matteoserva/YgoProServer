@@ -47,7 +47,6 @@ bool GameServer::StartServer(int server_fd,int manager_fd)
     bufferevent_enable(manager_buf, EV_READ|EV_WRITE);
 
 
-    Thread::NewThread(ServerThread, this);
     return true;
 }
 
@@ -107,7 +106,8 @@ GameServer::~GameServer()
         sleep(5);
     }
 
-    event_base_loopexit(net_evbase, 0);
+    if(net_evbase)
+        event_base_loopbreak(net_evbase);
     while(net_evbase)
     {
         log(WARN,"waiting for server thread\n");
@@ -310,6 +310,8 @@ void GameServer::sendStats(evutil_socket_t fd, short events, void* arg)
     gss.type = STATS;
     bufferevent_write(that->manager_buf, &gss,sizeof(GameServerStats));
 
+    if(!gss.isAlive && !that->getNumPlayers())
+        event_base_loopbreak(that->net_evbase);
 
 }
 void GameServer::checkInjectedMessages_cb(evutil_socket_t fd, short events, void* arg)

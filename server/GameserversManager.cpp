@@ -16,9 +16,12 @@ namespace ygo
 
 
 static volatile bool needsReboot;
+GameServer *child_gameserver = nullptr;
 void sigterm_handler(int signum)
 {
     static int timesPressed = 0;
+    if(!needsReboot && child_gameserver)
+        child_gameserver->StopServer();
     needsReboot=true;
     ++timesPressed;
 
@@ -135,31 +138,11 @@ void GameserversManager::child_loop(int receive_fd)
         printf("cannot start the gameserver\n");
         exit(1);
     }
-    else
-    {
-        bool isRebooting = false;
+    child_gameserver = gameServer;
+    GameServer::ServerThread(gameServer);
+    child_gameserver = nullptr;
+    delete gameServer;
 
-
-        while(1)
-        {
-            sleep(1);
-            if (needsReboot)
-            {
-                if(!isRebooting)
-                {
-                    cout<<"rebooting\n";
-                    gameServer->StopServer();
-                    isRebooting = true;
-                }
-
-                if(gameServer->getNumPlayers() == 0)
-                {
-                    delete gameServer;
-                    exit(0);
-                }
-            }
-        }
-    }
     exit(EXIT_SUCCESS);
 }
 
