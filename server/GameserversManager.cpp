@@ -84,14 +84,17 @@ void GameserversManager::ShowStats()
             if(!it->second.isAlive)
                 printf("  *dying*");
             printf("\n");
-            if(last_showstats-gss.last_update > 30)
-                kill(gss.pid,SIGTERM);
-            Statistics::ServerStats serverStats(gss.pid,gss.players,gss.rooms,Config::getInstance()->max_users_per_process,it->second.isAlive?std::string("ALIVE"):std::string("DYING"));
-            Statistics::getInstance()->SendStatisticsRow(serverStats);
 
         }
         printf("children: %2d, alive %2d, rooms: %3d, players alive:%3d, players: %3d\n",
                (int)children.size(),getNumAliveChildren(),getNumRooms(),getNumPlayersInAliveChildren(),getNumPlayers());
+        for(auto it = children.cbegin(); it != children.cend(); ++it)
+        {
+            ChildInfo gss = it->second;
+            Statistics::ServerStats serverStats(gss.pid,gss.players,gss.rooms,Config::getInstance()->max_users_per_process,it->second.isAlive?std::string("ALIVE"):std::string("DYING"));
+            Statistics::getInstance()->SendStatisticsRow(serverStats);
+
+        }
 
     }
 }
@@ -181,6 +184,7 @@ int GameserversManager::spawn_gameserver()
         ChildInfo gss;
         gss.pid = pid;
         gss.isAlive=true;
+        gss.last_update=time(NULL);
         children[s_pair[0]] = gss;
         //gss.players=0;
         //aliveChildren.insert(pipefd[0]);
@@ -314,37 +318,37 @@ void GameserversManager::parent_loop()
             server_fd = 0;
             Statistics::getInstance()->StopThread();
         }
-        if(retval <= 0)
-            continue;
-
-        int child_fd = 0;
-        for(auto it = children.cbegin(); it != children.cend(); ++it)
+        if(retval > 0)
         {
-            if(FD_ISSET(it->first,&rfds))
+
+            int child_fd = 0;
+            for(auto it = children.cbegin(); it != children.cend(); ++it)
             {
-                child_fd = it->first;
-                break;
+                if(FD_ISSET(it->first,&rfds))
+                {
+                    child_fd = it->first;
+                    break;
+                }
             }
-        }
 
 
-
-        if(!handleChildMessage(child_fd))
-        {
-            //il figlio ha chiuso
-            printf("figlio terminato,fd: %d, pid: %d\n",child_fd,children[child_fd].pid);
-            int status;
-            waitpid(children[child_fd].pid,&status,0);
-            closeChild(child_fd);
-            children.erase(child_fd);
-
-            cout<<"child exited , remaining: "<<children.size()<<endl;
-
-
-            if(needsReboot && children.size() == 0)
+            if(!handleChildMessage(child_fd))
             {
-                printf("PADRE:figli terminati. esco\n");
-                exit(0);
+                //il figlio ha chiuso
+                printf("figlio terminato,fd: %d, pid: %d\n",child_fd,children[child_fd].pid);
+                int status;
+                waitpid(children[child_fd].pid,&status,0);
+                closeChild(child_fd);
+                children.erase(child_fd);
+
+                cout<<"child exited , remaining: "<<children.size()<<endl;
+
+
+                if(needsReboot && children.size() == 0)
+                {
+                    printf("PADRE:figli terminati. esco\n");
+                    exit(0);
+                }
             }
         }
         std::list<GameServerChat> lista =  ExternalChat::getInstance()->getPendingMessages();
@@ -359,13 +363,17 @@ void GameserversManager::parent_loop()
         ShowStats();
 
         static time_t lastDeadCheck = 0;
-        if(time(NULL) - lastDeadCheck > 5)
+        time_t now = time(NULL);
+        if(now - lastDeadCheck > 5)
         {
             for(auto it = children.cbegin(); it != children.cend(); ++it)
             {
                 ChildInfo gss = it->second;
-                if(!gss.isAlive && gss.rooms == 0)
+                if(!gss.isAlive && gss.rooms == 0 )
                     kill(gss.pid,SIGTERM);
+                else if(now -gss.last_update > 30)
+                    kill(gss.pid,SIGTERM);
+
             }
             lastDeadCheck = time(NULL);
         }

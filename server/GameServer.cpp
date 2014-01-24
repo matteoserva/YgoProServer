@@ -30,6 +30,7 @@ bool GameServer::StartServer(int server_fd,int manager_fd)
 
     listener =evconnlistener_new(net_evbase,ServerAccept, this, LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE ,-1,server_fd);
 
+    evutil_make_socket_nonblocking(server_fd);
     if(!listener)
     {
         event_base_free(net_evbase);
@@ -308,6 +309,8 @@ void GameServer::sendStats(evutil_socket_t fd, short events, void* arg)
     gss.isAlive = that->listener != nullptr;
     gss.type = STATS;
     bufferevent_write(that->manager_buf, &gss,sizeof(GameServerStats));
+
+
 }
 void GameServer::checkInjectedMessages_cb(evutil_socket_t fd, short events, void* arg)
 {
@@ -332,7 +335,6 @@ void GameServer::checkInjectedMessages_cb(evutil_socket_t fd, short events, void
 int GameServer::ServerThread(void* parama)
 {
     GameServer*that = (GameServer*)parama;
-
     //std::thread checkAlive(CheckAliveThread, that);
     event* keepAliveEvent = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, that);
     timeval timeout = {600, 0};
@@ -340,7 +342,7 @@ int GameServer::ServerThread(void* parama)
 
     event* statsEvent = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, sendStats, that);
     timeval statstimeout = {5, 0};
-    event_add(statsEvent, &timeout);
+    event_add(statsEvent, &statstimeout);
 
     /*event* cicle_injected = event_new(that->net_evbase, 0, EV_TIMEOUT | EV_PERSIST, checkInjectedMessages_cb, parama);
     timeval timeout2 = {0, 200000};
@@ -413,7 +415,6 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
 void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
     char* pdata = data;
-
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
 
     if(dp->netServer == NULL)
