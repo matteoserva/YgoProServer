@@ -207,28 +207,28 @@ bool UsersDatabase::userExists(std::string username)
     return true;
 }
 
-bool UsersDatabase::login(std::string username,std::string password,char*ip)
+int UsersDatabase::login(std::string username,std::string password,char*ip)
 {
 
     try
     {
                 sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
 
-        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select password FROM users WHERE username = ?"));
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select password,color FROM users WHERE username = ?"));
         stmt->setString(1, username);
         //stmt->setString(2, password);
         std::unique_ptr<sql::ResultSet> res(stmt->executeQuery());
         if(!res->next())
         {
             createUser(username,password);
-            return true;
+            return 1;
         }
 
         std::string realPassword = res->getString(1);
         if(realPassword != "" && password != realPassword)
-            return false;
+            return 0;
         if(realPassword != "" && password == realPassword)
-            return true;
+            return 1+res->getInt(2);
         //login success
 
         std::unique_ptr<sql::PreparedStatement> stmt2(con->prepareStatement("UPDATE users set password = ?, last_login = CURRENT_TIMESTAMP,last_ip = ? WHERE username = ?"));
@@ -237,13 +237,13 @@ bool UsersDatabase::login(std::string username,std::string password,char*ip)
         stmt2->setString(3, username);
 
         stmt2->execute();
-        return true;
+        return 1;
     }
     catch (sql::SQLException &e)
     {
         MySqlWrapper::getInstance()->notifyException(e);
         std::cout<<"errore in userexists\n";
-        return false;
+        return 0;
     }
 }
 

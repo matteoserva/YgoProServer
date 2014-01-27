@@ -28,7 +28,7 @@ public:
     ~UsersDatabase();
     bool createUser(std::string username, std::string password, int score=default_score,int wins=0,int losses=0,int draws=0);
     bool userExists(std::string username);
-    bool login(std::string username,std::string password,char*ip);
+    int login(std::string username,std::string password,char*ip);
     UserStats getUserStats(std::string username);
     bool setUserStats(UserStats&);
     int getRank(std::string username);

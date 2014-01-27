@@ -431,6 +431,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
             BufferIO::CopyWStr(result.first.c_str(), dp->name, 20);
             dp->loginStatus = result.second;
+            dp->color = result.color;
 
             auto score = Users::getInstance()->getFullScore(result.first);
             dp->cachedRankScore = score.first;

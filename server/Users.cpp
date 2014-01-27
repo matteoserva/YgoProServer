@@ -70,7 +70,7 @@ std::pair<std::string,std::string> Users::splitLoginString(std::string loginStri
     return std::pair<std::string,std::string> (username,password);
 }
 
-std::pair<std::string,Users::LoginResult> Users::login(std::string loginString,char* ip)
+Users::LoginResultTuple Users::login(std::string loginString,char* ip)
 {
     std::string username;
     std::string password;
@@ -82,30 +82,30 @@ std::pair<std::string,Users::LoginResult> Users::login(std::string loginString,c
     }
     catch(std::exception& ex)
     {
-        return std::pair<std::string,Users::LoginResult> ("-Player",Users::LoginResult::INVALIDUSERNAME);
+        return Users::LoginResultTuple ("-Player",Users::LoginResult::INVALIDUSERNAME,0);
     }
 
     return login(username,password,ip);
 }
 
-std::pair<std::string,Users::LoginResult> Users::login(std::string username, std::string password,char* ip)
+Users::LoginResultTuple Users::login(std::string username, std::string password,char* ip)
 {
     log(INFO,"Tento il login con %s e %s, ip %s\n",username.c_str(),password.c_str(),ip);
     std::string usernamel=username;
     std::transform(usernamel.begin(), usernamel.end(), usernamel.begin(), ::tolower);
     if(username[0] == '-')
-        return std::pair<std::string,Users::LoginResult> (username,Users::LoginResult::UNRANKED);
+        return Users::LoginResultTuple (username,Users::LoginResult::UNRANKED,0);
 
-    if(database->login(username,password,ip))
+    if(int color = database->login(username,password,ip))
     {
         if(password != "")
-            return std::pair<std::string,Users::LoginResult> (username,Users::LoginResult::AUTHENTICATED);
+            return Users::LoginResultTuple (username,Users::LoginResult::AUTHENTICATED,color-1);
         else
-            return std::pair<std::string,Users::LoginResult> (username,Users::LoginResult::NOPASSWORD);
+            return Users::LoginResultTuple (username,Users::LoginResult::NOPASSWORD,color-1);
     }
     else
     {
-        return std::pair<std::string,Users::LoginResult> ("-" + username,Users::LoginResult::INVALIDPASSWORD);
+        return Users::LoginResultTuple ("-" + username,Users::LoginResult::INVALIDPASSWORD,0);
 
 
     }

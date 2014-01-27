@@ -223,8 +223,13 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
         {
             STOC_Chat scc;
             scc.player = 12;
-
-            int msglen = BufferIO::CopyWStr(msg, scc.msg, 256);
+            wchar_t stringa[256];
+            stringa[0] = '[';
+            stringa[1] = 0;
+            BufferIO::CopyWStr(dp->name,&stringa[1],25);
+            wcscat(stringa,L"]: ");
+            wcscat(stringa,msg);
+            int msglen = BufferIO::CopyWStr(stringa, scc.msg, 256);
             for(auto pl:players)
                 SendBufferToPlayer(pl.first, STOC_CHAT, &scc, 4 + msglen * 2);
             return true;

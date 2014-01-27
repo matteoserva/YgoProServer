@@ -53,6 +53,15 @@ class Users
     public:
     enum LoginResult {NOTENTERED,UNRANKED,INVALIDUSERNAME,INVALIDPASSWORD,NOPASSWORD,AUTHENTICATED};
 
+    struct LoginResultTuple
+    {
+        std::string first; //nam
+        LoginResult second; //result
+        int color;
+        LoginResultTuple(std::string name,LoginResult result,int color=0):first(name),second(result),color(color){}
+    };
+
+
 private:
     std::thread t1;
     std::pair<std::string,std::string> splitLoginString(std::string);
@@ -63,7 +72,7 @@ private:
     std::string getFirstAvailableUsername(std::string base);
     void LoadDB();
     void SaveDB();
-    std::pair<std::string,LoginResult> login(std::string,std::string,char* ip);
+    LoginResultTuple login(std::string,std::string,char* ip);
     UsersDatabase* database;
 
 public:
@@ -74,7 +83,7 @@ public:
     std::pair<int,int> getFullScore(std::string username);
     int getRank(std::string username);
     static Users* getInstance();
-    std::pair<std::string,LoginResult> login(std::string,char* ip);
+    LoginResultTuple login(std::string,char* ip);
     void Draw(std::string d1, std::string d2);
     void Draw(std::string d1, std::string d2,std::string d3, std::string d4);
     void Victory(std::string, std::string);
