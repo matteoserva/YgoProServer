@@ -62,7 +62,7 @@ private:
     void flushPendingMessages();
     DuelPlayer * getDpFromType(unsigned char);
 public:
-    void SystemChatToPlayer(DuelPlayer*dp, const std::wstring,bool isAdmin=false);
+    void SystemChatToPlayer(DuelPlayer*dp, const std::wstring,bool isAdmin=false,int color = 0);
     DuelRoom(RoomManager*roomManager,GameServer*,unsigned char mode);
     void LeaveGame(DuelPlayer* dp);
     bool StartServer(unsigned short port);

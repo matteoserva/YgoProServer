@@ -52,7 +52,7 @@ public:
     DuelPlayer* findPlayerByName(std::wstring);
 
     virtual void SendMessageToPlayer(DuelPlayer*dp, char*msg);
-    virtual void SystemChatToPlayer(DuelPlayer*dp, std::wstring,bool isAdmin = false);
+    virtual void SystemChatToPlayer(DuelPlayer*dp, std::wstring,bool isAdmin = false,int color = 0);
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
     template<typename ST>
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st)

@@ -369,7 +369,7 @@ bool GameServer::dispatchPM(std::wstring recipient,std::wstring message)
     if(dp==nullptr)
         return false;
 
-    dp->netServer->SystemChatToPlayer(dp,message,false);
+    dp->netServer->SystemChatToPlayer(dp,message,false,5);
     printf("completed\n");
     return true;
 }

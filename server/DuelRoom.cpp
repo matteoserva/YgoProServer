@@ -757,11 +757,11 @@ void DuelRoom::StopServer()
     updateServerState();
 }
 
-void DuelRoom::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg,bool isAdmin)
+void DuelRoom::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg,bool isAdmin,int color)
 {
     if(chatReady)
     {
-        RoomInterface::SystemChatToPlayer(dp,msg,isAdmin);
+        RoomInterface::SystemChatToPlayer(dp,msg,isAdmin,color);
     }
     else
     {
