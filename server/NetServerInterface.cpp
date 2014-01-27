@@ -91,10 +91,11 @@ void RoomInterface::SystemChatToPlayer(DuelPlayer*dp, std::wstring msg,bool isAd
     scc.player = isAdmin?8:10;
 
     static int inc = 0;
-    if(isAdmin && msg[0] == '-')
+    if(isAdmin)
     {
-        inc = (inc+1)%9;
-        scc.player=11 + inc;
+        msg = L"[CheckMate]: " + msg;
+
+        scc.player=14;
     }
 
 
