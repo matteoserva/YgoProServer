@@ -111,6 +111,7 @@ struct DuelPlayer {
     char ip[INET_ADDRSTRLEN];
     unsigned int cachedRankScore;
     unsigned int cachedGameScore;
+    unsigned char color;
     Users::LoginResult loginStatus;
 	DuelPlayer() {
 		game = 0;
@@ -119,6 +120,7 @@ struct DuelPlayer {
 		bev = 0;
         netServer=0;
         lflist=2;
+        color = 0;
 	}
     int lflist;
     std::string countryCode;

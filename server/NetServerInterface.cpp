@@ -114,7 +114,7 @@ void RoomInterface::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
 DuelPlayer* RoomInterface::findPlayerByName(std::wstring user)
 {
     std::transform(user.begin(), user.end(), user.begin(), ::tolower);
-    for(auto it = players.cbegin();it != players.cend();++it)
+    for(auto it = players.cbegin(); it != players.cend(); ++it)
     {
         if(!wcsncmp(user.c_str(),it->first->namew_low,20))
             return it->first;
@@ -151,9 +151,9 @@ int RoomInterface::detectDeckCompatibleLflist(void* pdata)
 
     char* deckbuf = (char*)pdata;
     Deck deck;
-	int mainc = BufferIO::ReadInt32(deckbuf);
-	int sidec = BufferIO::ReadInt32(deckbuf);
-		deckManager.LoadDeck(deck, (int*)deckbuf, mainc, sidec);
+    int mainc = BufferIO::ReadInt32(deckbuf);
+    int sidec = BufferIO::ReadInt32(deckbuf);
+    deckManager.LoadDeck(deck, (int*)deckbuf, mainc, sidec);
 
     int compatible =0;
 
@@ -164,20 +164,23 @@ int RoomInterface::detectDeckCompatibleLflist(void* pdata)
 
     int err3=0;
 
-    for(size_t i = 0; i < deck.main.size(); ++i) {
-            code_pointer cit = deck.main[i];
-            if(cit->second.ot>0x3)
-                err3 =cit->first;
+    for(size_t i = 0; i < deck.main.size(); ++i)
+    {
+        code_pointer cit = deck.main[i];
+        if(cit->second.ot>0x3)
+            err3 =cit->first;
     }
-    for(size_t i = 0; i < deck.side.size(); ++i) {
-            code_pointer cit = deck.side[i];
-            if(cit->second.ot>0x3)
-                err3= cit->first;
+    for(size_t i = 0; i < deck.side.size(); ++i)
+    {
+        code_pointer cit = deck.side[i];
+        if(cit->second.ot>0x3)
+            err3= cit->first;
     }
-    for(size_t i = 0; i < deck.extra.size(); ++i) {
-            code_pointer cit = deck.extra[i];
-            if(cit->second.ot>0x3)
-                err3 = cit->first;
+    for(size_t i = 0; i < deck.extra.size(); ++i)
+    {
+        code_pointer cit = deck.extra[i];
+        if(cit->second.ot>0x3)
+            err3 = cit->first;
     }
 
     //printf("valori: %d %d %d\n",err1,err2,err3);
@@ -212,10 +215,25 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
 {
     wchar_t* messaggio=msg;
     wchar_t mittente[20];
-    if(msg[0] == 0 || msg[0] != '!')
+    if(msg[0] == 0 )
         return false;
+    if(msg[0] != '!')
+    {
+        if(dp->color > 0)
+        {
+            STOC_Chat scc;
+            scc.player = 12;
 
-    if(!wcsncmp(messaggio,L"!cheat2",7) )
+            int msglen = BufferIO::CopyWStr(msg, scc.msg, 256);
+            for(auto pl:players)
+                SendBufferToPlayer(pl.first, STOC_CHAT, &scc, 4 + msglen * 2);
+            return true;
+        }
+        else
+            return false;
+    }
+
+    else if(!wcsncmp(messaggio,L"!cheat2",7) )
     {
         char buf[16];
         int *val = (int*) &buf[4];
@@ -285,6 +303,8 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
 
         return true;
     }
+
+
     return false;
 }
 
