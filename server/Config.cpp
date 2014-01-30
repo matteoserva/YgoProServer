@@ -77,6 +77,20 @@ void Config::check_variable(std::string &var,std::string value,std::string name)
 
 }
 
+void Config::check_variable(bool &var,std::string value,std::string name)
+{
+    bool val = false;
+    std::size_t found = value.find("true");
+    if (found!=std::string::npos)
+        val=true;
+
+    var = val;
+    printf("caricata la variabile %s con il valore %s\n",name.c_str(),value.c_str());
+}
+
+
+
+
 void Config::LoadConfig()
 {
 #ifdef _WIN32
@@ -147,6 +161,7 @@ void Config::LoadConfig()
             CHECK_VARIABLE(max_processes);
             CHECK_VARIABLE(waitingroom_min_waiting);
             CHECK_VARIABLE(waitingroom_max_waiting);
+            CHECK_VARIABLE(noExternalChat);
 
             else
                 cerr<<"Could not understand the keyword at line"<<linenum<<": "<<strbuf<<endl;

@@ -25,13 +25,14 @@ namespace ygo
         bool debugSql;
         bool disableMysql;
         bool strictAllowedList;
-
+        bool noExternalChat;
         private:
         Config();
         std::string configFile;
 
         void check_variable(int &,std::string value,std::string name);
         void check_variable(std::string &,std::string value,std::string name);
+        void check_variable(bool &,std::string value,std::string name);
     };
 
 }

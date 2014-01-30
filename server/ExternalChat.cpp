@@ -24,7 +24,8 @@ ExternalChat* ExternalChat::getInstance()
 
 void ExternalChat::broadcastMessage(GameServerChat* msg)
 {
-
+    if(Config::getInstance()->noExternalChat)
+        return;
     char buffer[1024];
     char nome[25];
     const char* localIP = "127.0.0.1";
@@ -76,8 +77,10 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
 }
 std::list<GameServerChat> ExternalChat::getPendingMessages()
 {
-    std::list<GameServerChat> lista;
 
+    std::list<GameServerChat> lista;
+    if(Config::getInstance()->noExternalChat)
+        return lista;
     try
     {
         sql::Connection* con = MySqlWrapper::getInstance()->getConnection();
