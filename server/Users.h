@@ -51,7 +51,7 @@ class UsersDatabase;
 class Users
 {
     public:
-    enum LoginResult {NOTENTERED,UNRANKED,INVALIDUSERNAME,INVALIDPASSWORD,NOPASSWORD,AUTHENTICATED};
+    enum LoginResult {NOTENTERED,WAITINGJOIN,UNRANKED,INVALIDUSERNAME,INVALIDPASSWORD,NOPASSWORD,AUTHENTICATED};
 
     struct LoginResultTuple
     {
@@ -72,7 +72,7 @@ private:
     std::string getFirstAvailableUsername(std::string base);
     void LoadDB();
     void SaveDB();
-    LoginResultTuple login(std::string,std::string,char* ip);
+
     UsersDatabase* database;
 
 public:
@@ -84,6 +84,7 @@ public:
     int getRank(std::string username);
     static Users* getInstance();
     LoginResultTuple login(std::string,char* ip);
+    LoginResultTuple login(std::string,std::string,char* ip);
     void Draw(std::string d1, std::string d2);
     void Draw(std::string d1, std::string d2,std::string d3, std::string d4);
     void Victory(std::string, std::string);

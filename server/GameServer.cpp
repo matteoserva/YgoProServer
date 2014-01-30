@@ -424,10 +424,25 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(pktType==CTOS_PLAYER_INFO && dp->loginStatus == Users::LoginResult::NOTENTERED)
         {
             CTOS_PlayerInfo* pkt = (CTOS_PlayerInfo*)pdata;
-            char name[20];
 
-            BufferIO::CopyWStr(pkt->name,name,20);
-            auto result = Users::getInstance()->login(std::string(name),dp->ip);
+
+            BufferIO::CopyWStr(pkt->name,dp->name,20);
+
+            dp->loginStatus = Users::LoginResult::WAITINGJOIN;
+
+            return;
+        }
+        else if(pktType == CTOS_JOIN_GAME && dp->name[0] != 0 && dp->loginStatus == Users::LoginResult::WAITINGJOIN)
+        {
+            CTOS_JoinGame * ctjg =(CTOS_JoinGame*) pdata;
+            char loginstring[45];
+            int c1 = BufferIO::CopyWStr(dp->name,loginstring,20);
+
+            int passc = BufferIO::CopyWStr(ctjg->pass,&loginstring[c1+1],20);
+            if(passc > 0)
+                loginstring[c1] = '$';
+
+            auto result = Users::getInstance()->login(std::string(loginstring),dp->ip);
 
             BufferIO::CopyWStr(result.first.c_str(), dp->name, 20);
             dp->loginStatus = result.second;
@@ -437,11 +452,6 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             dp->cachedRankScore = score.first;
             dp->cachedGameScore = score.second;
 
-
-            return;
-        }
-        else if(pktType == CTOS_JOIN_GAME && dp->name[0] != 0 && dp->loginStatus != Users::LoginResult::NOTENTERED)
-        {
             if(roomManager.InsertPlayerInWaitingRoom(dp))
             {
                 wchar_t nome[25];
