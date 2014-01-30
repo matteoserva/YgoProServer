@@ -199,6 +199,7 @@ Config::Config():configFile("server.conf"),serverport(0)
     max_processes = 3;
     waitingroom_min_waiting = 4;
     waitingroom_max_waiting = 8;
+    noExternalChat = false;
     spam_string = "www.ygopro.it <-- this is the official website of this server";
     signal(SIGUSR1,disMysql);
     signal(SIGUSR2,enMysql);
