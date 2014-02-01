@@ -104,6 +104,16 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
         scjg.info.time_limit=60;
         RoomInterface::SendBufferToPlayer(dp, STOC_JOIN_GAME, &scjg,sizeof(STOC_JoinGame));
 
+        for(auto it:players)
+        {
+            STOC_HS_PlayerEnter scpe;
+            BufferIO::CopyWStr(it.first->name, scpe.name, 20);
+            scpe.pos = it.first->type;
+            RoomInterface::SendBufferToPlayer(dp, STOC_HS_PLAYER_ENTER, &scpe,sizeof(STOC_HS_PlayerEnter));
+
+        }
+
+
     }
     else if(proto == STOC_JOIN_GAME)
     {
