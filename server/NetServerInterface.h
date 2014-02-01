@@ -57,20 +57,15 @@ public:
     template<typename ST>
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st)
     {
-        char* p = net_server_write;
-        BufferIO::WriteInt16(p, 1 + sizeof(ST));
-        BufferIO::WriteInt8(p, proto);
-        memcpy(p, &st, sizeof(ST));
-        last_sent = sizeof(ST) + 3;
-        if(dp)
-            ReSendToPlayer(dp);
+        SendBufferToPlayer(dp,proto,&st,sizeof(ST));
+
 
     }
     bool isShouting;
     void shout(unsigned short*,DuelPlayer* dp);
     void shout_internal(std::wstring message,bool isAdmin=false,std::wstring sender=L"");
     void BroadcastSystemChat(std::wstring,bool isAdmin = false);
-    void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
+    virtual void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
     void ReSendToPlayer(DuelPlayer* dp);
     int getNumPlayers();
     int detectDeckCompatibleLflist(void* pdata);

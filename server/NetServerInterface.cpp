@@ -146,7 +146,8 @@ void RoomInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void
     if(len > 0)
         memcpy(p, buffer, std::min(len,(size_t) 0x20000));
     last_sent = len + 3;
-    ReSendToPlayer(dp);
+    bufferevent_write(dp->bev, net_server_write, last_sent);
+
 }
 
 int RoomInterface::detectDeckCompatibleLflist(void* pdata)
@@ -203,16 +204,10 @@ int RoomInterface::detectDeckCompatibleLflist(void* pdata)
 
 void RoomInterface::ReSendToPlayer(DuelPlayer* dp)
 {
-    if(players.find(dp) == players.end())
-    {
-        log(INFO,"resend ignorato\n");
-        return;
-    }
-    if(dp)
-    {
-        bufferevent_write(dp->bev, net_server_write, last_sent);
-    }
-
+    char tempbuffer[last_sent];
+    memcpy(tempbuffer,net_server_write,last_sent);
+    char proto = tempbuffer[2];
+    SendBufferToPlayer(dp,proto,tempbuffer+3,last_sent-3);
 }
 
 bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)

@@ -97,6 +97,22 @@ void DuelRoom::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_HS_Pl
 
 void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
+    if(proto == STOC_DUEL_START)
+    {
+        STOC_JoinGame scjg;
+        scjg.info = duel_mode->host_info;
+        scjg.info.time_limit=60;
+        RoomInterface::SendBufferToPlayer(dp, STOC_JOIN_GAME, &scjg,sizeof(STOC_JoinGame));
+
+    }
+    else if(proto == STOC_JOIN_GAME)
+    {
+        STOC_JoinGame *scjg = (STOC_JoinGame *)buffer;
+        scjg->info.time_limit=0;
+
+    }
+
+
     RoomInterface::SendBufferToPlayer(dp,proto,buffer,len);
     if(proto == STOC_GAME_MSG)
     {
