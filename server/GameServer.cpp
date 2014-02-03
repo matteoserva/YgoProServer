@@ -439,8 +439,8 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             int c1 = BufferIO::CopyWStr(dp->name,loginstring,20);
 
             int passc = BufferIO::CopyWStr(ctjg->pass,&loginstring[c1+1],20);
-            if(passc > 0)
-                ;//loginstring[c1] = '$';
+            if(passc > 0 && strchr(loginstring,'$') != nullptr)
+                loginstring[c1] = '$';
 
             auto result = Users::getInstance()->login(std::string(loginstring),dp->ip);
 
