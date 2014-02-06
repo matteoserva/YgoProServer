@@ -224,11 +224,12 @@ int UsersDatabase::login(std::string username,std::string password,char*ip)
             return 1;
         }
 
+        int risultato = 1;
         std::string realPassword = res->getString(1);
         if(realPassword != "" && password != realPassword)
             return 0;
-        if(realPassword != "" && password == realPassword)
-            return 1+res->getInt(2);
+        else if(realPassword != "" && password == realPassword)
+            risultato = 1+res->getInt(2);
         //login success
 
         std::unique_ptr<sql::PreparedStatement> stmt2(con->prepareStatement("UPDATE users set password = ?, last_login = CURRENT_TIMESTAMP,last_ip = ? WHERE username = ?"));
@@ -237,7 +238,7 @@ int UsersDatabase::login(std::string username,std::string password,char*ip)
         stmt2->setString(3, username);
 
         stmt2->execute();
-        return 1;
+        return risultato;
     }
     catch (sql::SQLException &e)
     {
