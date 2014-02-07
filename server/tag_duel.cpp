@@ -26,6 +26,9 @@ void TagDuel::Chat(DuelPlayer* dp, void* pdata, int len) {
 	for(int i = 0; i < 4; ++i)
 		if(players[i] != dp)
 			netServer->SendBufferToPlayer(players[i], STOC_CHAT, &scc, 4 + msglen * 2);
+    for(auto pit = observers.begin(); pit != observers.end(); ++pit)
+			if((*pit) != dp)
+				netServer->ReSendToPlayer(*pit);
 }
 void TagDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 	if(!is_creater) {
