@@ -419,7 +419,7 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     char* pdata = data;
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
 
-    if(dp->netServer == NULL)
+    if(dp->loginStatus == Users::LoginResult::NOTENTERED || dp->loginStatus == Users::LoginResult::WAITINGJOIN)
     {
         if(pktType==CTOS_PLAYER_INFO && dp->loginStatus == Users::LoginResult::NOTENTERED)
         {
@@ -429,8 +429,6 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             BufferIO::CopyWStr(pkt->name,dp->name,20);
 
             dp->loginStatus = Users::LoginResult::WAITINGJOIN;
-
-            return;
         }
         else if(pktType == CTOS_JOIN_GAME && dp->name[0] != 0 && dp->loginStatus == Users::LoginResult::WAITINGJOIN)
         {
@@ -464,10 +462,8 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
                 {
                     loggedUsers[nomes] = dp;
                 }
-
             }
-            else
-                return;
+
         }
         else if(!strcmp(data,"ping"))
         {
@@ -475,21 +471,17 @@ void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             printf("pong\n");
             bufferevent_write(dp->bev, "pong", 5);
             bufferevent_flush(dp->bev, EV_WRITE, BEV_FLUSH);
-            //DisconnectPlayer(dp);
-            return;
+
         }
         else if(!strncmp(data,"ipchange",8))
         {
-
             inet_ntop(AF_INET, &data[8], dp->ip, INET_ADDRSTRLEN);
-            return;
         }
-
         else
         {
             log(WARN,"player info is not the first packet\n");
-            return;
         }
+        return;
     }
 
     roomManager.HandleCTOSPacket(dp,data,len);

@@ -290,6 +290,7 @@ bool RoomManager::InsertPlayerInWaitingRoom(DuelPlayer*dp)
         return false;
     }
     dp->netServer = netServer;
+    netServer->InsertPlayer(dp);
     return true;
 }
 
