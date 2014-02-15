@@ -26,6 +26,8 @@ namespace ygo
         bool disableMysql;
         bool strictAllowedList;
         bool noExternalChat;
+        unsigned int startTimer;
+        unsigned int maxTimer;
         private:
         Config();
         std::string configFile;

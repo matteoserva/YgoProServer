@@ -101,7 +101,7 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
     {
         STOC_JoinGame scjg;
         scjg.info = duel_mode->host_info;
-        scjg.info.time_limit=60;
+        scjg.info.time_limit=Config::getInstance()->maxTimer;
         RoomInterface::SendBufferToPlayer(dp, STOC_JOIN_GAME, &scjg,sizeof(STOC_JoinGame));
 
         for(auto it:players)
@@ -477,7 +477,7 @@ void DuelRoom::createGame()
     info.no_check_deck=false;
     info.start_hand=5;
     info.lflist=0;
-    info.time_limit=60;
+    info.time_limit=Config::getInstance()->startTimer;
     info.start_lp=(getNumDayOfWeek() == 6)?8000:8000;
     info.enable_priority=false;
     info.no_shuffle_deck=false;
@@ -905,7 +905,7 @@ bool DuelRoom::reCheckLfList()
             info.no_check_deck=false;
             info.start_hand=5;
             info.lflist=list_hash;
-            info.time_limit=60;
+            info.time_limit=Config::getInstance()->startTimer;
             info.start_lp=8000;
             info.enable_priority=false;
             info.no_shuffle_deck=false;
@@ -1001,7 +1001,7 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             int resp_type = dp->type;
             if(mode == MODE_TAG)
                 resp_type= dp->type < 2 ? 0 : 1;
-            if(duel_mode->time_limit[resp_type]>0 and duel_mode->time_limit[resp_type]<60)
+            if(duel_mode->time_limit[resp_type]>0 and duel_mode->time_limit[resp_type]<Config::getInstance()->maxTimer)
                 duel_mode->time_limit[resp_type] +=1;
         }
         catch (std::string &errore)
