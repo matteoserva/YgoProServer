@@ -1,3 +1,6 @@
 [submodule "ygopro"]
 	path = ygopro
 	url = https://github.com/Fluorohydride/ygopro.git
+[submodule "ygopro-client"]
+	path = ygopro-client
+	url = ssh://matteo@cyberplanet.it/~/git/ygopro-client
