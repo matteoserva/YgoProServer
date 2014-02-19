@@ -29,6 +29,14 @@ void RoomInterface::SendMessageToPlayer(DuelPlayer*dp, char*msg)
     SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
 }
 
+void RoomInterface::BroadcastRemoteChat(std::wstring msg,int color)
+{
+	for(auto it = players.cbegin(); it!=players.cend(); ++it)
+    {
+        RemoteChatToPlayer(it->first,msg,color);
+    }
+}
+
 void RoomInterface::BroadcastSystemChat(std::wstring msg,bool isAdmin)
 {
     if(isShouting)
@@ -83,6 +91,36 @@ void RoomInterface::shout_internal(std::wstring message,bool isAdmin,std::wstrin
     isShouting=false;
 }
 
+void RoomInterface::RemoteChatToPlayer(DuelPlayer* dp, std::wstring msg,int color)
+{
+	if(msg.length() > 256)
+        msg.resize(256);
+    STOC_Chat scc;
+
+    if(color == -1) //[System]: 
+    {
+        scc.player=8;
+    }
+	if(color == -2) //checkmate admin
+    {
+        msg = L"[CheckMate]: " + msg;
+
+        scc.player=14;
+    }
+    else if(color > 0) //colored chat
+    {
+        scc.player = 11+color;
+    }
+	else //[---]: [name] guest
+	{
+		scc.player = 10;
+	}
+
+    int msglen = BufferIO::CopyWStr(msg.c_str(), scc.msg, 256);
+    SendBufferToPlayer(dp, STOC_CHAT, &scc, 4 + msglen * 2);
+	
+	
+}
 void RoomInterface::SystemChatToPlayer(DuelPlayer*dp, std::wstring msg,bool isAdmin,int color)
 {
     if(msg.length() > 256)
@@ -227,8 +265,8 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
             BufferIO::CopyWStr(dp->name,&stringa[1],25);
             wcscat(stringa,L"]: ");
             wcscat(stringa,msg);
-            for(auto pl:players)
-                SystemChatToPlayer(pl.first,stringa,false,dp->color);
+			BroadcastRemoteChat(stringa,dp->color);
+            
             return true;
         }
         else
@@ -262,7 +300,9 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
             return false;
         wchar_t*msg2 = &messaggio[7];
         std::wstring tmp(msg2);
-        roomManager->BroadcastMessage(tmp,true,false);
+		roomManager->BroadcastMessage(tmp,-2,this);
+		BroadcastRemoteChat(tmp,-2);
+        
         return true;
     }
     else if(!wcsncmp(messaggio,L"!pm ",3) )

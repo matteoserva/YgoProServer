@@ -48,8 +48,9 @@ namespace ygo {
         void BroadcastMessage(std::wstring, bool, bool crossServer = false);
         void BroadcastMessage(std::string, bool, bool crossServer = false);
         void BroadcastMessage(std::wstring message, bool isAdmin,RoomInterface* origin = nullptr);
-
-        void notifyStateChange(DuelRoom* room,DuelRoom::State oldstate,DuelRoom::State newstate);
+		void BroadcastMessage(std::wstring message, int color =0,RoomInterface* origin = nullptr);
+        
+		void notifyStateChange(DuelRoom* room,DuelRoom::State oldstate,DuelRoom::State newstate);
         bool InsertPlayerInWaitingRoom(DuelPlayer*dp);
         bool InsertPlayer(DuelPlayer*dp);
         bool InsertPlayer(DuelPlayer*dp,unsigned char mode);

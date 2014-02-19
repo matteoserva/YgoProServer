@@ -232,6 +232,26 @@ void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,bool cross
 
 }
 
+void RoomManager::BroadcastMessage(std::wstring message, int color,RoomInterface* origin)
+{
+	if(message.length() > 250)
+        return;
+	for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
+    {
+        if((*it) != origin)
+            (*it)->BroadcastRemoteChat(message,color);
+    }
+    for(auto it =playingServer.begin(); it!=playingServer.end(); ++it)
+    {
+        if((*it) != origin)
+            (*it)->BroadcastRemoteChat(message,color);
+    }
+    if(waitingRoom != origin)
+        waitingRoom->BroadcastRemoteChat(message,color);
+	if(origin != nullptr)
+        gameServer->callChatCallback(message,(color<0)?true:false);
+}
+
 void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,RoomInterface* origin)
 {
     if(message.length() > 250)
@@ -405,7 +425,7 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         std::wstring message(messaggio);
         if(sender!=L"")
             message = L"["+sender+L"]: "+message;
-        BroadcastMessage(message,false,dp->netServer);
+        BroadcastMessage(message,0,dp->netServer);
 
         break;
     }

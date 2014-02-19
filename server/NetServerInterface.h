@@ -18,7 +18,7 @@ float secondsWaiting;
 unsigned char last_state_in_timeout;
 bool zombiePlayer;
 
-std::list< std::pair<bool,std::wstring> > pendingMessages;
+std::list< std::pair<int,std::wstring> > pendingMessages;
 
 };
 
@@ -53,6 +53,7 @@ public:
 
     virtual void SendMessageToPlayer(DuelPlayer*dp, char*msg);
     virtual void SystemChatToPlayer(DuelPlayer*dp, std::wstring,bool isAdmin = false,int color = 0);
+	virtual void RemoteChatToPlayer(DuelPlayer*dp, std::wstring,int color = 0);
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
     template<typename ST>
     void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto, ST& st)
@@ -65,6 +66,7 @@ public:
     void shout(unsigned short*,DuelPlayer* dp);
     void shout_internal(std::wstring message,bool isAdmin=false,std::wstring sender=L"");
     void BroadcastSystemChat(std::wstring,bool isAdmin = false);
+	void BroadcastRemoteChat(std::wstring,int color=0);
     virtual void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
     void ReSendToPlayer(DuelPlayer* dp);
     int getNumPlayers();

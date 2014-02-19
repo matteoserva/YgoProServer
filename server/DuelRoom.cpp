@@ -29,7 +29,7 @@ void DuelRoom::flushPendingMessages()
 
         for(auto i=it->second.pendingMessages.begin(); i != it->second.pendingMessages.end(); i++)
         {
-            SystemChatToPlayer(it->first,i->second,i->first);
+            RemoteChatToPlayer(it->first,i->second,i->first);
 
         }
         it->second.pendingMessages.clear();
@@ -783,19 +783,24 @@ void DuelRoom::StopServer()
     updateServerState();
 }
 
-void DuelRoom::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg,bool isAdmin,int color)
+void DuelRoom::RemoteChatToPlayer(DuelPlayer* dp, std::wstring msg,int color)
 {
-    if(chatReady)
+	if(chatReady)
     {
-        RoomInterface::SystemChatToPlayer(dp,msg,isAdmin,color);
+        RoomInterface::RemoteChatToPlayer(dp,msg,color);
     }
     else
     {
-        players[dp].pendingMessages.push_back(std::pair<bool,std::wstring>(isAdmin,msg));
+        players[dp].pendingMessages.push_back(std::pair<int,std::wstring>(color,msg));
         if(players[dp].pendingMessages.size() > 5)
             players[dp].pendingMessages.pop_front();
     }
-
+	
+	
+}
+void DuelRoom::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg,bool isAdmin,int color)
+{
+    RemoteChatToPlayer(dp,msg,isAdmin?-2:color);
 }
 
 void DuelRoom::toObserver(DuelPlayer* dp)
