@@ -61,9 +61,6 @@ $(OUT): $(OBJ) ocgcore #libclzma
 
 clean:	client-clean server-clean
 
-client:
-	make -C client/
-
 client-clean:
 	make -C ygopro-client/build/ clean
 
