@@ -297,8 +297,7 @@ bool WaitingRoom::ChatMessageReceived(DuelPlayer* dp,unsigned short* msg)
     int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
     if(msglen == 0)
         return false;
-    if(handleChatCommand(dp,messaggio))
-        return true;
+    
 
     char sender[20];
     BufferIO::CopyWStr(dp->name,sender,20);

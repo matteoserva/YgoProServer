@@ -356,7 +356,7 @@ void RoomManager::removeDeadRooms()
 void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
 
-    dp->netServer->HandleCTOSPacket(dp,data,len);
+    
     char* pdata = data;
     unsigned char pktType = BufferIO::ReadUInt8(pdata);
     switch(pktType)
@@ -366,10 +366,14 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         wchar_t messaggio[256];
 
         int msglen = BufferIO::CopyWStr((unsigned short*) pdata,messaggio, 256);
+		unsigned short* msgbuf = (unsigned short*)pdata;
+		if(msglen <= 1 || msgbuf[0]=='-')
+			break;
+		if(dp->netServer->handleChatCommand(dp,messaggio))
+			return;
 
-
-        unsigned short* msgbuf = (unsigned short*)pdata;
-        if(msglen <= 1 || msgbuf[0]=='-' || msgbuf[0]=='!')
+        
+        if(msgbuf[0]=='!')
             break;
 
         if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
@@ -406,6 +410,7 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         break;
     }
     }
+	dp->netServer->HandleCTOSPacket(dp,data,len);
 
 }
 

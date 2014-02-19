@@ -1034,8 +1034,7 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(!dp->game)
             return;
 
-        if(msglen != 0 && handleChatCommand(dp,messaggio))
-            break;
+        
 
         duel_mode->Chat(dp, msgbuf, len - 1);
 
