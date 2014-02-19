@@ -480,12 +480,10 @@ void WaitingRoom::ShowChallengeReceived(DuelPlayer* dp,wchar_t * opponent)
 bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
 {
     if(RoomInterface::handleChatCommand(dp,messaggio))
-        return true;
-
-
-
-
-    if(!wcscmp(messaggio,L"!tag") || !wcscmp(messaggio,L"!t"))
+    {
+		//comando riuscito
+	}
+	else if(!wcscmp(messaggio,L"!tag") || !wcscmp(messaggio,L"!t"))
     {
         SystemChatToPlayer(dp,L"http://ygopro.it/help.php",true);
         playerReadinessChange(dp,false);
@@ -520,9 +518,6 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
     }
     else if( !wcsncmp(messaggio,L"!challenge ",11) )
     {
-
-
-
         if(wcslen(messaggio) < 13)
         {
             SystemChatToPlayer(dp,L"I need a username",true);
@@ -565,13 +560,8 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
         {
                 SystemChatToPlayer(dp,L"Error, invalid duel mode. example:  !challenge SINGLE username",true);
         }
-
-
-
-
         return true;
     }
-
     else
     {
         return false;
