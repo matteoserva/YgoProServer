@@ -975,13 +975,13 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         return;
     }
 
-    updateUserTimeout(dp);
+    
     if(state==ZOMBIE)
     {
         log(INFO,"pacchetto ricevuto per uno zombie, ignorato\n");
         return;
     }
-
+	updateUserTimeout(dp);
 
 
     if((pktType != CTOS_SURRENDER) && (pktType != CTOS_CHAT) && (dp->state == 0xff || (dp->state && dp->state != pktType)))
