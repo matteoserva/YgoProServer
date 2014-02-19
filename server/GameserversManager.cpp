@@ -247,7 +247,7 @@ bool GameserversManager::handleChildMessage(int child_fd)
     }
     else if(type == CHAT)
     {
-        GameServerStats* gss = (GameServerStats*)buffer;
+        GameServerChat* gss = (GameServerChat*)buffer;
 
         for(auto it = children.cbegin(); it != children.cend(); ++it)
         {

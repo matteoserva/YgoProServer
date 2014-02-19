@@ -228,7 +228,7 @@ void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,bool cross
     waitingRoom->BroadcastSystemChat(message,isAdmin);
 
     if(!crossServer)
-        gameServer->callChatCallback(message,isAdmin);
+        gameServer->callChatCallback(message,isAdmin?-1:0);
 
 }
 
@@ -249,7 +249,7 @@ void RoomManager::BroadcastMessage(std::wstring message, int color,RoomInterface
     if(waitingRoom != origin)
         waitingRoom->BroadcastRemoteChat(message,color);
 	if(origin != nullptr)
-        gameServer->callChatCallback(message,(color<0)?true:false);
+        gameServer->callChatCallback(message,color);
 }
 
 void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,RoomInterface* origin)
@@ -270,7 +270,7 @@ void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,RoomInterf
         waitingRoom->BroadcastSystemChat(message,isAdmin);
 
     if(origin != nullptr)
-        gameServer->callChatCallback(message,isAdmin);
+        gameServer->callChatCallback(message,isAdmin?-1:0);
 }
 
 bool RoomManager::FillAllRooms()

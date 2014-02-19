@@ -266,7 +266,13 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
             wcscat(stringa,L"]: ");
             wcscat(stringa,msg);
 			BroadcastRemoteChat(stringa,dp->color);
-            
+			stringa[0] = '[';
+            stringa[1] = 0;
+			BufferIO::CopyWStr(dp->name,&stringa[1],25);
+			std::wstring tmp(dp->countryCode.begin(),dp->countryCode.end());
+			tmp = L"<"+tmp+L">]: ";
+			wcscat(stringa,msg);
+            roomManager->BroadcastMessage(stringa,0,this);
             return true;
         }
         else

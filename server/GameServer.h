@@ -27,7 +27,7 @@ struct GameServerStats
 struct GameServerChat
 {
     MessageType type;
-    bool isAdmin;
+    int chatColor;
     wchar_t messaggio[260];
 };
 
@@ -64,7 +64,7 @@ private:
 
 public:
     void injectChatMessage(std::wstring a,bool b);
-    void callChatCallback(std::wstring a,bool b);
+    void callChatCallback(std::wstring a,int color);
 
     static void checkInjectedMessages_cb(evutil_socket_t fd, short events, void* arg);
 

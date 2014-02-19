@@ -57,7 +57,7 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
     try
     {
         sql::Connection* con = MySqlWrapper::getInstance()->getConnection();
-        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("INSERT INTO ajax_chat_messages(userName,userID,userRole,channel,dateTime,ip,text,pid) VALUES (?,3, 1,0,now(),?,?,?)"));
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("INSERT INTO ajax_chat_messages(userName,userID,userRole,channel,dateTime,ip,text,pid,chatColor) VALUES (?,3, 1,0,now(),?,?,?,?)"));
         //sql::PreparedStatement *stmt = con->prepareStatement("INSERT INTO users VALUES (?, ?, ?)");
 
 
@@ -66,6 +66,7 @@ void ExternalChat::broadcastMessage(GameServerChat* msg)
         stmt->setString(2, binaryIP);
         stmt->setString(3, buffer);
         stmt->setInt(4,pid);
+		stmt->setInt(5,msg->chatColor);
         stmt->execute();
 
     }
@@ -86,7 +87,7 @@ std::list<GameServerChat> ExternalChat::getPendingMessages()
         sql::Connection* con = MySqlWrapper::getInstance()->getConnection();
 
         //std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("SELECT rank from (SELECT username,score, @rownum := @rownum + 1 AS rank FROM stats, (SELECT @rownum := 0) r ORDER BY score DESC) z where username = ?"));
-        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select userName,LEFT(text,256),id from ajax_chat_messages where text not like '/%' and id > ? and pid != ? order by id desc limit 5"));
+        std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("select userName,LEFT(text,256),id,chatColor from ajax_chat_messages where text not like '/%' and id > ? and pid != ? order by id desc limit 5"));
 
         stmt->setInt(1, last_id);
         stmt->setInt(2, pid);
@@ -97,11 +98,12 @@ std::list<GameServerChat> ExternalChat::getPendingMessages()
             std::string username = res->getString(1);
             std::string message = res->getString(2);
             int id = res->getInt(3);
+			int chatColor = res->getInt(4);
             if(id>last_id)
                 last_id = id;
             wchar_t buffer[1024];
             GameServerChat gsc;
-            gsc.isAdmin = false;
+            gsc.chatColor = chatColor;
             gsc.type=MessageType::CHAT;
             BufferIO::DecodeUTF8(message.c_str(),buffer);
             swprintf(gsc.messaggio,260,L"[%hs<^_^>]: %ls",username.c_str(),buffer);

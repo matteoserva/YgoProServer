@@ -70,7 +70,7 @@ void GameServer::ManagerRead(bufferevent *bev, void *ctx)
             evbuffer_remove(input, &gsc, sizeof(gsc));
 
             len -= sizeof(gsc);
-            that->roomManager.BroadcastMessage(gsc.messaggio,gsc.isAdmin,true);
+            that->roomManager.BroadcastMessage(gsc.messaggio,gsc.chatColor);
         }
         else
             return;
@@ -195,12 +195,12 @@ void GameServer::ServerAcceptError(evconnlistener* listener, void* ctx)
 
 
 
-void GameServer::callChatCallback(std::wstring message,bool isAdmin)
+void GameServer::callChatCallback(std::wstring message,int color)
 {
     GameServerChat gsc;
     gsc.type = CHAT;
     wcscpy(gsc.messaggio,message.c_str());
-    gsc.isAdmin = isAdmin;
+    gsc.chatColor = color;
     bufferevent_write(manager_buf,&gsc,sizeof(GameServerChat));
 }
 
