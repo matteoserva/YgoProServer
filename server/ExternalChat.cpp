@@ -82,6 +82,13 @@ std::list<GameServerChat> ExternalChat::getPendingMessages()
     std::list<GameServerChat> lista;
     if(Config::getInstance()->noExternalChat)
         return lista;
+		
+	static time_t lastCheck = 0;
+	time_t now = time(NULL);
+	if(now - lastCheck <2)	
+		return lista;
+	lastCheck = now;
+	
     try
     {
         sql::Connection* con = MySqlWrapper::getInstance()->getConnection();
