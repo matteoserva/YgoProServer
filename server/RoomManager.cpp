@@ -407,10 +407,10 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
                 ban(std::string(dp->ip));
                 std::cout<<"banned: "<<std::string(dp->ip)<<std::endl;
                 dp->netServer->LeaveGame(dp);
-                break;
+                return;
             }
-
-            dp->chatTimestamp.pop_front();
+			else
+				dp->chatTimestamp.pop_front();
         }
 
 
