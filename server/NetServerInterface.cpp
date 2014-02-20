@@ -271,6 +271,21 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
         
         return true;
     }
+	else if(!wcsncmp(messaggio,L"!shoutS ",8) )
+    {
+        char name[20];
+        BufferIO::CopyWStr(dp->name,name,20);
+        std::string nome(name);
+        std::transform(nome.begin(), nome.end(), nome.begin(), ::tolower);
+        if(nome != "checkmate")
+            return false;
+        wchar_t*msg2 = &messaggio[8];
+        std::wstring tmp(msg2);
+		roomManager->BroadcastMessage(tmp,-1,this);
+		BroadcastRemoteChat(tmp,-1);
+        
+        return true;
+    }
     else if(!wcsncmp(messaggio,L"!pm ",3) )
     {
         wchar_t mittente[20];
