@@ -63,8 +63,8 @@ void RoomInterface::shout(unsigned short* msg,DuelPlayer* dp)
             LeaveGame(dp);
             return;
         }
-
-        dp->chatTimestamp.pop_front();
+		else
+			dp->chatTimestamp.pop_front();
     }
 
 
