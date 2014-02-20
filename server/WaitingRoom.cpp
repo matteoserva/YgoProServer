@@ -197,7 +197,8 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
 
 
     sprintf(buffer,"PID: %d, BUILD: %d, PLAYERS: %d",(int)getpid(),(int)BUILD_NUMBER,Statistics::getInstance()->getNumPlayers());
-    ChatWithPlayer(dp, "CheckMate",buffer);
+    RemoteChatToPlayer(dp,std::wstring(buffer, buffer + strlen(buffer)),-1);
+	//ChatWithPlayer(dp, "CheckMate",buffer);
 
      ChatWithPlayer(dp, "CheckMate","Welcome to the CheckMate server!");
     //ChatWithPlayer(dp, "CheckMate","Type !tag to enter a tag duel, !single for a single duel or !match");

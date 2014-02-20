@@ -60,7 +60,7 @@ void RoomInterface::RemoteChatToPlayer(DuelPlayer* dp, std::wstring msg,int colo
     {
         scc.player=8;
     }
-	if(color == -2) //checkmate admin
+	else if(color == -2) //checkmate admin
     {
         
 
