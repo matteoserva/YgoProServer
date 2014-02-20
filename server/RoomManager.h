@@ -45,9 +45,7 @@ namespace ygo {
 
         RoomManager();
         ~RoomManager();
-        void BroadcastMessage(std::wstring, bool, bool crossServer = false);
-        void BroadcastMessage(std::string, bool, bool crossServer = false);
-        void BroadcastMessage(std::wstring message, bool isAdmin,RoomInterface* origin = nullptr);
+        
 		void BroadcastMessage(std::wstring message, int color =0,RoomInterface* origin = nullptr);
         
 		void notifyStateChange(DuelRoom* room,DuelRoom::State oldstate,DuelRoom::State newstate);

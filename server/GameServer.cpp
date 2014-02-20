@@ -297,7 +297,8 @@ void GameServer::keepAlive(evutil_socket_t fd, short events, void* arg)
 {
     GameServer*that = (GameServer*) arg;
 
-    that->roomManager.BroadcastMessage(Config::getInstance()->spam_string,true,true);
+	std::string message = Config::getInstance()->spam_string;
+    that->roomManager.BroadcastMessage(std::wstring(message.begin(),message.end()),-1);
 }
 
 void GameServer::sendStats(evutil_socket_t fd, short events, void* arg)

@@ -207,30 +207,7 @@ bool RoomManager::FillRoom(DuelRoom* room)
     }
     return true;
 }
-void RoomManager::BroadcastMessage(std::string message, bool isAdmin,bool crossServer)
-{
-    BroadcastMessage(std::wstring(message.begin(),message.end()), isAdmin, crossServer);
-}
 
-
-void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,bool crossServer)
-{
-    if(message.length() > 250)
-        return;
-    for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
-    {
-        (*it)->BroadcastSystemChat(message,isAdmin);
-    }
-    for(auto it =playingServer.begin(); it!=playingServer.end(); ++it)
-    {
-        (*it)->BroadcastSystemChat(message,isAdmin);
-    }
-    waitingRoom->BroadcastSystemChat(message,isAdmin);
-
-    if(!crossServer)
-        gameServer->callChatCallback(message,isAdmin?-1:0);
-
-}
 
 void RoomManager::BroadcastMessage(std::wstring message, int color,RoomInterface* origin)
 {
@@ -252,26 +229,7 @@ void RoomManager::BroadcastMessage(std::wstring message, int color,RoomInterface
         gameServer->callChatCallback(message,color);
 }
 
-void RoomManager::BroadcastMessage(std::wstring message, bool isAdmin,RoomInterface* origin)
-{
-    if(message.length() > 250)
-        return;
-    for(auto it =elencoServer.begin(); it!=elencoServer.end(); ++it)
-    {
-        if((*it) != origin)
-            (*it)->BroadcastSystemChat(message,isAdmin);
-    }
-    for(auto it =playingServer.begin(); it!=playingServer.end(); ++it)
-    {
-        if((*it) != origin)
-            (*it)->BroadcastSystemChat(message,isAdmin);
-    }
-    if(waitingRoom != origin)
-        waitingRoom->BroadcastSystemChat(message,isAdmin);
 
-    if(origin != nullptr)
-        gameServer->callChatCallback(message,isAdmin?-1:0);
-}
 
 bool RoomManager::FillAllRooms()
 {
