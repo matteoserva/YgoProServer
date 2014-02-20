@@ -7,15 +7,7 @@ namespace ygo
 
 void WaitingRoom::ReadyFlagPressed(DuelPlayer* dp,bool readyFlag)
 {
-    /*if(player_status[dp].status!=DuelPlayerStatus::STATS)
-    {
-        STOC_HS_PlayerChange scpc;
-        scpc.status = (NETPLAYER_TYPE_PLAYER1 << 4) | PLAYERCHANGE_READY;
-        SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
-    }
-    else*/
         playerReadinessChange(dp,readyFlag);
-
 }
 
 void WaitingRoom::ShowDuelSettings(DuelPlayer* dp)

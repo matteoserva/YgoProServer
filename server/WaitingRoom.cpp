@@ -41,22 +41,6 @@ void WaitingRoom::periodic_updates(evutil_socket_t fd, short events, void* arg)
         if(it->second.isReady)
             it->second.secondsWaiting+= 0.1;
 
-/*
-        if(it->second.secondsWaiting< 1.5)
-            continue;
-        int cycle = 10 * (it->second.secondsWaiting-1.5);
-
-        int start = cycle % (banner.length() + 10);
-        if(start >= banner.length())
-            start = 0;
-        std::string newstr = banner.substr(start) + banner.substr(0,start);
-        STOC_HS_PlayerEnter scpe;
-        BufferIO::CopyWStr(newstr.c_str(), scpe.name, 20);
-
-        scpe.pos = 1;*/
-        //that->SendPacketToPlayer(it->first, STOC_HS_PLAYER_ENTER, scpe);
-
-
     }
 
 
@@ -174,27 +158,11 @@ void WaitingRoom::InsertPlayer(DuelPlayer* dp)
     SendPacketToPlayer(dp, STOC_TYPE_CHANGE, sctc);
 
 
-    /*STOC_HS_PlayerEnter scpe;
-    BufferIO::CopyWStr(dp->name, scpe.name, 20);
-    scpe.pos = 0;
-    SendPacketToPlayer(dp, STOC_HS_PLAYER_ENTER, scpe);*/
-
-
-
-
-
-
     updateObserversNum();
-
-    //playerReadinessChange(dp,true);
-
-
 
     ShowStats(dp);
 
     char buffer[200];
-
-
 
     sprintf(buffer,"PID: %d, BUILD: %d, PLAYERS: %d",(int)getpid(),(int)BUILD_NUMBER,Statistics::getInstance()->getNumPlayers());
     RemoteChatToPlayer(dp,std::wstring(buffer, buffer + strlen(buffer)),-1);
