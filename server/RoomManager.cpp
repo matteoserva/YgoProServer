@@ -344,7 +344,7 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(msgbuf[0]=='!')
             break;
 
-        if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
+        if(dp->netServer == waitingRoom ||dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
         {} else break;
 
         dp->chatTimestamp.push_back(time(NULL));
@@ -361,7 +361,9 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 				dp->chatTimestamp.pop_front();
         }
 
-
+		if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
+        {} else break;
+		
         wchar_t name[25];
 
         BufferIO::CopyWStr(dp->name, name, 20);
