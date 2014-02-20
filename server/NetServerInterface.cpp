@@ -47,49 +47,8 @@ void RoomInterface::BroadcastSystemChat(std::wstring msg,bool isAdmin)
     }
 
 }
-void RoomInterface::shout(unsigned short* msg,DuelPlayer* dp)
-{
-    if(last_chat_dp == dp && time(NULL) - dp->chatTimestamp.back() <5)
-        return;
-    last_chat_dp = dp;
-
-    dp->chatTimestamp.push_back(time(NULL));
-    if(dp->chatTimestamp.size() > 5)
-    {
-        if(dp->chatTimestamp.back() - dp->chatTimestamp.front() <5)
-        {
-            roomManager->ban(std::string(dp->ip));
-            std::cout<<"banned: "<<std::string(dp->ip)<<std::endl;
-            LeaveGame(dp);
-            return;
-        }
-		else
-			dp->chatTimestamp.pop_front();
-    }
 
 
-    wchar_t name[25];
-    wchar_t messaggio[200];
-    BufferIO::CopyWStr(msg, messaggio, 200);
-    BufferIO::CopyWStr(dp->name, name, 20);
-    std::wstring tmp(dp->countryCode.begin(),dp->countryCode.end());
-    tmp = L"<"+tmp+L">";
-    wcscat(name,tmp.c_str());
-    if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
-        shout_internal(std::wstring(messaggio),false,std::wstring(name));
-}
-
-#include <algorithm>
-
-void RoomInterface::shout_internal(std::wstring message,bool isAdmin,std::wstring sender)
-{
-    isShouting=true;
-    //std::replace(message.begin(),message.end(),'e','3');
-    if(sender!=L"")
-        message = L"["+sender+L"]: "+message;
-    roomManager->BroadcastMessage(message,isAdmin,false);
-    isShouting=false;
-}
 
 void RoomInterface::RemoteChatToPlayer(DuelPlayer* dp, std::wstring msg,int color)
 {

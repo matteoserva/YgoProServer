@@ -63,8 +63,6 @@ public:
 
     }
     bool isShouting;
-    void shout(unsigned short*,DuelPlayer* dp);
-    void shout_internal(std::wstring message,bool isAdmin=false,std::wstring sender=L"");
     void BroadcastSystemChat(std::wstring,bool isAdmin = false);
 	void BroadcastRemoteChat(std::wstring,int color=0);
     virtual void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
