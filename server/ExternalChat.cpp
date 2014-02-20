@@ -113,7 +113,7 @@ std::list<GameServerChat> ExternalChat::getPendingMessages()
             gsc.chatColor = chatColor;
             gsc.type=MessageType::CHAT;
             BufferIO::DecodeUTF8(message.c_str(),buffer);
-			if(username.find(">",1) != std::string::npos)
+			if(username.find(">",1) != std::string::npos && chatColor == 0)
 				swprintf(gsc.messaggio,260,L"[%hs]: %ls",username.c_str(),buffer);
 			else
 				swprintf(gsc.messaggio,260,L"[%hs<^_^>]: %ls",username.c_str(),buffer);

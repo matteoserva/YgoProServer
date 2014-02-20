@@ -103,7 +103,7 @@ void RoomInterface::RemoteChatToPlayer(DuelPlayer* dp, std::wstring msg,int colo
     }
 	if(color == -2) //checkmate admin
     {
-        msg = L"[CheckMate]: " + msg;
+        
 
         scc.player=14;
     }
@@ -271,6 +271,7 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
 			BufferIO::CopyWStr(dp->name,&stringa[1],25);
 			std::wstring tmp(dp->countryCode.begin(),dp->countryCode.end());
 			tmp = L"<"+tmp+L">]: ";
+			wcscat(stringa,tmp.c_str());
 			wcscat(stringa,msg);
             roomManager->BroadcastMessage(stringa,0,this);
             return true;
@@ -305,7 +306,7 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
         if(nome != "checkmate")
             return false;
         wchar_t*msg2 = &messaggio[7];
-        std::wstring tmp(msg2);
+        std::wstring tmp = L"[CheckMate]: " + std::wstring(msg2);
 		roomManager->BroadcastMessage(tmp,-2,this);
 		BroadcastRemoteChat(tmp,-2);
         
