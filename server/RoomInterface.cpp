@@ -1,4 +1,4 @@
-#include "NetServerInterface.h"
+#include "RoomInterface.h"
 #include "debug.h"
 #include "RoomManager.h"
 #include "GameServer.h"

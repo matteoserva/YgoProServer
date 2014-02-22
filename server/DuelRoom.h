@@ -6,7 +6,7 @@
 #include "data_manager.h"
 #include "deck_manager.h"
 #include <unordered_map>
-#include "NetServerInterface.h"
+#include "RoomInterface.h"
 #include "field.h"
 #include <mutex>
 
