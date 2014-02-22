@@ -369,7 +369,7 @@ void DuelRoom::updateServerState()
     }
     if(numPlayers==0 &&state != DEAD)//&& (state==ZOMBIE || state == WAITING))
     {
-        log(INFO,"server vuoto. addio, morto\n");
+        log(VERBOSE,"server vuoto. addio, morto\n");
 
         destroyGame();
         setState(DEAD);
@@ -390,7 +390,7 @@ void DuelRoom::playerDisconnected(DuelPlayer* dp )
         players.erase(dp);
     numPlayers=players.size();
 
-    log(INFO,"netserver: giocatori connessi:%d\n",numPlayers);
+    log(VERBOSE,"netserver: giocatori connessi:%d\n",numPlayers);
     updateServerState();
 }
 void DuelRoom::DuelTimer(evutil_socket_t fd, short events, void* arg)
@@ -558,7 +558,7 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
     unsigned char oldstate = dp->state;
     unsigned char oldtype = dp->type;
 
-    log(INFO,"leavegame chiamato\n");
+    log(VERBOSE,"leavegame chiamato\n");
 
     /*bug in match duel,
      * if the player leaves during side decking
@@ -806,7 +806,7 @@ void DuelRoom::SystemChatToPlayer(DuelPlayer*dp, const std::wstring msg,bool isA
 void DuelRoom::toObserver(DuelPlayer* dp)
 {
     bool wasReady = players[dp].isReady;
-    log(INFO,"to observer\n");
+    log(VERBOSE,"to observer\n");
     duel_mode->ToObserver(dp);
 
     playerReadinessChange(dp,false);
@@ -1127,7 +1127,7 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
                 scpc.status = (it->first->type << 4) |PLAYERCHANGE_READY;
 
                 SendPacketToPlayer(dp, STOC_HS_PLAYER_CHANGE, scpc);
-                log(INFO,"sent player change to p\n");
+                log(VERBOSE,"sent player change to p\n");
             }
         }
 
