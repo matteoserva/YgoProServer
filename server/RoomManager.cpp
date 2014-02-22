@@ -334,51 +334,70 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         wchar_t messaggio[256];
 
         int msglen = BufferIO::CopyWStr((unsigned short*) pdata,messaggio, 256);
+		if(msglen < 1)
+			return;
+			
+		//ora sappiamo che abbiamo almeno un carattere
 		unsigned short* msgbuf = (unsigned short*)pdata;
 		
-		if(dp->netServer->handleChatCommand(dp,messaggio))
-			return;
-
-        
-        if(msgbuf[0]=='!')
-            break;
+		
+		//e' un comando, non un messaggio chat
+		if(msgbuf[0]=='!')
+		{
+				bool risultato = dp->netServer->handleChatCommand(dp,messaggio);
+				return;
+		}
 
         if(dp->netServer == waitingRoom ||dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
-        {} else break;
+        { //se dobbiamo fare un controllo spam
 
-        dp->chatTimestamp.push_back(time(NULL));
-        if(dp->chatTimestamp.size() > 5)
-        {
-            if(dp->chatTimestamp.back() - dp->chatTimestamp.front() <5)
-            {
-                ban(std::string(dp->ip));
-                std::cout<<"banned: "<<std::string(dp->ip)<<std::endl;
-                dp->netServer->LeaveGame(dp);
-                return;
-            }
-			else
-				dp->chatTimestamp.pop_front();
-        }
-		if(msglen <= 1 || msgbuf[0]=='-')
-			break;
-			
-		if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
-        {} else break;
+			dp->chatTimestamp.push_back(time(NULL));
+			if(dp->chatTimestamp.size() > 5)
+			{
+				if(dp->chatTimestamp.back() - dp->chatTimestamp.front() <5)
+				{
+					ban(std::string(dp->ip));
+					std::cout<<"banned: "<<std::string(dp->ip)<<std::endl;
+					dp->netServer->LeaveGame(dp);
+					return;
+				}
+				else
+					dp->chatTimestamp.pop_front();
+			}
+		}
+		if( msgbuf[0]!='-' && (dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD))
+		{  //se dobbiamo broadcastare
 		
-        wchar_t name[25];
+			wchar_t name[25];
 
-        BufferIO::CopyWStr(dp->name, name, 20);
-        std::wstring tmp(dp->countryCode.begin(),dp->countryCode.end());
-        tmp = L"<"+tmp+L">";
-        wcscat(name,tmp.c_str());
+			BufferIO::CopyWStr(dp->name, name, 20);
+			std::wstring tmp(dp->countryCode.begin(),dp->countryCode.end());
+			tmp = L"<"+tmp+L">";
+			wcscat(name,tmp.c_str());
 
-        std::wstring sender(name);
-        std::wstring message(messaggio);
-        if(sender!=L"")
-            message = L"["+sender+L"]: "+message;
-        BroadcastMessage(message,0,dp->netServer);
+			std::wstring sender(name);
+			std::wstring message(messaggio);
+			if(sender!=L"")
+				message = L"["+sender+L"]: "+message;
+			BroadcastMessage(message,0,dp->netServer);
 
-        break;
+			break;
+		
+		}
+		
+        if(dp->color > 0)
+        {
+
+            wchar_t stringa[256];
+            stringa[0] = '[';
+            stringa[1] = 0;
+            BufferIO::CopyWStr(dp->name,&stringa[1],25);
+            wcscat(stringa,L"]: ");
+            wcscat(stringa,msg);
+			dp->netServer->BroadcastRemoteChat(stringa,dp->color);
+            return;
+        }
+		
     }
     }
 	dp->netServer->HandleCTOSPacket(dp,data,len);

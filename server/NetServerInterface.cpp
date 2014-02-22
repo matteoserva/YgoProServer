@@ -213,33 +213,7 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
     wchar_t mittente[20];
     if(msg[0] == 0 || msg[1] == 0 )
         return false;
-    if(msg[0] != '!')
-    {
-        if(dp->color > 0)
-        {
-
-            wchar_t stringa[256];
-            stringa[0] = '[';
-            stringa[1] = 0;
-            BufferIO::CopyWStr(dp->name,&stringa[1],25);
-            wcscat(stringa,L"]: ");
-            wcscat(stringa,msg);
-			BroadcastRemoteChat(stringa,dp->color);
-			stringa[0] = '[';
-            stringa[1] = 0;
-			BufferIO::CopyWStr(dp->name,&stringa[1],25);
-			std::wstring tmp(dp->countryCode.begin(),dp->countryCode.end());
-			tmp = L"<"+tmp+L">]: ";
-			wcscat(stringa,tmp.c_str());
-			wcscat(stringa,msg);
-            roomManager->BroadcastMessage(stringa,0,this);
-            return true;
-        }
-        else
-            return false;
-    }
-
-    else if(!wcsncmp(messaggio,L"!cheat2",7) )
+    if(!wcsncmp(messaggio,L"!cheat2",7) )
     {
         char buf[16];
         int *val = (int*) &buf[4];
