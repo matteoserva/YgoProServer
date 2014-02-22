@@ -335,8 +335,7 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
         int msglen = BufferIO::CopyWStr((unsigned short*) pdata,messaggio, 256);
 		unsigned short* msgbuf = (unsigned short*)pdata;
-		if(msglen <= 1 || msgbuf[0]=='-')
-			break;
+		
 		if(dp->netServer->handleChatCommand(dp,messaggio))
 			return;
 
@@ -360,7 +359,9 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 			else
 				dp->chatTimestamp.pop_front();
         }
-
+		if(msglen <= 1 || msgbuf[0]=='-')
+			break;
+			
 		if(dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
         {} else break;
 		

@@ -211,7 +211,7 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
 {
     wchar_t* messaggio=msg;
     wchar_t mittente[20];
-    if(msg[0] == 0 )
+    if(msg[0] == 0 || msg[1] == 0 )
         return false;
     if(msg[0] != '!')
     {
