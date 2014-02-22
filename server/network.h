@@ -111,7 +111,7 @@ struct DuelPlayer {
     char ip[INET_ADDRSTRLEN];
     unsigned int cachedRankScore;
     unsigned int cachedGameScore;
-    unsigned char color;
+    signed char color;
     Users::LoginResult loginStatus;
 	DuelPlayer() {
 		game = 0;

@@ -349,6 +349,8 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 				return;
 		}
 
+		if(dp->color == -3)
+			return;
         if(dp->netServer == waitingRoom ||dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
         { //se dobbiamo fare un controllo spam
 
@@ -360,11 +362,12 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 					wchar_t name[20];
 
 					BufferIO::CopyWStr(dp->name, name, 20);
-					std::wstring banmessage = std::wstring(name) + std::wstring(L" is banned for spamming!");
-					ban(std::string(dp->ip));
+					std::wstring banmessage = std::wstring(name) + std::wstring(L" is muted for spamming!");
+					//ban(std::string(dp->ip));
+					dp->color = -3;
 					BroadcastMessage(banmessage,-1);
-					std::cout<<"banned: "<<std::string(dp->ip)<<std::endl;
-					dp->netServer->LeaveGame(dp);
+					//std::cout<<"banned: "<<std::string(dp->ip)<<std::endl;
+					//dp->netServer->LeaveGame(dp);
 					return;
 				}
 				else
