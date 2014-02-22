@@ -344,7 +344,8 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 		//e' un comando, non un messaggio chat
 		if(msgbuf[0]=='!')
 		{
-				bool risultato = dp->netServer->handleChatCommand(dp,messaggio);
+				if(!dp->netServer->handleChatCommand(dp,messaggio))
+				dp->netServer->RemoteChatToPlayer(dp,L"Unrecognized command",-1);
 				return;
 		}
 
@@ -356,7 +357,12 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 			{
 				if(dp->chatTimestamp.back() - dp->chatTimestamp.front() <5)
 				{
+					wchar_t name[20];
+
+					BufferIO::CopyWStr(dp->name, name, 20);
+					std::wstring banmessage = std::wstring(name) + std::wstring(L" is banned for spamming!");
 					ban(std::string(dp->ip));
+					BroadcastMessage(banmessage,-1);
 					std::cout<<"banned: "<<std::string(dp->ip)<<std::endl;
 					dp->netServer->LeaveGame(dp);
 					return;
@@ -380,8 +386,6 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 			if(sender!=L"")
 				message = L"["+sender+L"]: "+message;
 			BroadcastMessage(message,0,dp->netServer);
-
-			break;
 		
 		}
 		
@@ -393,7 +397,7 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             stringa[1] = 0;
             BufferIO::CopyWStr(dp->name,&stringa[1],25);
             wcscat(stringa,L"]: ");
-            wcscat(stringa,msg);
+            wcscat(stringa,messaggio);
 			dp->netServer->BroadcastRemoteChat(stringa,dp->color);
             return;
         }
