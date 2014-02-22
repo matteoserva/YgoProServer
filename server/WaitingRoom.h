@@ -29,7 +29,7 @@ private:
     static const std::string banner;
     bool handleChatCommand(DuelPlayer* dp,wchar_t* msg);
 
-    bool ChatMessageReceived(DuelPlayer* dp,unsigned short* msg);
+    void RoomChat(DuelPlayer* dp, std::wstring messaggio);
     bool ReadyToDuel(DuelPlayer *dp);
     static int minSecondsWaiting;
     static int maxSecondsWaiting;

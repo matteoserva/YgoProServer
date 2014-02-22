@@ -404,7 +404,8 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 			dp->netServer->BroadcastRemoteChat(stringa,dp->color);
             return;
         }
-		
+		dp->netServer->RoomChat(dp,std::wstring(messaggio));
+		return;
     }
     }
 	dp->netServer->HandleCTOSPacket(dp,data,len);

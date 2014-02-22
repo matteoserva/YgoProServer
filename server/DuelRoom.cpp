@@ -966,6 +966,24 @@ return true;
 
 }
 
+
+void DuelRoom::RoomChat(DuelPlayer* dp, std::wstring messaggio)
+{
+	if(!dp->game)
+            return;
+	STOC_Chat scc;
+	scc.player = dp->type;
+	
+	int msglen = BufferIO::CopyWStr(messaggio.c_str(), scc.msg, 256);
+	for(auto it=players.begin(); it!=players.end(); ++it)
+    {
+        if(it->first== dp)
+            continue;
+        SendBufferToPlayer(it->first, STOC_CHAT, &scc, 4 + msglen * 2);
+    }
+	
+}
+
 void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
     char* pdata = data;

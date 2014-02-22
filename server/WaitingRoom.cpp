@@ -259,26 +259,17 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer,int 
     }
     return chosenOne;
 }
-
-bool WaitingRoom::ChatMessageReceived(DuelPlayer* dp,unsigned short* msg)
+void WaitingRoom::RoomChat(DuelPlayer* dp, std::wstring messaggio)
 {
-    wchar_t messaggio[256];
-    int msglen = BufferIO::CopyWStr(msg, messaggio, 256);
-    if(msglen == 0)
-        return false;
-    
-
     char sender[20];
+	
     BufferIO::CopyWStr(dp->name,sender,20);
-    for(auto it=players.begin(); it!=players.end(); ++it)
+	for(auto it=players.begin(); it!=players.end(); ++it)
     {
         if(it->first== dp)
             continue;
         ChatWithPlayer(it->first, std::string(sender) + "<"+dp->countryCode+">",messaggio);
     }
-
-
-    return true;
 
 }
 
@@ -315,7 +306,7 @@ void WaitingRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     }
     case CTOS_CHAT:
     {
-        ChatMessageReceived(dp,(unsigned short*) pdata);
+        //ChatMessageReceived(dp,(unsigned short*) pdata);
         break;
     }
     case CTOS_LEAVE_GAME:

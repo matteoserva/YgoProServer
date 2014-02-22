@@ -61,7 +61,8 @@ private:
     void ShowPlayerScores();
     void flushPendingMessages();
     DuelPlayer * getDpFromType(unsigned char);
-public:
+	public:
+	void RoomChat(DuelPlayer* dp, std::wstring messaggio);
     void SystemChatToPlayer(DuelPlayer*dp, const std::wstring,bool isAdmin=false,int color = 0);
 	void RemoteChatToPlayer(DuelPlayer*dp, std::wstring,int color = 0);
     DuelRoom(RoomManager*roomManager,GameServer*,unsigned char mode);

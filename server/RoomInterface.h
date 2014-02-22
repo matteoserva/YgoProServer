@@ -69,6 +69,7 @@ public:
     void ReSendToPlayer(DuelPlayer* dp);
     int getNumPlayers();
     int detectDeckCompatibleLflist(void* pdata);
+	virtual void RoomChat(DuelPlayer* dp, std::wstring messaggio)=0;
 };
 }
 #endif
