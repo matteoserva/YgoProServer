@@ -351,7 +351,9 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
 		if(dp->color == -3)
 			return;
-        if(dp->netServer == waitingRoom ||dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD)
+			
+		bool daBroadcastare = 	msgbuf[0]!='-' && (dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD);
+        if(dp->netServer == waitingRoom ||daBroadcastare)
         { //se dobbiamo fare un controllo spam
 
 			dp->chatTimestamp.push_back(time(NULL));
@@ -374,7 +376,7 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 					dp->chatTimestamp.pop_front();
 			}
 		}
-		if( msgbuf[0]!='-' && (dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD))
+		if( daBroadcastare)
 		{  //se dobbiamo broadcastare
 		
 			wchar_t name[25];
