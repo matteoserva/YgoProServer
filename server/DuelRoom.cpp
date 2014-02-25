@@ -581,17 +581,19 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
     if(state == PLAYING && dp->game == duel_mode && mode == MODE_TAG && oldtype != NETPLAYER_TYPE_OBSERVER)
     {
          log(BUG,"player disconnected in tag, inform about duel result\n");
-         /*
-         char buf[3];
-         buf[0] = MSG_WIN;
-         buf[1] = oldtype;
-         buf[2] = 0x04;
-         duel_mode->Analyze(buf,3);
-         */
+         
          wchar_t nome[40];
          BufferIO::CopyWStr(dp->name,nome,40);
          std::wstring messaggio = L"Lost connection with: " + std::wstring(nome);
          BroadcastRemoteChat(messaggio,-1);
+		 
+		 //informa tutti del risultato
+         char buf[3];
+         buf[0] = MSG_WIN;
+         buf[1] = 1-(oldtype/2);
+         buf[2] = 0x04;
+         duel_mode->Analyze(buf,3);
+         
         
     }
 
