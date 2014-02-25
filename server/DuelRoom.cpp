@@ -588,11 +588,11 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
          buf[2] = 0x04;
          duel_mode->Analyze(buf,3);
          */
-         /*wchar_t nome[40];
+         wchar_t nome[40];
          BufferIO::CopyWStr(dp->name,nome,40);
          std::wstring messaggio = L"Lost connection with: " + std::wstring(nome);
-         BroadcastSystemChat(messaggio,true);
-        */
+         BroadcastRemoteChat(messaggio,-1);
+        
     }
 
     if(state != ZOMBIE && dp->game == duel_mode)
