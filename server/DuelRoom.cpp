@@ -414,29 +414,38 @@ void DuelRoom::DuelTimer(evutil_socket_t fd, short events, void* arg)
     int limite =  that->duel_mode->time_limit[last_response];
     int trascorso = that->duel_mode->time_elapsed;
     int rimanente = limite - trascorso ;
-    if(rimanente != 4)
+    if(rimanente != 4 && rimanente != 3)
         return;
-    if(that->ultimo_game_message != MSG_SELECT_BATTLECMD && that->ultimo_game_message != MSG_SELECT_IDLECMD)
-            return;
 
+	/* ORA VEDO SE POSSO FARE QUALCOSA*/
+	char buffer[5];
+    int *risposta =(int*) &buffer[1];
+    if(that->ultimo_game_message == MSG_SELECT_BATTLECMD) {
+		*risposta = 3;
+	}
+	else if(that->ultimo_game_message == 16)
+	{
+		*risposta = -1;
+	}
+	else if(that->ultimo_game_message == MSG_SELECT_IDLECMD) {
+		*risposta = 7;
+	}
+	else if(that->ultimo_game_message == 15) {
+		*risposta = 1;
+	}
+	else
+        return;
+	
+	/* CERCO L'UTENTE */
     DuelPlayer *dpattivo = nullptr;
     for(auto it = that->players.cbegin(); it!=that->players.cend(); ++it)
     {
         if(it->first->state == CTOS_RESPONSE)
             dpattivo = it->first;
-     }
+	}
     if(dpattivo == nullptr)
         return;
-    char buffer[5];
-    buffer[0] = CTOS_RESPONSE;
-    int *risposta =(int*) &buffer[1];
-    if(that->ultimo_game_message == MSG_SELECT_BATTLECMD) {
-		*risposta = 3;
-	} else if(that->ultimo_game_message == MSG_SELECT_IDLECMD) {
-		*risposta = 7;
-	}
-	else
-        return;
+    
     that->HandleCTOSPacket(dpattivo, buffer, 5);
 }
 
@@ -1022,8 +1031,9 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         sblocca_segnali();
         try
         {
-            duel_mode->GetResponse(dp, pdata, len > 64 ? 64 : len - 1);
-            int resp_type = dp->type;
+			duel_mode->GetResponse(dp, pdata, len > 64 ? 64 : len - 1);
+            
+			int resp_type = dp->type;
             if(mode == MODE_TAG)
                 resp_type= dp->type < 2 ? 0 : 1;
             if(duel_mode->time_limit[resp_type]>0 and duel_mode->time_limit[resp_type]<Config::getInstance()->maxTimer)
