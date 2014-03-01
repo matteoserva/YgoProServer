@@ -601,7 +601,8 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
          buf[0] = MSG_WIN;
          buf[1] = 1-(oldtype/2);
          buf[2] = 0x04;
-         duel_mode->Analyze(buf,3);
+         for(auto it=players.cbegin(); it!= players.cend(); ++it)
+			SendBufferToPlayer(it->first,STOC_GAME_MSG,buf,3);
          
         
     }
