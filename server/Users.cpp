@@ -248,7 +248,7 @@ void Users::UpdateScore(std::vector<std::string> nomi, int risultato) //0= vitto
 				us_tmp.score = 100;
 			database->setUserStats(us_tmp);
 			
-			log(INFO,"%s score: %d -(%d)-> %d\n",us_tmp.username.c_str(),us[i].score,(us_tmp.score-us[i].score),us_tmp.score);
+			log(INFO,"%s score: %d >(%+d)-> %d\n",us_tmp.username.c_str(),us[i].score,(us_tmp.score-us[i].score),us_tmp.score);
 			
 		}
 		
