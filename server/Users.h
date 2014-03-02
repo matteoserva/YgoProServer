@@ -7,6 +7,7 @@
 #include <ctime>
 #include <mutex>
 #include <thread>
+#include <vector>
 
 namespace ygo
 {
@@ -89,6 +90,7 @@ public:
     void Draw(std::string d1, std::string d2,std::string d3, std::string d4);
     void Victory(std::string, std::string);
     void Victory(std::string, std::string,std::string, std::string);
+	void UpdateScore(std::vector<std::string> nomi, int risultato);
 
 };
 

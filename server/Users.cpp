@@ -172,37 +172,12 @@ static int k(const UserStats &us)
 
 void Users::Draw(std::string win, std::string los)
 {
-    if(win[0] == '-')
-        return;
-    if(los[0] == '-')
-        return;
-
-    try
-    {
-        UserStats us_win = database->getUserStats(win);
-        UserStats us_los = database->getUserStats(los);
-        int winscore = us_win.score;
-        int losescore = us_los.score;
-        int delta = winscore-losescore;
-        us_win.score = winscore + k(us_win) * (0.5-win_exp(delta));
-        us_los.score = losescore + k(us_los) * (0.5 - win_exp(-delta));
-
-        us_win.draws++;
-        us_los.draws++;
-        if(us_los.score < 100)
-            us_los.score = 100;
-        if(us_win.score < 100)
-            us_win.score = 100;
-        database->setUserStats(us_win);
-        database->setUserStats(us_los);
-
-        log(INFO,"%s score: %d --> %d\n",us_win.username.c_str(),winscore,us_win.score);
-        log(INFO,"%s score: %d --> %d\n",us_los.username.c_str(),losescore,us_los.score);
-    }
-    catch (std::exception e)
-    {
-
-    }
+    
+    std::vector<std::string> nomi;
+	nomi.push_back(win);
+	nomi.push_back(los);	
+	
+	Users::getInstance()->UpdateScore(nomi,2);
 }
 
 std::string Users::getCountryCode(std::string ip)
@@ -213,162 +188,123 @@ std::string Users::getCountryCode(std::string ip)
 
 }
 
-void Users::Draw(std::string win1, std::string win2,std::string los1, std::string los2)
+void Users::UpdateScore(std::vector<std::string> nomi, int risultato) //0= vittoria, -1 = pareggio
 {
-    if(win1[0] == '-')
-        return;
-    if(los1[0] == '-')
-        return;
-    if(win2[0] == '-')
-        return;
-    if(los2[0] == '-')
-        return;
-
-    try
+	std::vector<UserStats> us;
+	
+	unsigned int num_squadra1 = nomi.size()/2;
+	unsigned int num_squadra2 = nomi.size() - num_squadra1;
+	
+	unsigned int media_squadra1=0;
+	unsigned int media_squadra2=0;
+	int delta = 0;
+	try
     {
-        UserStats us_win1 = database->getUserStats(win1);
-        UserStats us_win2 = database->getUserStats(win2);
-        UserStats us_los1 = database->getUserStats(los1);
-        UserStats us_los2 = database->getUserStats(los2);
+		int pos = 0;
+		for(auto nome = nomi.cbegin(); nome != nomi.cend();++nome,++pos)
+		{
+			if((*nome)[0] == '-')
+				return;
+			UserStats us_tmp = database->getUserStats(*nome);
+			us.push_back(us_tmp);
+			if(pos < num_squadra1)
+				media_squadra1 += us_tmp.score;
+			else
+				media_squadra2 += us_tmp.score;
+		}
+		media_squadra1 /= num_squadra1;
+		media_squadra2 /= num_squadra2;
+		delta = media_squadra1 - media_squadra2;
+			
+		
+		for(int i = 0;i<nomi.size();i++)
+		{
+			UserStats us_tmp = us[i];
+			
+			if(i<num_squadra1 && risultato == 0)
+			{
+				us_tmp.score += k(us_tmp) * (1.0-win_exp(delta))  * 1.0*us_tmp.score/media_squadra1;
+				us_tmp.wins++;
+			}
+			else if(i>=num_squadra1 && risultato == 0)
+			{
+				us_tmp.score += k(us_tmp) * (0.0-win_exp(-delta))  * 1.0*us_tmp.score/media_squadra2;
+				us_tmp.losses++;
+			}
+			else if(i<num_squadra1 && risultato == 2)
+			{
+				us_tmp.score += k(us_tmp) * (0.5-win_exp(delta))  * 1.0*us_tmp.score/media_squadra1;
+				us_tmp.draws++;
+			}
+			else if(i>=num_squadra1 && risultato == 2)
+			{
+				us_tmp.score += k(us_tmp) * (0.5-win_exp(-delta))  * 1.0*us_tmp.score/media_squadra2;
+				us_tmp.draws++;
+			}
 
-        int win1score = us_win1.score;
-        int lose1score = us_los1.score;
-        int win2score = us_win2.score;
-        int lose2score = us_los2.score;
-        int delta = (win1score+win2score-lose1score-lose2score)/2; //<-- /2!
-
-        us_win1.score += k(us_win1) * (0.5-win_exp(delta))  * 2.0*win1score/(win1score+win2score);
-        us_win2.score += k(us_win2) * (0.5-win_exp(delta))  * 2.0*win2score/(win1score+win2score);
-        us_los1.score += k(us_los1) * (0.5-win_exp(-delta)) * 2.0*lose1score/(lose1score+lose2score);
-        us_los2.score += k(us_los2) * (0.5-win_exp(-delta)) * 2.0*lose2score/(lose1score+lose2score);
-
-        if(us_los1.score < 100)
-            us_los1.score = 100;
-        if(us_los2.score < 100)
-            us_los2.score = 100;
-        if(us_win1.score < 100)
-            us_win1.score = 100;
-        if(us_win2.score < 100)
-            us_win2.score = 100;
-
-        us_win1.draws++;
-        us_los1.draws++;
-        us_win2.draws++;
-        us_los2.draws++;
-
-        us_win1.tags++;
-        us_los1.tags++;
-        us_win2.tags++;
-        us_los2.tags++;
-
-        database->setUserStats(us_win1);
-        database->setUserStats(us_los1);
-        database->setUserStats(us_win2);
-        database->setUserStats(us_los2);
-
-        log(INFO,"%s score: %d --> %d\n",win1.c_str(),win1score,us_win1.score);
-        log(INFO,"%s score: %d --> %d\n",win2.c_str(),win2score,us_win2.score);
-        log(INFO,"%s score: %d --> %d\n",los1.c_str(),lose1score,us_los1.score);
-        log(INFO,"%s score: %d --> %d\n",los2.c_str(),lose2score,us_los2.score);
-    }
+			if(num_squadra2 > 1)
+				us_tmp.tags++;
+			if(us_tmp.score < 100)
+				us_tmp.score = 100;
+			database->setUserStats(us_tmp);
+			
+			log(INFO,"%s score: %d -(%d)-> %d\n",us_tmp.username.c_str(),us[i].score,(us_tmp.score-us[i].score),us_tmp.score);
+			
+		}
+		
+	}
     catch (std::exception e)
     {
 
     }
+	
+	
+	/*
+	std::vector<std::string> nomi;
+	nomi.push_back("checkmate");
+	nomi.push_back("overcold_ice");
+	nomi.push_back("makop");
+	nomi.push_back("makop");
+	
+	
+	Users::getInstance()->UpdateScore(nomi,0);*/
+	
+	
+	
+}
+
+void Users::Draw(std::string win1, std::string win2,std::string los1, std::string los2)
+{
+    std::vector<std::string> nomi;
+	nomi.push_back(win1);
+	nomi.push_back(win2);
+	nomi.push_back(los1);
+	nomi.push_back(los2);
+	
+	
+	Users::getInstance()->UpdateScore(nomi,2);
 }
 
 void Users::Victory(std::string win, std::string los)
 {
-    if(win[0] == '-')
-        return;
-    if(los[0] == '-')
-        return;
-
-    try
-    {
-        UserStats us_win = database->getUserStats(win);
-        UserStats us_los = database->getUserStats(los);
-        int winscore = us_win.score;
-        int losescore = us_los.score;
-        int delta = winscore-losescore;
-        us_win.score = winscore + k(us_win) * (1.0-win_exp(delta));
-        us_los.score = losescore + k(us_los) * (0.0 - win_exp(-delta));
-
-        us_win.wins++;
-        us_los.losses++;
-        if(us_los.score < 100)
-            us_los.score = 100;
-        database->setUserStats(us_win);
-        database->setUserStats(us_los);
-
-        log(INFO,"%s score: %d --> %d\n",us_win.username.c_str(),winscore,us_win.score);
-        log(INFO,"%s score: %d --> %d\n",us_los.username.c_str(),losescore,us_los.score);
-    }
-    catch (std::exception e)
-    {
-
-    }
+    std::vector<std::string> nomi;
+	nomi.push_back(win);
+	nomi.push_back(los);	
+	
+	Users::getInstance()->UpdateScore(nomi,0);
 
 }
 void Users::Victory(std::string win1, std::string win2,std::string los1, std::string los2)
 {
 
-    if(win1[0] == '-')
-        return;
-    if(los1[0] == '-')
-        return;
-    if(win2[0] == '-')
-        return;
-    if(los2[0] == '-')
-        return;
-
-    try
-    {
-        UserStats us_win1 = database->getUserStats(win1);
-        UserStats us_win2 = database->getUserStats(win2);
-        UserStats us_los1 = database->getUserStats(los1);
-        UserStats us_los2 = database->getUserStats(los2);
-
-        int win1score = us_win1.score;
-        int lose1score = us_los1.score;
-        int win2score = us_win2.score;
-        int lose2score = us_los2.score;
-        int delta = (win1score+win2score-lose1score-lose2score)/2; //<-- /2!
-
-        us_win1.score += k(us_win1) * (1.0-win_exp(delta))  * 2.0*win1score/(win1score+win2score);
-        us_win2.score += k(us_win2) * (1.0-win_exp(delta))  * 2.0*win2score/(win1score+win2score);
-        us_los1.score += k(us_los1) * (0.0-win_exp(-delta)) * 2.0*lose1score/(lose1score+lose2score);
-        us_los2.score += k(us_los2) * (0.0-win_exp(-delta)) * 2.0*lose2score/(lose1score+lose2score);
-
-        if(us_los1.score < 100)
-            us_los1.score = 100;
-        if(us_los2.score < 100)
-            us_los2.score = 100;
-
-        us_win1.wins++;
-        us_los1.losses++;
-        us_win2.wins++;
-        us_los2.losses++;
-
-        us_win1.tags++;
-        us_los1.tags++;
-        us_win2.tags++;
-        us_los2.tags++;
-
-        database->setUserStats(us_win1);
-        database->setUserStats(us_los1);
-        database->setUserStats(us_win2);
-        database->setUserStats(us_los2);
-
-        log(INFO,"%s score: %d --> %d\n",win1.c_str(),win1score,us_win1.score);
-        log(INFO,"%s score: %d --> %d\n",win2.c_str(),win2score,us_win2.score);
-        log(INFO,"%s score: %d --> %d\n",los1.c_str(),lose1score,us_los1.score);
-        log(INFO,"%s score: %d --> %d\n",los2.c_str(),lose2score,us_los2.score);
-    }
-    catch (std::exception e)
-    {
-
-    }
+    std::vector<std::string> nomi;
+	nomi.push_back(win1);
+	nomi.push_back(win2);
+	nomi.push_back(los1);
+	nomi.push_back(los2);
+	
+	
+	Users::getInstance()->UpdateScore(nomi,0);
 
 }
 
