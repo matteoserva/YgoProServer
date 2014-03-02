@@ -1047,7 +1047,7 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             setState(ZOMBIE);
             updateServerState();
 
-            kill(SIGTERM,getpid());
+            kill(SIGINT,getpid());
 
         }
         blocca_segnali();

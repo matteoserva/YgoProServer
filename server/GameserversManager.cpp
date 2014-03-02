@@ -25,11 +25,13 @@ void sigterm_handler(int signum)
     needsReboot=true;
     ++timesPressed;
 
-    printf("SIGTERM received: now %d\n",timesPressed);
+    printf("SIGINT received: now %d\n",timesPressed);
     if(timesPressed ==10)
         kill(getpid(),SIGKILL);
-    else if(timesPressed >= 5)
+	else if(timesPressed ==6)
         kill(getpid(),SIGQUIT);
+    else if(timesPressed == 5)
+        kill(getpid(),SIGTERM);
 }
 
 GameServerStats::GameServerStats(): rooms(0),players(0)
@@ -104,7 +106,7 @@ void GameserversManager::ShowStats()
 
 GameserversManager::GameserversManager():maxchildren(4)
 {
-    signal(SIGTERM, sigterm_handler);
+   // signal(SIGTERM, sigterm_handler);
     signal(SIGINT, sigterm_handler);
     prepara_segnali();
 }
@@ -353,9 +355,9 @@ void GameserversManager::parent_loop()
             {
                 ChildInfo gss = it->second;
                 if(!gss.isAlive && gss.rooms == 0 )
-                    kill(gss.pid,SIGTERM);
+                    kill(gss.pid,SIGINT);
                 else if(now -gss.last_update > 30)
-                    kill(gss.pid,SIGTERM);
+                    kill(gss.pid,SIGINT);
 
             }
             lastDeadCheck = time(NULL);
@@ -383,7 +385,7 @@ void GameserversManager::parent_loop()
                 }
 
             children[chosen_one].isAlive = false;
-            kill(chosen_pid,SIGTERM);
+            kill(chosen_pid,SIGINT);
             if(children.size()-getNumAliveChildren() > Config::getInstance()->max_processes)
                 killOneTerminatingServer();
         }
