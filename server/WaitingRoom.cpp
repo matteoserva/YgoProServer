@@ -255,7 +255,7 @@ DuelPlayer* WaitingRoom::ExtractBestMatchPlayer(DuelPlayer* referencePlayer,int 
     if(chosenOne != nullptr)
     {
         ExtractPlayer(chosenOne);
-        log(INFO,"qdifference = %d\n",qdifference);
+        log(VERBOSE,"qdifference = %d\n",qdifference);
     }
     return chosenOne;
 }

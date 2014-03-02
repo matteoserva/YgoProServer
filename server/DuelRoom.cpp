@@ -169,7 +169,7 @@ DuelPlayer * DuelRoom::getDpFromType(unsigned char type)
 void DuelRoom::auto_idle_cb(evutil_socket_t fd, short events, void* arg)
 {
     DuelRoom* that = (DuelRoom*)arg;
-    log(INFO,"auto idle_cb\n");
+    log(VERBOSE,"auto idle_cb\n");
     if(that->state != FULL)
         return;
     for(auto it = that->players.cbegin(); it!=that->players.cend(); ++it)
@@ -773,7 +773,7 @@ void DuelRoom::Victory(char winner)
 void DuelRoom::StopServer()
 {
     //the duel asked me to stop
-    log(INFO,"netserver server diventato zombie\n");
+    log(VERBOSE,"netserver server diventato zombie\n");
     if(state==PLAYING)
     {
         Victory(last_winner);
