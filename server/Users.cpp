@@ -177,7 +177,7 @@ void Users::Draw(std::string win, std::string los)
 	nomi.push_back(win);
 	nomi.push_back(los);	
 	
-	Users::getInstance()->UpdateScore(nomi,2);
+	UpdateScore(nomi,2);
 }
 
 std::string Users::getCountryCode(std::string ip)
@@ -258,19 +258,6 @@ void Users::UpdateScore(std::vector<std::string> nomi, int risultato) //0= vitto
 
     }
 	
-	
-	/*
-	std::vector<std::string> nomi;
-	nomi.push_back("checkmate");
-	nomi.push_back("overcold_ice");
-	nomi.push_back("makop");
-	nomi.push_back("makop");
-	
-	
-	Users::getInstance()->UpdateScore(nomi,0);*/
-	
-	
-	
 }
 
 void Users::Draw(std::string win1, std::string win2,std::string los1, std::string los2)
@@ -282,7 +269,7 @@ void Users::Draw(std::string win1, std::string win2,std::string los1, std::strin
 	nomi.push_back(los2);
 	
 	
-	Users::getInstance()->UpdateScore(nomi,2);
+	UpdateScore(nomi,2);
 }
 
 void Users::Victory(std::string win, std::string los)
@@ -291,7 +278,7 @@ void Users::Victory(std::string win, std::string los)
 	nomi.push_back(win);
 	nomi.push_back(los);	
 	
-	Users::getInstance()->UpdateScore(nomi,0);
+	UpdateScore(nomi,0);
 
 }
 void Users::Victory(std::string win1, std::string win2,std::string los1, std::string los2)
@@ -304,7 +291,7 @@ void Users::Victory(std::string win1, std::string win2,std::string los1, std::st
 	nomi.push_back(los2);
 	
 	
-	Users::getInstance()->UpdateScore(nomi,0);
+	UpdateScore(nomi,0);
 
 }
 
