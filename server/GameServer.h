@@ -63,10 +63,8 @@ private:
 
 
 public:
-    void injectChatMessage(std::wstring a,bool b);
     void callChatCallback(std::wstring a,int color);
 
-    static void checkInjectedMessages_cb(evutil_socket_t fd, short events, void* arg);
 
 
     DuelPlayer* findPlayer(std::wstring);

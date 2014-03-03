@@ -204,11 +204,6 @@ void GameServer::callChatCallback(std::wstring message,int color)
     bufferevent_write(manager_buf,&gsc,sizeof(GameServerChat));
 }
 
-void GameServer::injectChatMessage(std::wstring a,bool b)
-{
-    std::lock_guard<std::mutex> lock(injectedMessages_mutex);
-    injectedMessages.push_back(std::pair<std::wstring,bool>(a,b));
-}
 
 DuelPlayer* GameServer::findPlayer(std::wstring nome)
 {
@@ -315,24 +310,7 @@ void GameServer::sendStats(evutil_socket_t fd, short events, void* arg)
         event_base_loopbreak(that->net_evbase);
 
 }
-void GameServer::checkInjectedMessages_cb(evutil_socket_t fd, short events, void* arg)
-{
-    GameServer*that = (GameServer*) arg;
-    std::lock_guard<std::mutex> lock(that->injectedMessages_mutex);
-    if(that->injectedMessages.size() == 0)
-        return;
 
-    for(auto it = that->injectedMessages.begin(); it!=that->injectedMessages.end(); ++it)
-    {
-
-
-
-
-    }
-
-    that->injectedMessages.clear();
-
-}
 
 
 int GameServer::ServerThread(void* parama)
