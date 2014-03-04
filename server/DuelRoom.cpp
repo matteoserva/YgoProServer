@@ -62,10 +62,15 @@ bool DuelRoom::isAvailableToPlayer(DuelPlayer* refdp, unsigned char refmode)
     return true;
 }
 
-
-
 void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
+	if(proto == STOC_DUEL_END)
+	{
+		 char* p = net_server_write;
+		 BufferIO::WriteInt16(p, 1);
+		 BufferIO::WriteInt8(p, proto);
+		return;
+	}
 	if(proto == STOC_TYPE_CHANGE)
 	{
 		STOC_TypeChange *sctc = (STOC_TypeChange *) buffer;
@@ -603,6 +608,14 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
         
     }
 
+	if(state == DUEL_END && dp->type != NETPLAYER_TYPE_OBSERVER)
+	{
+		for(auto it = players.cbegin();it != players.cend();++it)
+			RoomInterface::SendBufferToPlayer(it->first,STOC_DUEL_END,nullptr,0);
+		setState(ZOMBIE);
+		updateServerState();
+	}
+
     if(state != ZOMBIE && dp->game == duel_mode)
         duel_mode->LeaveGame(dp);
     else
@@ -774,15 +787,35 @@ void DuelRoom::StopServer()
         Victory(last_winner);
 
 	int numReady = 0;
-	for(auto it = players.cbegin();it != players.cend();it++)
+	for(auto it = players.begin();it != players.end();it++)
 	{
 		if(it->first->type != NETPLAYER_TYPE_OBSERVER && it->second.isReady)
 			numReady++;
+		it->second.isReady = false;
 	}
+
 	if(getMaxDuelPlayers() == numReady)
-		printf("si potrebbe ricominciare\n");
-    setState(ZOMBIE);
-    updateServerState();
+	{
+		//ricominciare si puo'
+		char buffer[10];
+		buffer[0] = MSG_SELECT_YESNO;
+		buffer[1] = 0;
+		buffer[2] = 30;
+		buffer[3] = buffer[4] = buffer[5] = 0;
+		for(auto it = players.cbegin();it != players.cend();++it)
+			if(it->first->type !=  NETPLAYER_TYPE_OBSERVER)
+			RoomInterface::SendBufferToPlayer(it->first,STOC_GAME_MSG,buffer,6);
+		
+		setState(DUEL_END);
+	}
+	else
+	{
+		for(auto it = players.cbegin();it != players.cend();++it)
+			RoomInterface::SendBufferToPlayer(it->first,STOC_DUEL_END,nullptr,0);
+		setState(ZOMBIE);
+		updateServerState();
+	
+	}
 }
 
 void DuelRoom::RemoteChatToPlayer(DuelPlayer* dp, std::wstring msg,int color)
@@ -1000,7 +1033,38 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         return;
     }
 
-    
+    if(state==DUEL_END)
+	{
+		if(pktType != CTOS_RESPONSE || data[1] != 1)
+		{
+			for(auto it = players.cbegin();it != players.cend();it++)
+				RoomInterface::SendBufferToPlayer(it->first,STOC_DUEL_END,nullptr,0);
+			setState(ZOMBIE);
+			//LeaveGame(dp);
+		}
+		
+		else
+		{
+			players[dp].isReady= true;
+			int numReady = 0;
+			for(auto it = players.cbegin();it != players.cend();it++)
+			{
+				if(it->first->type != NETPLAYER_TYPE_OBSERVER && it->second.isReady)
+					numReady++;
+			}
+
+			if(getMaxDuelPlayers() == numReady)
+			{
+				setState(FULL);
+				duel_mode->host_player = dp;
+				duel_mode->StartDuel(dp);
+				duel_mode->host_player=NULL;
+				
+			}
+		}
+		return;
+	}
+	
     if(state==ZOMBIE)
     {
         log(INFO,"pacchetto ricevuto per uno zombie, ignorato\n");

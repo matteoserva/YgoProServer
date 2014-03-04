@@ -79,7 +79,7 @@ void RoomManager::notifyStateChange(DuelRoom* room,DuelRoom::State oldstate,Duel
     }
     else if(newstate == DuelRoom::ZOMBIE || newstate == DuelRoom::DEAD)
     {
-        if(oldstate == DuelRoom::PLAYING)
+        if(oldstate == DuelRoom::PLAYING || oldstate == DuelRoom::DUEL_END)
             playingServer.erase(room);
         else
             elencoServer.remove(room);
