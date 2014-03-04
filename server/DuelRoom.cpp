@@ -36,25 +36,7 @@ void DuelRoom::flushPendingMessages()
     }
 
 }
-void DuelRoom::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto)
-{
-    RoomInterface::SendPacketToPlayer(dp,proto);
-    if(proto == STOC_DUEL_START)
-    {
-        clientStarted();
-    }
-    else if(proto == STOC_CHANGE_SIDE)
-    {
-        chatReady=false;
-        ReadyMessagesSent=0;
-    }
-}
 
-void DuelRoom::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_TypeChange sctc)
-{
-    sctc.type &= ~ 0x10;
-    RoomInterface::SendPacketToPlayer(dp,proto,sctc);
-}
 
 bool DuelRoom::isAvailableToPlayer(DuelPlayer* refdp, unsigned char refmode)
 {
@@ -80,23 +62,17 @@ bool DuelRoom::isAvailableToPlayer(DuelPlayer* refdp, unsigned char refmode)
     return true;
 }
 
-void DuelRoom::SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_HS_PlayerChange scpc)
-{
 
-
-    /* BUG, fixato, se l'utente si readyzza con un deck invalido gli altri non si accorgono che non e' ready
-*/
-    if(dp->type == (scpc.status >>4) && ((scpc.status&0x0f) == PLAYERCHANGE_READY) != players[dp].isReady)
-    {
-       playerReadinessChange(dp,!players[dp].isReady);
-       log(BUG,"bug in readiness\n");
-    }
-    RoomInterface::SendPacketToPlayer(dp,proto,scpc);
-
-}
 
 void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
+	if(proto == STOC_TYPE_CHANGE)
+	{
+		STOC_TypeChange *sctc = (STOC_TypeChange *) buffer;
+		sctc->type &= ~ 0x10;
+		
+		
+	}
     if(proto == STOC_DUEL_START)
     {
         STOC_JoinGame scjg;
@@ -153,6 +129,26 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
 
         ReadyMessagesSent=0;
     }
+	if (proto == STOC_HS_PLAYER_CHANGE)
+	{
+		STOC_HS_PlayerChange *scpc = (STOC_HS_PlayerChange *) buffer;
+		if(dp->type == (scpc->status >>4) && ((scpc->status&0x0f) == PLAYERCHANGE_READY) != players[dp].isReady)
+		{
+		   playerReadinessChange(dp,!players[dp].isReady);
+		   log(BUG,"bug in readiness\n");
+		}
+		
+	}
+	if(proto == STOC_DUEL_START)
+    {
+        clientStarted();
+    }
+    else if(proto == STOC_CHANGE_SIDE)
+    {
+        chatReady=false;
+        ReadyMessagesSent=0;
+    }
+	
 }
 
 DuelPlayer * DuelRoom::getDpFromType(unsigned char type)

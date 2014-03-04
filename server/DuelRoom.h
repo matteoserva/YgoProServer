@@ -79,10 +79,7 @@ private:
     void InsertPlayer(DuelPlayer* dp);
     void ExtractPlayer(DuelPlayer* dp);
     bool isAvailableToPlayer(DuelPlayer* dp, unsigned char mode);
-    using RoomInterface::SendPacketToPlayer;
-    void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto);
-    void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_TypeChange);
-    void SendPacketToPlayer(DuelPlayer* dp, unsigned char proto,STOC_HS_PlayerChange);
+    //using RoomInterface::SendPacketToPlayer;
     void SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len);
 };
 
