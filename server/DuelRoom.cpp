@@ -562,7 +562,7 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
 {
     unsigned char oldstate = dp->state;
     unsigned char oldtype = dp->type;
-
+	players[dp].isReady = false;
     log(VERBOSE,"leavegame chiamato\n");
 
     /*bug in match duel,
@@ -771,22 +771,16 @@ void DuelRoom::StopServer()
     //the duel asked me to stop
     log(VERBOSE,"netserver server diventato zombie\n");
     if(state==PLAYING)
-    {
         Victory(last_winner);
-        if(mode == MODE_TAG)
-        {
-            //Bug in tagduel.cpp
-            //only the first two players were notified at the end of the duel
-            /*for(auto it=players.cbegin(); it!= players.cend(); ++it)
-            {
-                if(it->first->type == NETPLAYER_TYPE_PLAYER3 || it->first->type == NETPLAYER_TYPE_PLAYER4)
-                    SendPacketToPlayer(it->first, STOC_DUEL_END);
-            }*/
-        }
 
-
-
-    }
+	int numReady = 0;
+	for(auto it = players.cbegin();it != players.cend();it++)
+	{
+		if(it->first->type != NETPLAYER_TYPE_OBSERVER && it->second.isReady)
+			numReady++;
+	}
+	if(getMaxDuelPlayers() == numReady)
+		printf("si potrebbe ricominciare\n");
     setState(ZOMBIE);
     updateServerState();
 }
