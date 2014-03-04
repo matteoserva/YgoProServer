@@ -272,7 +272,7 @@ int DuelRoom::getLfList()
 
 void DuelRoom::clientStarted()
 {
-    if(state==FULL)
+    if(state==FULL || state == DUEL_END)
     {
         setState(PLAYING);
         timeval timeout = {TIMEOUT_INTERVAL, 0};
@@ -1055,7 +1055,7 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
 			if(getMaxDuelPlayers() == numReady)
 			{
-				setState(FULL);
+				
 				duel_mode->host_player = dp;
 				duel_mode->StartDuel(dp);
 				duel_mode->host_player=NULL;

@@ -72,7 +72,7 @@ void RoomManager::tryToInsertPlayerInServer(DuelPlayer*dp,DuelRoom* serv)
 
 void RoomManager::notifyStateChange(DuelRoom* room,DuelRoom::State oldstate,DuelRoom::State newstate)
 {
-    if(newstate == DuelRoom::PLAYING)
+    if(newstate == DuelRoom::PLAYING && oldstate == DuelRoom::FULL)
     {
         elencoServer.remove(room);
         playingServer.insert(room);
