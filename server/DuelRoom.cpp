@@ -619,6 +619,10 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
 		setState(ZOMBIE);
 		updateServerState();
 	}
+	if(state == DUEL_END && dp->type == NETPLAYER_TYPE_OBSERVER)
+	{
+		players[dp].zombiePlayer = true;
+	}
 	
     if(state != ZOMBIE && dp->game == duel_mode)
         duel_mode->LeaveGame(dp);
