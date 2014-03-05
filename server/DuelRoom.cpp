@@ -420,6 +420,7 @@ void DuelRoom::DuelTimer(evutil_socket_t fd, short events, void* arg)
 
 	/* ORA VEDO SE POSSO FARE QUALCOSA*/
 	char buffer[5];
+	buffer[0] = CTOS_RESPONSE;
     int *risposta =(int*) &buffer[1];
     if(that->ultimo_game_message == MSG_SELECT_BATTLECMD) {
 		*risposta = 3;
@@ -890,6 +891,10 @@ void DuelRoom::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
         else if(that->state == ZOMBIE && it->second.zombiePlayer == false)
             it->second.zombiePlayer = true;
         else if(that->state == ZOMBIE && it->second.zombiePlayer)
+            deadUsers.push_back(it->first);
+		else if(that->state == DUEL_END && it->second.zombiePlayer == false)
+            it->second.zombiePlayer = true;
+        else if(that->state == DUEL_END && it->second.zombiePlayer)
             deadUsers.push_back(it->first);
     }
     for(auto it = deadUsers.begin(); it!= deadUsers.end(); ++it)
