@@ -73,6 +73,13 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
 		
 		
 	}
+	if(false && proto == STOC_DUEL_END)
+	{
+		char* p = net_server_write;
+		BufferIO::WriteInt16(p, 1);
+		BufferIO::WriteInt8(p, proto);
+		return;
+	}
     if(proto == STOC_DUEL_START)
     {
         STOC_JoinGame scjg;
@@ -522,8 +529,19 @@ void DuelRoom::DisconnectPlayer(DuelPlayer* dp)
     //dp->netServer=0;
 }
 
+std::map<DuelPlayer*, DuelPlayerInfo> DuelRoom::ExtractAllPlayers()
+{
+	std::map<DuelPlayer*, DuelPlayerInfo> p = players;
+	
+	for(auto it = p.cbegin();it!= p.cend();++it)
+		ExtractPlayer(it->first);
+	return p;
+}
+
 void DuelRoom::ExtractPlayer(DuelPlayer* dp)
 {
+	dp->netServer = nullptr;
+	dp->game = nullptr;
     //it removes the player from the duel without disconnecting its tcp connection
     log(VERBOSE,"ExtractPlayer called\n");
     playerDisconnected(dp);
@@ -565,7 +583,8 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
     unsigned char oldtype = dp->type;
 
     log(VERBOSE,"leavegame chiamato\n");
-	players[dp].zombiePlayer = true;
+	if(players.find(dp)!=players.end())
+		players[dp].zombiePlayer = true;
     /*bug in match duel,
      * if the player leaves during side decking
      * the player MUST become a loser
@@ -604,7 +623,7 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
         
     }
 
-    if(state != ZOMBIE && dp->game == duel_mode)
+    if(state != ZOMBIE && dp->game == duel_mode && duel_mode != 0)
         duel_mode->LeaveGame(dp);
     else
         DisconnectPlayer(dp);
@@ -861,7 +880,7 @@ void DuelRoom::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
         else if(it->first->state ==CTOS_HAND_RESULT && it->second.secondsWaiting >= 60)
             deadUsers.push_back(it->first);
         //deadUsers.push_back(it->first);
-        else if(that->state == ZOMBIE && it->second.zombiePlayer == false)
+        else if(that->state == ZOMBIE && it->second.zombiePlayer == false && it->second.secondsWaiting >= maxTimeout)
             it->second.zombiePlayer = true;
         else if(that->state == ZOMBIE && it->second.zombiePlayer)
             deadUsers.push_back(it->first);

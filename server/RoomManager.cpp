@@ -313,6 +313,7 @@ void RoomManager::removeDeadRooms()
         }
         else
         {
+			//p->ExtractAllPlayers();
             ++it;
         }
 

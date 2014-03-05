@@ -77,6 +77,7 @@ private:
     void HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len);
 
     void InsertPlayer(DuelPlayer* dp);
+	std::map<DuelPlayer*, DuelPlayerInfo> ExtractAllPlayers();
     void ExtractPlayer(DuelPlayer* dp);
     bool isAvailableToPlayer(DuelPlayer* dp, unsigned char mode);
     //using RoomInterface::SendPacketToPlayer;
