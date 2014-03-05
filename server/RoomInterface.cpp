@@ -132,17 +132,21 @@ void RoomInterface::playerReadinessChange(DuelPlayer *dp, bool isReady)
 
 void RoomInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
-    if( players.end() == players.find(dp))
-    {
-        log(INFO,"sendbuffer ignorato \n");
-        return;
-    }
+
+	
     char* p = net_server_write;
     BufferIO::WriteInt16(p, 1 + len);
     BufferIO::WriteInt8(p, proto);
     if(len > 0)
         memcpy(p, buffer, std::min(len,(size_t) 0x20000));
     last_sent = len + 3;
+	if( players.end() == players.find(dp) || players[dp].zombiePlayer)
+    {
+		//e' necessario perche' altre chiamate riciclano il buffer e si aspettano
+		//di trovarlo carico
+        log(INFO,"sendbuffer ignorato \n");
+        return;
+    }
     bufferevent_write(dp->bev, net_server_write, last_sent);
 
 }

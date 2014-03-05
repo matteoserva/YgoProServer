@@ -7,8 +7,8 @@ namespace ygo
 
 int RoomManager::getNumRooms()
 {
-    log(VERBOSE,"pronti %d, giocanti %d, zombie %d\n",elencoServer.size(),playingServer.size(),zombieServer.size());
-    return elencoServer.size()+playingServer.size()+zombieServer.size();
+    log(VERBOSE,"----------pronti %d, giocanti %d, zombie %d\n",elencoServer.size(),playingServer.size(),zombieServer.size());
+	return elencoServer.size()+playingServer.size()+zombieServer.size();
 }
 
 void RoomManager::setGameServer(GameServer* gs)
@@ -72,14 +72,14 @@ void RoomManager::tryToInsertPlayerInServer(DuelPlayer*dp,DuelRoom* serv)
 
 void RoomManager::notifyStateChange(DuelRoom* room,DuelRoom::State oldstate,DuelRoom::State newstate)
 {
-    if(newstate == DuelRoom::PLAYING)
+    if(newstate == DuelRoom::PLAYING && oldstate == DuelRoom::FULL)
     {
         elencoServer.remove(room);
         playingServer.insert(room);
     }
     else if(newstate == DuelRoom::ZOMBIE || newstate == DuelRoom::DEAD)
     {
-        if(oldstate == DuelRoom::PLAYING)
+        if(oldstate == DuelRoom::PLAYING || oldstate == DuelRoom::DUEL_END)
             playingServer.erase(room);
         else
             elencoServer.remove(room);

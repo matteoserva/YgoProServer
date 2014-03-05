@@ -66,6 +66,14 @@ bool DuelRoom::isAvailableToPlayer(DuelPlayer* refdp, unsigned char refmode)
 
 void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
+	if(proto == STOC_DUEL_END)
+	{
+		char* p = net_server_write;
+		BufferIO::WriteInt16(p, 1);
+		BufferIO::WriteInt8(p, proto);
+		//last_sent=len;
+		return;
+	}
 	if(proto == STOC_TYPE_CHANGE)
 	{
 		STOC_TypeChange *sctc = (STOC_TypeChange *) buffer;
@@ -122,6 +130,7 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
     }
     else if(proto==STOC_REPLAY)
     {
+		printf("replay ricevuto, per un utente %d:%s\n",players[dp].zombiePlayer,dp->namew_low);
         if(chatReady)
         {
             chatReady=false;
@@ -267,7 +276,7 @@ int DuelRoom::getLfList()
 
 void DuelRoom::clientStarted()
 {
-    if(state==FULL)
+    if(state==FULL || state == DUEL_END)
     {
         setState(PLAYING);
         timeval timeout = {TIMEOUT_INTERVAL, 0};
@@ -565,7 +574,7 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
     unsigned char oldtype = dp->type;
 
     log(VERBOSE,"leavegame chiamato\n");
-
+	players[dp].zombiePlayer = true;
     /*bug in match duel,
      * if the player leaves during side decking
      * the player MUST become a loser
@@ -604,6 +613,14 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
         
     }
 
+	if(state == DUEL_END && dp->type != NETPLAYER_TYPE_OBSERVER)
+	{
+		for(auto it = players.cbegin();it != players.cend();++it)
+			RoomInterface::SendBufferToPlayer(it->first,STOC_DUEL_END,nullptr,0);
+		setState(ZOMBIE);
+		updateServerState();
+	}
+	
     if(state != ZOMBIE && dp->game == duel_mode)
         duel_mode->LeaveGame(dp);
     else
@@ -788,8 +805,38 @@ void DuelRoom::StopServer()
 
 
     }
-    setState(ZOMBIE);
-    updateServerState();
+	int numReady = 0;
+	for(auto it = players.begin();it != players.end();it++)
+	{
+		if(it->first->type != NETPLAYER_TYPE_OBSERVER && it->second.isReady &&!it->second.zombiePlayer)
+			{numReady++;
+				it->second.isReady = false;
+			}
+	}
+	if(state == DUEL_END || state == ZOMBIE)
+		return;
+	if(getMaxDuelPlayers() == numReady)
+    {
+		//ricominciare si puo'
+		char buffer[10];
+		buffer[0] = MSG_SELECT_YESNO;
+		buffer[1] = 0;
+		buffer[2] = 30;
+		buffer[3] = buffer[4] = buffer[5] = 0;
+		for(auto it = players.cbegin();it != players.cend();++it)
+			if(it->first->type !=  NETPLAYER_TYPE_OBSERVER)
+			RoomInterface::SendBufferToPlayer(it->first,STOC_GAME_MSG,buffer,6);
+		
+		setState(DUEL_END);
+	}
+	else
+	{
+		for(auto it = players.cbegin();it != players.cend();++it)
+			RoomInterface::SendBufferToPlayer(it->first,STOC_DUEL_END,nullptr,0);
+		setState(ZOMBIE);
+		updateServerState();
+	
+	}
 }
 
 void DuelRoom::RemoteChatToPlayer(DuelPlayer* dp, std::wstring msg,int color)
@@ -1006,7 +1053,39 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         log(INFO,"BUG: handlectospacket ha ricevuto un pacchetto per un utente inesistente \n");
         return;
     }
+	if(players[dp].zombiePlayer)
+		return;
+	if(state==DUEL_END)
+	{
+		if(pktType != CTOS_RESPONSE || data[1] != 1)
+		{
+			for(auto it = players.cbegin();it != players.cend();it++)
+				RoomInterface::SendBufferToPlayer(it->first,STOC_DUEL_END,nullptr,0);
+			setState(ZOMBIE);
+			//LeaveGame(dp);
+		}
+		
+		else
+		{
+			players[dp].isReady= true;
+			int numReady = 0;
+			for(auto it = players.cbegin();it != players.cend();it++)
+			{
+				if(it->first->type != NETPLAYER_TYPE_OBSERVER && it->second.isReady)
+					numReady++;
+			}
 
+			if(getMaxDuelPlayers() == numReady)
+			{
+				
+				duel_mode->host_player = dp;
+				duel_mode->StartDuel(dp);
+				duel_mode->host_player=NULL;
+				
+			}
+		}
+		return;
+	}
     
     if(state==ZOMBIE)
     {
