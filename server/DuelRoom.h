@@ -26,7 +26,7 @@ class DuelRoom:public RoomInterface
 {
     public:
     unsigned char mode;
-    enum State {WAITING,FULL,PLAYING,DUEL_END,ZOMBIE,DEAD};
+    enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};
     State state;
     int getLfList();
 private:
