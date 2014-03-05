@@ -66,7 +66,7 @@ bool DuelRoom::isAvailableToPlayer(DuelPlayer* refdp, unsigned char refmode)
 
 void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
-	if(proto == STOC_DUEL_END)
+	if(proto == STOC_DUEL_END && dp->type != NETPLAYER_TYPE_OBSERVER)
 	{
 		char* p = net_server_write;
 		BufferIO::WriteInt16(p, 1);
@@ -822,6 +822,9 @@ void DuelRoom::StopServer()
 		buffer[1] = 0;
 		buffer[2] = 30;
 		buffer[3] = buffer[4] = buffer[5] = 0;
+		
+			
+		
 		for(auto it = players.cbegin();it != players.cend();++it)
 			if(it->first->type !=  NETPLAYER_TYPE_OBSERVER)
 			RoomInterface::SendBufferToPlayer(it->first,STOC_GAME_MSG,buffer,6);
@@ -831,6 +834,7 @@ void DuelRoom::StopServer()
 	else
 	{
 		for(auto it = players.cbegin();it != players.cend();++it)
+			if(it->first->type !=  NETPLAYER_TYPE_OBSERVER)
 			RoomInterface::SendBufferToPlayer(it->first,STOC_DUEL_END,nullptr,0);
 		setState(ZOMBIE);
 		updateServerState();
@@ -1076,7 +1080,13 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
 			if(getMaxDuelPlayers() == numReady)
 			{
-				
+				auto p = players;
+				for(auto it = p.cbegin();it != p.cend();++it)
+				if(it->first->type ==  NETPLAYER_TYPE_OBSERVER)
+				{
+					RoomInterface::SendBufferToPlayer(it->first,STOC_DUEL_END,nullptr,0);
+					LeaveGame(it->first);
+				}
 				duel_mode->host_player = dp;
 				duel_mode->StartDuel(dp);
 				duel_mode->host_player=NULL;
