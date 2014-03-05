@@ -347,7 +347,7 @@ int DuelRoom::getNumDuelPlayers()
 
     for(auto it = players.cbegin(); it!=players.cend(); ++it)
     {
-        if(it->first->type != NETPLAYER_TYPE_OBSERVER)
+        if(it->first->type != NETPLAYER_TYPE_OBSERVER && !it->second.zombiePlayer)
             n++;
     }
     return n;
@@ -565,7 +565,7 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
     unsigned char oldtype = dp->type;
 
     log(VERBOSE,"leavegame chiamato\n");
-
+	players[dp].zombiePlayer = true;
     /*bug in match duel,
      * if the player leaves during side decking
      * the player MUST become a loser
