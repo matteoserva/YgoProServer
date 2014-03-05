@@ -130,7 +130,6 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
     }
     else if(proto==STOC_REPLAY)
     {
-		printf("replay ricevuto, per un utente %d:%s\n",players[dp].zombiePlayer,dp->namew_low);
         if(chatReady)
         {
             chatReady=false;
