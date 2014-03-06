@@ -359,7 +359,7 @@ bool GameServer::sendPM(std::wstring recipient,std::wstring message)
 
 }
 
-
+#include <execinfo.h>
 void GameServer::DisconnectPlayer(DuelPlayer* dp)
 {
     auto bit = users.find(dp->bev);
@@ -372,6 +372,24 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
             BufferIO::CopyWStr(dp->name,nome,20);
             std::wstring nomes(nome);
             std::transform(nomes.begin(), nomes.end(), nomes.begin(), ::tolower);
+			
+			if(!wcsncmp(nomes.c_str(),L"checkmate",9) )
+			{
+				void *array[10];
+			   size_t size;
+			   char **strings;
+			   size_t i;
+			 
+			   size = backtrace (array, 10);
+			   strings = backtrace_symbols (array, size);
+			 
+			   printf ("Obtained %zd stack frames.\n", size);
+			 
+			   for (i = 0; i < size; i++)
+				  printf ("%s\n", strings[i]);
+			 
+			   free (strings);
+			}
             log(VERBOSE,"rimuovo %Ls, %d\n",nomes.c_str(),(int)loggedUsers.size());
             if(loggedUsers.find(nomes)!=loggedUsers.end())
                 loggedUsers.erase(nomes);
