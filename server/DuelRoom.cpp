@@ -69,7 +69,7 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
 	if(dp->netServer != this)
 	{
 		printf("MEGABUG, ho un giocatore che non dovrebbe esistere\n");
-		players.erase(dp);
+		playerDisconnected(dp );
 		return;
 	}
 	if(proto == STOC_TYPE_CHANGE)
