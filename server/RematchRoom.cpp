@@ -1,5 +1,5 @@
 #include "RematchRoom.h"
-
+#include "GameServer.h"
 namespace ygo
 {
 
@@ -11,7 +11,8 @@ RematchRoom::RematchRoom(RoomManager*roomManager,GameServer*gameServer)
 
 void RematchRoom::killRoom(std::list<VirtualRoom>::iterator r)
 {
-	
+	if(r == virtualRooms.end())
+		return;
 	char buffer[10];
 	char* pbuf = buffer;
 		BufferIO::WriteInt16(pbuf, 1);
@@ -36,6 +37,14 @@ std::list<VirtualRoom>::iterator RematchRoom::getRoomByDp(DuelPlayer* dp)
 void RematchRoom::createRoom(std::map<DuelPlayer*, DuelPlayerInfo> p, unsigned char mode,int required)
 {
 
+	static time_t last_showstats = 0;
+
+    if(time(NULL) - last_showstats > 3)
+    {
+		printf("nel limbo ci sono stanze: %d\n",(int) virtualRooms.size());
+			last_showstats = time(NULL);
+	}
+	
 	/*DuelRoom* dr = roomManager->createServer( mode);
 	*/
 	int count = 0;
@@ -86,6 +95,7 @@ void RematchRoom::LeaveGame(DuelPlayer* dp)
 		it->players.erase(dp);
 	else
 		killRoom(it);
+	gameServer->DisconnectPlayer(dp);
 }		
 
 void RematchRoom::InsertPlayer(DuelPlayer* dp)
@@ -143,36 +153,29 @@ void RematchRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 		virtualRooms.erase(it);
 	}
 	
-    /*if(data[1] != 1)
-		{
-			
-		}
-		
-		else
-	{
-			players[dp].isReady= true;
-			int numReady = 0;
-			for(auto it = players.cbegin();it != players.cend();it++)
-			{
-				if(it->first->type != NETPLAYER_TYPE_OBSERVER && it->second.isReady)
-					numReady++;
-			}
-
-			if(getMaxDuelPlayers() == numReady)
-			{
-				
-				duel_mode->host_player = dp;
-				duel_mode->StartDuel(dp);
-				duel_mode->host_player=NULL;
-				
-			}
-		}*/
+   
 	
 	
 }
 void RematchRoom::RoomChat(DuelPlayer* dp, std::wstring messaggio)
 {
-
+	auto it = getRoomByDp(dp);
+	
+	STOC_Chat scc;
+    scc.player = dp->type;
+    int msglen = BufferIO::CopyWStr(messaggio.c_str(), scc.msg, 256);
+	
+	char buffer[1024];
+	char *pbuf = buffer;
+	msglen = 4 + msglen*2;
+	BufferIO::WriteInt16(pbuf, 1 + msglen);
+    BufferIO::WriteInt8(pbuf, STOC_CHAT);
+	memcpy(pbuf,&scc,msglen);
+	
+	for(auto p = it->players.cbegin();p!=it->players.cend();p++)
+		if(p->first != dp)
+			bufferevent_write(p->first->bev, buffer, 3+msglen);
+	
 }
 
 
