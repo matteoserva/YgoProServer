@@ -71,6 +71,7 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
 		printf("MEGABUG, ho un giocatore che non dovrebbe esistere\n");
 		
 		LeaveGame(dp );
+		setState(ZOMBIE);
 		return;
 	}
 	if(proto == STOC_TYPE_CHANGE)
@@ -633,7 +634,7 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
         
     }
 
-    if(state != ZOMBIE && duel_mode != 0)
+    if(state != ZOMBIE && dp->game == duel_mode && duel_mode != 0)
         duel_mode->LeaveGame(dp);
     else
         DisconnectPlayer(dp);
