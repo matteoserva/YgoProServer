@@ -69,6 +69,7 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
 	if(dp->netServer != this)
 	{
 		printf("MEGABUG, ho un giocatore che non dovrebbe esistere\n");
+		
 		LeaveGame(dp );
 		return;
 	}
@@ -591,6 +592,9 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
     log(VERBOSE,"leavegame chiamato\n");
 	if(players.find(dp)!=players.end())
 		players[dp].zombiePlayer = true;
+	else
+		return;
+		
     /*bug in match duel,
      * if the player leaves during side decking
      * the player MUST become a loser
@@ -629,7 +633,7 @@ void DuelRoom::LeaveGame(DuelPlayer* dp)
         
     }
 
-    if(state != ZOMBIE && dp->game == duel_mode && duel_mode != 0)
+    if(state != ZOMBIE && duel_mode != 0)
         duel_mode->LeaveGame(dp);
     else
         DisconnectPlayer(dp);
