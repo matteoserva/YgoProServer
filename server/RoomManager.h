@@ -5,10 +5,11 @@
 #include <mutex>
 #include "WaitingRoom.h"
 #include "DuelRoom.h"
+#include "RematchRoom.h"
 namespace ygo {
 
     class GameServer;
-
+    class RematchRoom;
 
     class RoomManager
     {
@@ -27,6 +28,7 @@ namespace ygo {
         static const int RemoveDeadRoomsRatio = 3;
 
         WaitingRoom* waitingRoom;
+		RematchRoom* rematchRoom;
         void removeDeadRooms();
         bool FillRoom(DuelRoom* room);
         bool FillAllRooms();

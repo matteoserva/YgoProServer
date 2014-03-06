@@ -73,7 +73,7 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
 		
 		
 	}
-	if(false && proto == STOC_DUEL_END)
+	if(proto == STOC_DUEL_END)
 	{
 		char* p = net_server_write;
 		BufferIO::WriteInt16(p, 1);
@@ -1098,6 +1098,8 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
         if(!dp->game)
             return;
+
+		memcpy(players[dp].deck, pdata, len);
         duel_mode->UpdateDeck(dp, pdata);
         break;
     }

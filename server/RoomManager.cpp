@@ -2,6 +2,7 @@
 #include "RoomManager.h"
 #include "debug.h"
 #include "Statistics.h"
+
 namespace ygo
 {
 
@@ -19,17 +20,20 @@ void RoomManager::setGameServer(GameServer* gs)
     timeval timeout = {SecondsBeforeFillAllRooms, 0};
     keepAliveEvent = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, keepAlive, this);
     waitingRoom = new WaitingRoom(this,gs);
+	rematchRoom = new RematchRoom(this,gs);
     event_add(keepAliveEvent, &timeout);
 }
 
 RoomManager::RoomManager()
 {
     waitingRoom=0;
+	rematchRoom = nullptr;
 }
 RoomManager::~RoomManager()
 {
     event_free(keepAliveEvent);
     delete waitingRoom;
+	delete rematchRoom;
 }
 
 
@@ -313,7 +317,11 @@ void RoomManager::removeDeadRooms()
         }
         else
         {
-			//p->ExtractAllPlayers();
+			
+				auto d = p->ExtractAllPlayers();
+				rematchRoom->createRoom(d,p->mode,p->getMaxDuelPlayers());
+			
+			
             ++it;
         }
 

@@ -17,6 +17,8 @@ bool isReady;
 float secondsWaiting;
 unsigned char last_state_in_timeout;
 bool zombiePlayer;
+char deck[1024];
+
 
 std::list< std::pair<int,std::wstring> > pendingMessages;
 

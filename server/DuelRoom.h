@@ -29,6 +29,8 @@ class DuelRoom:public RoomInterface
     enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};
     State state;
     int getLfList();
+	int getNumDuelPlayers();
+	int getMaxDuelPlayers();
 private:
     char ultimo_game_message;
     bool reCheckLfList();
@@ -37,7 +39,7 @@ private:
     void updateUserTimeout(DuelPlayer* dp);
     void Victory(char winner);
     char last_winner;
-    int getNumDuelPlayers();
+    
     void updateServerState();
     void destroyGame();
     event* auto_idle;
@@ -53,7 +55,7 @@ private:
 
     void playerConnected(DuelPlayer* dp);
     void playerDisconnected(DuelPlayer* dp);
-    int getMaxDuelPlayers();
+    
     void clientStarted();
     void setState(State state);
     void toObserver(DuelPlayer*dp);
