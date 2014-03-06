@@ -190,7 +190,7 @@ bool RoomManager::FillRoom(DuelRoom* room)
     if(room->state!= DuelRoom::State::WAITING)
         return true;
 
-    for(DuelPlayer* base = room->getFirstPlayer(); room->state!= DuelRoom::State::FULL;)
+    for(DuelPlayer* base = room->getFirstPlayer(); room->state== DuelRoom::State::WAITING;)
     {
         DuelPlayer* dp = waitingRoom->ExtractBestMatchPlayer(base,room->getLfList(),room->mode);
         if(dp == nullptr)
@@ -233,6 +233,9 @@ bool RoomManager::FillAllRooms()
         if(p->state == DuelRoom::State::WAITING )
         {
             bool result = FillRoom(p);
+			if(p->state != DuelRoom::State::WAITING && p->state != DuelRoom::State::FULL )
+				return false; //MEGABUG DETECTED
+				
             //if(!result)
             //  return false;
         }
