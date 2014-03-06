@@ -66,6 +66,12 @@ bool DuelRoom::isAvailableToPlayer(DuelPlayer* refdp, unsigned char refmode)
 
 void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buffer, size_t len)
 {
+	if(dp->netServer != this)
+	{
+		printf("MEGABUG, ho un giocatore che non dovrebbe esistere\n");
+		players.erase(dp);
+		return;
+	}
 	if(proto == STOC_TYPE_CHANGE)
 	{
 		STOC_TypeChange *sctc = (STOC_TypeChange *) buffer;
