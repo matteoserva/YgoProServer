@@ -211,6 +211,8 @@ void RoomManager::BroadcastMessage(std::wstring message, int color,RoomInterface
     {
         if((*it) != origin)
             (*it)->BroadcastRemoteChat(message,color);
+			if((*it)->state == DuelRoom::State::ZOMBIE )
+				break; //MEGABUG DETECTED
     }
     for(auto it =playingServer.begin(); it!=playingServer.end(); ++it)
     {
@@ -233,7 +235,8 @@ bool RoomManager::FillAllRooms()
         if(p->state == DuelRoom::State::WAITING )
         {
             bool result = FillRoom(p);
-			
+			if(p->state != DuelRoom::State::WAITING && p->state != DuelRoom::State::FULL )
+				return false; //MEGABUG DETECTED
 				
             //if(!result)
             //  return false;
