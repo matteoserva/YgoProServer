@@ -32,6 +32,8 @@ std::list<VirtualRoom>::iterator RematchRoom::getRoomByDp(DuelPlayer* dp)
 	for(auto it = virtualRooms.begin();it!=virtualRooms.end();++it)
 		if(it->players.find(dp) != it->players.end())
 			return it;
+	dp->netServer = nullptr;
+	gameServer->DisconnectPlayer(dp);
 	return virtualRooms.end();
 }
 void RematchRoom::createRoom(std::map<DuelPlayer*, DuelPlayerInfo> p, unsigned char mode,int required)
@@ -89,7 +91,8 @@ void RematchRoom::createRoom(std::map<DuelPlayer*, DuelPlayerInfo> p, unsigned c
 void RematchRoom::LeaveGame(DuelPlayer* dp)
 {
 	auto it = getRoomByDp(dp);
-	
+	if(it== virtualRooms.end())
+		return;
 	
 	if(dp->type == NETPLAYER_TYPE_OBSERVER)
 		it->players.erase(dp);
@@ -115,7 +118,8 @@ void RematchRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 		return;
 		
 	auto it = getRoomByDp(dp);
-	
+	if(it== virtualRooms.end())
+		return;
 	if(data[1] == 0)
 	{
 		killRoom(it);
@@ -160,7 +164,8 @@ void RematchRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 void RematchRoom::RoomChat(DuelPlayer* dp, std::wstring messaggio)
 {
 	auto it = getRoomByDp(dp);
-	
+	if(it== virtualRooms.end())
+		return;
 	STOC_Chat scc;
     scc.player = dp->type;
     int msglen = BufferIO::CopyWStr(messaggio.c_str(), scc.msg, 256);
