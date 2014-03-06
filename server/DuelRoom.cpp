@@ -72,6 +72,7 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
 		
 		LeaveGame(dp );
 		setState(ZOMBIE);
+		updateServerState();
 		return;
 	}
 	if(proto == STOC_TYPE_CHANGE)
