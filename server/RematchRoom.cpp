@@ -9,19 +9,83 @@ RematchRoom::RematchRoom(RoomManager*roomManager,GameServer*gameServer)
 
 }
 
+void RematchRoom::killRoom(std::list<VirtualRoom>::iterator r)
+{
+	
+	char buffer[10];
+	char* pbuf = buffer;
+		BufferIO::WriteInt16(pbuf, 1);
+		BufferIO::WriteInt8(pbuf, STOC_DUEL_END);
+	
+	for(auto it = r->players.cbegin();it!=r->players.cend();++it)
+	{
+		bufferevent_write(it->first->bev, buffer, 3);
+		
+	}
+	virtualRooms.erase(r);
+	
+	
+}
+std::list<VirtualRoom>::iterator RematchRoom::getRoomByDp(DuelPlayer* dp)
+{
+	for(auto it = virtualRooms.begin();it!=virtualRooms.end();++it)
+		if(it->players.find(dp) != it->players.end())
+			return it;
+	return virtualRooms.end();
+}
 void RematchRoom::createRoom(std::map<DuelPlayer*, DuelPlayerInfo> p, unsigned char mode,int required)
 {
 
-	DuelRoom* dr = roomManager->createServer( mode);
-	for(auto it = p.cbegin();it!=p.cend();++it)
-		dr->InsertPlayer(it->first);
+	/*DuelRoom* dr = roomManager->createServer( mode);
+	*/
+	int count = 0;
+	for(auto it = p.begin();it!=p.end();++it)
+	{
+		it->second.isReady=false;
+		if(it->first->type < NETPLAYER_TYPE_OBSERVER)
+			count++;
+		it->first->netServer = this;
+	}
+		
+	
 
-
+	VirtualRoom vr = {p,mode};
+	virtualRooms.push_front(vr);
+	
+	if(count != required)
+		killRoom(virtualRooms.begin());
+	else
+	{
+		printf("chiedo di rigiocare\n");
+		char buffer[10];
+		char* pbuf = buffer;
+		BufferIO::WriteInt16(pbuf, 7);
+		BufferIO::WriteInt8(pbuf, STOC_GAME_MSG);
+		buffer[3] = MSG_SELECT_YESNO;
+		buffer[4] = 0;
+		buffer[5] = 30;
+		buffer[6] = buffer[7] = buffer[8] = 0;
+		for(auto it = p.begin();it!=p.end();++it)
+		{
+			if(it->first->type < NETPLAYER_TYPE_OBSERVER)
+			{
+				bufferevent_write(it->first->bev, buffer, 9);
+				it->first->state = 0xff;
+			}
+				
+		}
+	}
 }
 
 void RematchRoom::LeaveGame(DuelPlayer* dp)
 {
-
+	auto it = getRoomByDp(dp);
+	
+	
+	if(dp->type == NETPLAYER_TYPE_OBSERVER)
+		it->players.erase(dp);
+	else
+		killRoom(it);
 }		
 
 void RematchRoom::InsertPlayer(DuelPlayer* dp)
@@ -34,7 +98,77 @@ void RematchRoom::ExtractPlayer(DuelPlayer* dp)
 }
 void RematchRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {
+	
 
+
+	if(data[0] != CTOS_RESPONSE)
+		return;
+		
+	auto it = getRoomByDp(dp);
+	
+	if(data[1] == 0)
+	{
+		killRoom(it);
+		
+	}
+	else
+	{
+		it->players[dp].isReady = true;
+		int count = 0;
+		for(auto i = it->players.cbegin();i!=it->players.cend(); ++i)
+			if(!i->second.isReady && i->first->type < NETPLAYER_TYPE_OBSERVER)
+				return;
+		
+		DuelRoom* dr = roomManager->createServer(it->mode);
+		
+		for(count = 0;count < 4;count++)
+			for(auto i = it->players.cbegin();i!=it->players.cend(); ++i)
+				if(i->first->type == count)
+					dr->InsertPlayer(i->first);
+		for(auto i = it->players.cbegin();i!=it->players.cend(); ++i)
+				if(i->first->type ==NETPLAYER_TYPE_OBSERVER)
+					dr->InsertPlayer(i->first);
+		char readyMSG = CTOS_HS_READY;
+		for(auto i = it->players.begin();i!=it->players.end(); ++i)
+				if(i->first->type !=NETPLAYER_TYPE_OBSERVER)
+				{
+					printf("fase 3\n");
+					i->first->state = 0;
+					dr->HandleCTOSPacket(i->first,i->second.deck,1024);
+					dr->HandleCTOSPacket(i->first,&readyMSG,1);
+					
+				}
+					
+		
+		virtualRooms.erase(it);
+	}
+	
+    /*if(data[1] != 1)
+		{
+			
+		}
+		
+		else
+	{
+			players[dp].isReady= true;
+			int numReady = 0;
+			for(auto it = players.cbegin();it != players.cend();it++)
+			{
+				if(it->first->type != NETPLAYER_TYPE_OBSERVER && it->second.isReady)
+					numReady++;
+			}
+
+			if(getMaxDuelPlayers() == numReady)
+			{
+				
+				duel_mode->host_player = dp;
+				duel_mode->StartDuel(dp);
+				duel_mode->host_player=NULL;
+				
+			}
+		}*/
+	
+	
 }
 void RematchRoom::RoomChat(DuelPlayer* dp, std::wstring messaggio)
 {

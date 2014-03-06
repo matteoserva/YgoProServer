@@ -1033,7 +1033,7 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         return;
     }
 	updateUserTimeout(dp);
-
+	printf("pacchetto ricevuto: %d\n",pktType);
 
     if((pktType != CTOS_SURRENDER) && (pktType != CTOS_CHAT) && (dp->state == 0xff || (dp->state && dp->state != pktType)))
         return;
@@ -1098,8 +1098,8 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
         if(!dp->game)
             return;
-
-		memcpy(players[dp].deck, pdata, len);
+		printf("update deck ricevuto\n");
+		memcpy(players[dp].deck, data, len);
         duel_mode->UpdateDeck(dp, pdata);
         break;
     }
@@ -1174,6 +1174,7 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         break;
     }
     case CTOS_HS_READY:
+		printf("ready ricevuto\n");
         if(dp->lflist <=0)
         {
             STOC_HS_PlayerChange scpc;
