@@ -549,12 +549,13 @@ std::map<DuelPlayer*, DuelPlayerInfo> DuelRoom::ExtractAllPlayers()
 
 void DuelRoom::ExtractPlayer(DuelPlayer* dp)
 {
-	dp->netServer = nullptr;
-	dp->game = nullptr;
+	
     //it removes the player from the duel without disconnecting its tcp connection
     log(VERBOSE,"ExtractPlayer called\n");
     playerDisconnected(dp);
     LeaveGame(dp);
+	dp->netServer = nullptr;
+	dp->game = nullptr;
 }
 void DuelRoom::InsertPlayer(DuelPlayer* dp)
 {
