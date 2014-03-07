@@ -220,7 +220,18 @@ DuelPlayer* GameServer::findPlayer(std::wstring nome)
 }
 void GameServer::ServerEchoRead(bufferevent *bev, void *ctx)
 {
-    GameServer* that = (GameServer*)ctx;
+	GameServer* that = (GameServer*)ctx;
+    if(that->users.find(bev) == that->users.end())
+    {
+        printf("LETTO UN BUFFEREVENT INVALIDO\n");
+		print_trace();
+        bufferevent_disable(bev, EV_READ);
+        bufferevent_free(bev);
+		return;
+	}
+	
+	
+    
     evbuffer* input = bufferevent_get_input(bev);
     size_t len = evbuffer_get_length(input);
     unsigned short packet_len = 0;
