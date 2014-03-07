@@ -176,7 +176,8 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
         printf("indirizzo: %s\n",node);
     */
 
-    that->users[bev] = dp;
+	DuelPlayer *dpp = new DuelPlayer(dp);
+    that->users[bev] = dpp;
     bufferevent_setcb(bev, ServerEchoRead, NULL, ServerEchoEvent, ctx);
     bufferevent_enable(bev, EV_READ);
     if(that->users.size()>= that->MAXPLAYERS)
@@ -232,7 +233,7 @@ void GameServer::ServerEchoRead(bufferevent *bev, void *ctx)
             return;
         evbuffer_remove(input, that->net_server_read, packet_len + 2);
         if(packet_len)
-            that->HandleCTOSPacket(&(that->users[bev]), &(that->net_server_read[2]), packet_len);
+            that->HandleCTOSPacket(that->users[bev], &(that->net_server_read[2]), packet_len);
         len -= packet_len + 2;
     }
 }
@@ -241,7 +242,7 @@ void GameServer::ServerEchoEvent(bufferevent* bev, short events, void* ctx)
     GameServer* that = (GameServer*)ctx;
     if (events & (BEV_EVENT_EOF | BEV_EVENT_ERROR))
     {
-        DuelPlayer* dp = &(that->users[bev]);
+        DuelPlayer* dp = that->users[bev];
         if(dp->netServer)
         {
             dp->netServer->LeaveGame(dp);
@@ -382,7 +383,7 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
         bufferevent_disable(dp->bev, EV_READ);
         bufferevent_free(dp->bev);
         users.erase(bit);
-
+		delete dp;
 
 
     }
