@@ -11,12 +11,6 @@ RematchRoom::RematchRoom(RoomManager*roomManager,GameServer*gameServer)
 
 void RematchRoom::killRoom(std::list<VirtualRoom>::iterator r)
 {
-	for(auto it = players.cbegin();it!=players.cend();++it)
-	{
-		gameServer->DisconnectPlayer(it->first);
-	}
-	players.clear();
-	
 	if(r == virtualRooms.end())
 		return;
 	char buffer[10];
@@ -27,7 +21,7 @@ void RematchRoom::killRoom(std::list<VirtualRoom>::iterator r)
 	for(auto it = r->players.cbegin();it!=r->players.cend();++it)
 	{
 		bufferevent_write(it->first->bev, buffer, 3);
-		players.insert(*it);
+		
 	}
 	virtualRooms.erase(r);
 	
