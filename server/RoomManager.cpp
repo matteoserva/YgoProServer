@@ -8,7 +8,13 @@ namespace ygo
 
 int RoomManager::getNumRooms()
 {
-    log(VERBOSE,"pronti %d, giocanti %d, zombie %d\n",elencoServer.size(),playingServer.size(),zombieServer.size());
+	static time_t last_showstats = 0;
+
+    if(time(NULL) - last_showstats > 5)
+    {
+		log(INFO,"pronti %d, giocanti %d, zombie %d\n",elencoServer.size(),playingServer.size(),zombieServer.size());
+		last_showstats = time(NULL);
+	}
     return elencoServer.size()+playingServer.size()+zombieServer.size();
 }
 
@@ -195,7 +201,6 @@ bool RoomManager::FillRoom(DuelRoom* room)
         DuelPlayer* dp = waitingRoom->ExtractBestMatchPlayer(base,room->getLfList(),room->mode);
         if(dp == nullptr)
             return false;
-        dp->netServer=room;
         room->InsertPlayer(dp);
 
     }
@@ -266,7 +271,6 @@ bool RoomManager::InsertPlayerInWaitingRoom(DuelPlayer*dp)
         gameServer->DisconnectPlayer(dp);
         return false;
     }
-    dp->netServer = netServer;
     netServer->InsertPlayer(dp);
     return true;
 }
