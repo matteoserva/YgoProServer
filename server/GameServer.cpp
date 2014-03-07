@@ -235,7 +235,7 @@ void GameServer::ServerEchoRead(bufferevent *bev, void *ctx)
     evbuffer* input = bufferevent_get_input(bev);
     size_t len = evbuffer_get_length(input);
     unsigned short packet_len = 0;
-    while(true)
+    while(that->users.find(bev) != that->users.end())
     {
         if(len < 2)
             return;
