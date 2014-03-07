@@ -38,17 +38,6 @@ std::list<VirtualRoom>::iterator RematchRoom::getRoomByDp(DuelPlayer* dp)
 }
 void RematchRoom::createRoom(std::map<DuelPlayer*, DuelPlayerInfo> p, unsigned char mode,int required)
 {
-
-	static time_t last_showstats = 0;
-
-    if(time(NULL) - last_showstats > 3)
-    {
-		printf("nel limbo ci sono stanze: %d\n",(int) virtualRooms.size());
-			last_showstats = time(NULL);
-	}
-	
-	/*DuelRoom* dr = roomManager->createServer( mode);
-	*/
 	int count = 0;
 	for(auto it = p.begin();it!=p.end();++it)
 	{
@@ -57,8 +46,6 @@ void RematchRoom::createRoom(std::map<DuelPlayer*, DuelPlayerInfo> p, unsigned c
 			count++;
 		it->first->netServer = this;
 	}
-		
-	
 
 	VirtualRoom vr = {p,mode};
 	virtualRooms.push_front(vr);
@@ -146,14 +133,14 @@ void RematchRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 		for(auto i = it->players.begin();i!=it->players.end(); ++i)
 				if(i->first->type !=NETPLAYER_TYPE_OBSERVER)
 				{
-					printf("fase 3\n");
+					
 					i->first->state = 0;
 					dr->HandleCTOSPacket(i->first,i->second.deck,1024);
 					dr->HandleCTOSPacket(i->first,&readyMSG,1);
 					
 				}
 					
-		
+		printf("--rematch richiesto\n");
 		virtualRooms.erase(it);
 	}
 	
