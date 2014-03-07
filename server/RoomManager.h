@@ -25,7 +25,7 @@ namespace ygo {
 
 
         static const int SecondsBeforeFillAllRooms = 3;
-        static const int RemoveDeadRoomsRatio = 3;
+        static const int RemoveDeadRoomsRatio = 2;
 
         WaitingRoom* waitingRoom;
 		RematchRoom* rematchRoom;

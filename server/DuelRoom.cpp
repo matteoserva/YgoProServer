@@ -894,10 +894,7 @@ void DuelRoom::user_timeout_cb(evutil_socket_t fd, short events, void* arg)
         else if(it->first->state ==CTOS_HAND_RESULT && it->second.secondsWaiting >= 60)
             deadUsers.push_back(it->first);
         //deadUsers.push_back(it->first);
-        else if(that->state == ZOMBIE && it->second.zombiePlayer == false && it->second.secondsWaiting >= maxTimeout)
-            it->second.zombiePlayer = true;
-        else if(that->state == ZOMBIE && it->second.zombiePlayer)
-            deadUsers.push_back(it->first);
+        
     }
     for(auto it = deadUsers.begin(); it!= deadUsers.end(); ++it)
     {
