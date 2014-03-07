@@ -143,7 +143,8 @@ void RoomInterface::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void
     if(len > 0)
         memcpy(p, buffer, std::min(len,(size_t) 0x20000));
     last_sent = len + 3;
-    bufferevent_write(dp->bev, net_server_write, last_sent);
+	gameServer->safe_bufferevent_write(dp,net_server_write,last_sent);
+    
 
 }
 

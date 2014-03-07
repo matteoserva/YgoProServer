@@ -393,6 +393,19 @@ void GameServer::DisconnectPlayer(DuelPlayer* dp)
     Statistics::getInstance()->setNumPlayers(users.size());
 }
 
+void GameServer::safe_bufferevent_write(DuelPlayer* dp, void* buffer, size_t len)
+{
+	bufferevent* bev = dp->bev;
+	
+	if(users.find(dp->bev) != users.end() && users[bev] == dp)
+		bufferevent_write(dp->bev, buffer, len);
+	else
+	{
+		printf("MEGABUG, bufferevent per un utente inesistente\n");
+		print_trace();
+	}
+	
+}
 
 void GameServer::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 {

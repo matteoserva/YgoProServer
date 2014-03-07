@@ -40,7 +40,7 @@ private:
 
     struct bufferevent * manager_buf;
     int MAXPLAYERS;
-    std::unordered_map<bufferevent*, DuelPlayer *> users;
+    std::map<bufferevent*, DuelPlayer *> users;
     std::map<std::wstring,DuelPlayer*> loggedUsers;
 
 
@@ -56,8 +56,6 @@ private:
     void RestartListen();
     bool isListening;
 
-    std::list<std::pair<std::wstring,bool>> injectedMessages;
-    std::mutex injectedMessages_mutex;
 
     bool dispatchPM(std::wstring,std::wstring);
 
@@ -88,6 +86,7 @@ public:
     int getNumPlayers();
 
     bool sendPM(std::wstring,std::wstring);
+	void safe_bufferevent_write(DuelPlayer* dp, void* buffer, size_t len);
 
 };
 
