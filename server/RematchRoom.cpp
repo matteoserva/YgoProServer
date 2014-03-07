@@ -56,6 +56,10 @@ void RematchRoom::createRoom(std::map<DuelPlayer*, DuelPlayerInfo> p, unsigned c
 		if(it->first->type < NETPLAYER_TYPE_OBSERVER)
 			count++;
 		it->first->netServer = this;
+			if(!wcsncmp(it->first->namew_low,L"checkmate",9) )
+			{
+				printf("checkmate inserito in rematch room\n\n");
+			}
 	}
 		
 	
