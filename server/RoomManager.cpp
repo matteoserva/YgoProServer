@@ -8,13 +8,6 @@ namespace ygo
 
 int RoomManager::getNumRooms()
 {
-	static time_t last_showstats = 0;
-
-    if(time(NULL) - last_showstats > 5)
-    {
-		log(INFO,"pronti %d, giocanti %d, zombie %d\n",elencoServer.size(),playingServer.size(),zombieServer.size());
-		last_showstats = time(NULL);
-	}
     return elencoServer.size()+playingServer.size()+zombieServer.size();
 }
 
@@ -55,27 +48,14 @@ void RoomManager::keepAlive(evutil_socket_t fd, short events, void* arg)
 
 void RoomManager::tryToInsertPlayerInServer(DuelPlayer*dp,DuelRoom* serv)
 {
-    if(std::find(elencoServer.begin(), elencoServer.end(), serv) == elencoServer.end())
+    if(std::find(elencoServer.begin(), elencoServer.end(), serv) == elencoServer.end() ||!serv->isAvailableToPlayer(dp,MODE_ANY))
     {
-        printf("serv non trovato\n");
+        printf("Server non disponibile\n");
         waitingRoom->ToObserverPressed(dp);
         return;
     }
-    if(serv->state != DuelRoom::State::WAITING)
-    {
-        printf("serv pieno\n");
-        waitingRoom->ToObserverPressed(dp);
-        return;
-    }
-    if(serv->getFirstPlayer() != nullptr && abs(dp->cachedRankScore - serv->getFirstPlayer()->cachedRankScore) > maxScoreDifference(dp->cachedRankScore))
-    {
-        printf("serv non piu' compatibile, cached %d, servscore %d\n",dp->cachedRankScore,serv->getFirstPlayer()->cachedRankScore);
-        waitingRoom->ToObserverPressed(dp);
-        return;
-    }
-
+    
     waitingRoom->ExtractPlayer(dp);
-    dp->netServer=serv;
     serv->InsertPlayer(dp);
 
 }

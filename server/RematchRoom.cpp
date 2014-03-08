@@ -54,7 +54,6 @@ void RematchRoom::createRoom(std::map<DuelPlayer*, DuelPlayerInfo> p, unsigned c
 		killRoom(virtualRooms.begin());
 	else
 	{
-		printf("chiedo di rigiocare\n");
 		char buffer[10];
 		char* pbuf = buffer;
 		BufferIO::WriteInt16(pbuf, 7);
