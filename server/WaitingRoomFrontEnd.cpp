@@ -338,9 +338,8 @@ void WaitingRoom::ButtonKickPressed(DuelPlayer* dp,int pos)
             player_status[dp].challenger = nullptr;
             player_status[dpnemico].challenger = nullptr;
 
-
-            roomManager->tryToInsertPlayerInServer(dp,netserver);
             roomManager->tryToInsertPlayerInServer(dpnemico,netserver);
+            roomManager->tryToInsertPlayerInServer(dp,netserver);
         }
         else
         {
