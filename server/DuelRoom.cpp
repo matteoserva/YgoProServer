@@ -42,6 +42,8 @@ bool DuelRoom::isAvailableToPlayer(DuelPlayer* refdp, unsigned char refmode)
 {
     if(state != DuelRoom::State::WAITING)
         return false;
+	if(numPlayers == 0)
+		return true;
     int reflflist = refdp->lflist;
     int refScore = refdp->cachedRankScore;
     if(abs(refScore - getFirstPlayer()->cachedRankScore) >= RoomManager::maxScoreDifference(refScore))
