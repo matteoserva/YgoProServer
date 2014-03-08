@@ -160,6 +160,8 @@ void WaitingRoom::ToObserverPressed(DuelPlayer* dp)
             sprintf(tipo,"%s","[MATCH]");
         else if(lista[i]->mode == MODE_TAG)
             sprintf(tipo,"%s","[TAG]");
+		else if(lista[i]->mode == MODE_HANDICAP)
+            sprintf(tipo,"%s","[TAG]");
         else
             sprintf(tipo,"%s","[SINGLE]");
 
