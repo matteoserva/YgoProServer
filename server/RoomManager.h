@@ -16,7 +16,7 @@ namespace ygo {
         private:
         event* keepAliveEvent;
 
-        std::set<std::string> bannedIPs;
+        std::multimap<std::string,time_t> bannedIPs;
 
         public:
         void ban(std::string);

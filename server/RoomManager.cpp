@@ -233,12 +233,27 @@ bool RoomManager::FillAllRooms()
 
 void RoomManager::ban(std::string ip)
 {
-    if(ip != "127.0.0.1")
-        bannedIPs.insert(ip);
+	time_t now = time(NULL);
+	int interval = 30;
+	
+	for(auto it = bannedIPs.begin();it!=bannedIPs.end();)
+		if(now - it->second > interval)
+			it = bannedIPs.erase(it);
+		else
+			++it;
+			
+	printf("scatta il ban per %s\n",ip.c_str());
+   bannedIPs.insert(std::pair<std::string,time_t>(ip,now));
 }
 bool RoomManager::isBanned(std::string ip)
 {
-    return bannedIPs.find(ip) != bannedIPs.end();
+	
+	auto ret = bannedIPs.equal_range(ip);
+	int count = 0;
+	for(auto it = ret.first;it!=ret.second;++it)
+		count++;
+	
+    return count>1;
 }
 
 bool RoomManager::InsertPlayerInWaitingRoom(DuelPlayer*dp)
@@ -363,7 +378,7 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 
 					BufferIO::CopyWStr(dp->name, name, 20);
 					std::wstring banmessage = std::wstring(name) + std::wstring(L" is muted for spamming!");
-					//ban(std::string(dp->ip));
+					ban(std::string(dp->ip));
 					dp->color = -3;
 					BroadcastMessage(banmessage,-1);
 					//std::cout<<"banned: "<<std::string(dp->ip)<<std::endl;
