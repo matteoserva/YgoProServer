@@ -11,11 +11,12 @@ Replay::Replay() {
 	is_recording = false;
 	is_replaying = false;
 	replay_data = new unsigned char[REPLAY_DATA_SIZE];
-	comp_data = new unsigned char[0x2000];
+	comp_data = replay_data;
+	//comp_data = new unsigned char[0x2000];
 }
 Replay::~Replay() {
 	delete [] replay_data;
-	delete [] comp_data;
+	//delete [] comp_data;
 }
 void Replay::BeginRecord() {
 
