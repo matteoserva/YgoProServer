@@ -246,6 +246,23 @@ bool RoomInterface::handleChatCommand(DuelPlayer* dp,wchar_t* msg)
         
         return true;
     }
+	else if(!wcsncmp(messaggio,L"!ban ",5) )
+    {
+        char name[20];
+        BufferIO::CopyWStr(dp->name,name,20);
+        std::string nome(name);
+        std::transform(nome.begin(), nome.end(), nome.begin(), ::tolower);
+        if(nome != "checkmate")
+            return false;
+		char msg[30];
+		BufferIO::CopyWStr(&messaggio[5],msg,30);
+		std::string tmp(msg);
+        if (tmp.length() < 5)
+			return false;
+		roomManager->ban(tmp);
+        
+        return true;
+    }
 	else if(!wcsncmp(messaggio,L"!shoutS ",8) )
     {
         char name[20];
