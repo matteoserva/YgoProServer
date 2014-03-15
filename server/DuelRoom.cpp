@@ -1057,7 +1057,7 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
         if(!dp->game || !duel_mode->pduel)
             return;
 
-        sblocca_segnali();
+        attiva_segnali();
         try
         {
 			duel_mode->GetResponse(dp, pdata, len > 64 ? 64 : len - 1);
@@ -1078,7 +1078,7 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             kill(SIGINT,getpid());
 
         }
-        blocca_segnali();
+        disattiva_segnali();
 
         break;
     }

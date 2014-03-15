@@ -24,7 +24,6 @@ void log(log_type lt, const char *format, ...)
 }
 
 
-
 static void sighandler(int sig)
 {
 
@@ -37,28 +36,36 @@ static void sighandler(int sig)
 void prepara_segnali()
 {
 	return;
+	signal(SIGALRM, sighandleralarm);
 	signal(SIGSEGV, sighandler);
 	sigset_t set;
 	sigemptyset(&set);
 	sigaddset(&set, SIGSEGV);
+	sigaddset(&set, SIGALRM);
 	pthread_sigmask(SIG_BLOCK, &set, NULL);
 }
 
-void sblocca_segnali()
+void attiva_segnali()
 {
+	signal(SIGSEGV, sighandler);
+	signal(SIGABRT, sighandler);
 	return;
 	sigset_t set;
 	sigemptyset(&set);
 	sigaddset(&set, SIGSEGV);
+	sigaddset(&set, SIGALRM);
 	pthread_sigmask(SIG_UNBLOCK, &set, NULL);
 }
 
-void blocca_segnali()
+void disattiva_segnali()
 {
+	signal(SIGSEGV, SIG_DFL);
+	signal(SIGABRT, SIG_DFL);
 	return;
 	sigset_t set;
 	sigemptyset(&set);
 	sigaddset(&set, SIGSEGV);
+	sigaddset(&set, SIGALRM);
 	pthread_sigmask(SIG_BLOCK, &set, NULL);
 }
 
