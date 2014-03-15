@@ -277,29 +277,7 @@ void GameServer::RestartListen()
     }
 }
 
-int GameServer::CheckAliveThread(void* parama)
-{
-    GameServer*that = (GameServer*)parama;
 
-    if(!that->net_evbase)
-        return 0;
-
-    static time_t last_check = time(NULL);
-    int sleepSeconds = 30;
-
-    if(time(NULL)- last_check < sleepSeconds)
-        return 0;
-
-    if( !that->isAlive)
-    {
-        abort();
-        exit(EXIT_FAILURE);
-    }
-    that->isAlive=false;
-    last_check = time(NULL);
-
-    return 0;
-}
 void GameServer::keepAlive(evutil_socket_t fd, short events, void* arg)
 {
     GameServer*that = (GameServer*) arg;
