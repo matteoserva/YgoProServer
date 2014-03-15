@@ -28,6 +28,7 @@ static void sighandler(int sig)
 {
 
 	std::cout << "segfault"<<std::endl;
+	print_trace();
 	throw std::string ("corretto");
 }
 
@@ -36,13 +37,13 @@ static void sighandler(int sig)
 void prepara_segnali()
 {
 	return;
-	signal(SIGALRM, sighandleralarm);
+	/*signal(SIGALRM, sighandleralarm);
 	signal(SIGSEGV, sighandler);
 	sigset_t set;
 	sigemptyset(&set);
 	sigaddset(&set, SIGSEGV);
 	sigaddset(&set, SIGALRM);
-	pthread_sigmask(SIG_BLOCK, &set, NULL);
+	pthread_sigmask(SIG_BLOCK, &set, NULL);*/
 }
 
 void attiva_segnali()
