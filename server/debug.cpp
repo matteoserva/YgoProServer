@@ -23,13 +23,7 @@ void log(log_type lt, const char *format, ...)
 #endif /* DEBUG */
 }
 
-static void sighandleralarm(int sig)
-{
 
-	std::cout << "alarm"<<std::endl;
-	kill(getpid(),SIGSEGV);
-	//throw std::string ("corretto");
-}
 
 static void sighandler(int sig)
 {
@@ -43,12 +37,10 @@ static void sighandler(int sig)
 void prepara_segnali()
 {
 	return;
-	signal(SIGALRM, sighandleralarm);
 	signal(SIGSEGV, sighandler);
 	sigset_t set;
 	sigemptyset(&set);
 	sigaddset(&set, SIGSEGV);
-	sigaddset(&set, SIGALRM);
 	pthread_sigmask(SIG_BLOCK, &set, NULL);
 }
 
@@ -58,7 +50,6 @@ void sblocca_segnali()
 	sigset_t set;
 	sigemptyset(&set);
 	sigaddset(&set, SIGSEGV);
-	sigaddset(&set, SIGALRM);
 	pthread_sigmask(SIG_UNBLOCK, &set, NULL);
 }
 
@@ -68,7 +59,6 @@ void blocca_segnali()
 	sigset_t set;
 	sigemptyset(&set);
 	sigaddset(&set, SIGSEGV);
-	sigaddset(&set, SIGALRM);
 	pthread_sigmask(SIG_BLOCK, &set, NULL);
 }
 
