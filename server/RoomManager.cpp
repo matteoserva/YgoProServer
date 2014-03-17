@@ -291,10 +291,7 @@ bool RoomManager::InsertPlayer(DuelPlayer*dp,unsigned char mode)
 
 DuelRoom* RoomManager::createServer(unsigned char mode)
 {
-    if(getNumRooms() >= 500)
-    {
-        return nullptr;
-    }
+    
     DuelRoom *netServer = new DuelRoom(this,gameServer,mode);
 
     elencoServer.push_back(netServer);
