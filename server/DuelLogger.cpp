@@ -9,7 +9,7 @@ void debugp(const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
-	//vprintf(format, args);
+	vprintf(format, args);
 	va_end(args);
 }
 DuelLogger::DuelLogger()
@@ -36,6 +36,8 @@ void DuelLogger::LogClientMessage(uintptr_t dp,unsigned char proto, char*buffer,
 					debugp("battlecmd: %lx risponde %d:\n",dp,buffer[1]);
 					if(buffer[1] == 3)
 						debugp("finisce turno\n");
+					if(buffer[1] == 1)
+						players[dp].attack();
 					break;
 				}
 			case MSG_SELECT_IDLECMD:

@@ -134,9 +134,9 @@ bool UsersDatabase::setUserStats(UserStats &us,LoggerPlayerInfo * lpi)
         {
                     sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
 
-            std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("UPDATE stats SET score = ?, wins = ?, losses = ?, draws = ?,tags = ? ,maxspsummonsturn = GREATEST(maxspsummonsturn , ?), longestduel = GREATEST(longestduel, ?) WHERE username = ?"));
+            std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("UPDATE stats SET score = ?, wins = ?, losses = ?, draws = ?,tags = ? ,maxspsummonsturn = GREATEST(maxspsummonsturn , ?), longestduel = GREATEST(longestduel, ?),maxattacksturn = GREATEST(maxattacksturn, ?) WHERE username = ?"));
             //stmt->setQueryTimeout(5);
-            stmt->setString(8, us.username);
+            stmt->setString(9, us.username);
             stmt->setInt(1, us.score);
             stmt->setInt(2, us.wins);
             stmt->setInt(3, us.losses);
@@ -144,6 +144,7 @@ bool UsersDatabase::setUserStats(UserStats &us,LoggerPlayerInfo * lpi)
             stmt->setInt(5, us.tags);
 			stmt->setInt(6,lpi->maxSpSummonTurn);
 			stmt->setInt(7,lpi->turns);
+			stmt->setInt(8,lpi->maxAttacksTurn);
             int updateCount = stmt->executeUpdate();
             return updateCount > 0;
         }

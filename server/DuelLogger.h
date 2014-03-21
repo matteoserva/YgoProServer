@@ -17,12 +17,15 @@ public:
 	unsigned int turns;
 	unsigned int SpSummonTurn;
 	unsigned int maxSpSummonTurn;
+	unsigned int maxAttacksTurn;
+	unsigned int attacksTurn;
 	
 	
 	void NewTurn();
 	void MainPhase();
 	void SpecialSummon();
 	void TypeChange(unsigned char);
+	void attack();
 };
 
 class DuelLogger
