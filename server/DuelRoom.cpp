@@ -758,7 +758,7 @@ void DuelRoom::Victory(char winner)
         Users::getInstance()->Victory(wins,loses);
 		*/
 		
-		if(!strcmp(win,logger.getPlayerInfo((uintptr_t) _players[winner])->name))
+		if(strcmp(win,logger.getPlayerInfo((uintptr_t) _players[winner])->name))
 			log(BUG,"nome sbagliato %s %s\n",win,logger.getPlayerInfo((uintptr_t) _players[winner])->name);
 		std::vector<LoggerPlayerInfo*> nomi;
 		nomi.push_back(logger.getPlayerInfo((uintptr_t) _players[winner]));
