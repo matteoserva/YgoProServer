@@ -188,7 +188,7 @@ std::string Users::getCountryCode(std::string ip)
 
 }
 
-void Users::UpdateScore(std::vector<std::string> nomi, int risultato) //0= vittoria, -1 = pareggio
+void Users::UpdateScore(std::vector<std::string> nomi, int risultato) //0= vittoria, 2 = pareggio
 {
 	std::vector<UserStats> us;
 	
@@ -247,6 +247,78 @@ void Users::UpdateScore(std::vector<std::string> nomi, int risultato) //0= vitto
 			if(us_tmp.score < 100)
 				us_tmp.score = 100;
 			database->setUserStats(us_tmp);
+			
+			log(INFO,"%s score: %d >(%+d)-> %d\n",us_tmp.username.c_str(),us[i].score,(us_tmp.score-us[i].score),us_tmp.score);
+			
+		}
+		
+	}
+    catch (std::exception e)
+    {
+
+    }
+	
+}
+
+void Users::UpdateStats(std::vector<LoggerPlayerInfo *> nomi, int risultato) //0= vittoria, 2 = pareggio
+{
+	std::vector<UserStats> us;
+	
+	unsigned int num_squadra1 = nomi.size()/2;
+	unsigned int num_squadra2 = nomi.size() - num_squadra1;
+	
+	unsigned int media_squadra1=0;
+	unsigned int media_squadra2=0;
+	int delta = 0;
+	try
+    {
+		int pos = 0;
+		for(auto nome = nomi.cbegin(); nome != nomi.cend();++nome,++pos)
+		{
+			if((*nome)->name[0] == '-')
+				return;
+			UserStats us_tmp = database->getUserStats((*nome)->name);
+			us.push_back(us_tmp);
+			if(pos < num_squadra1)
+				media_squadra1 += us_tmp.score;
+			else
+				media_squadra2 += us_tmp.score;
+		}
+		media_squadra1 /= num_squadra1;
+		media_squadra2 /= num_squadra2;
+		delta = media_squadra1 - media_squadra2;
+			
+		
+		for(int i = 0;i<nomi.size();i++)
+		{
+			UserStats us_tmp = us[i];
+			
+			if(i<num_squadra1 && risultato == 0)
+			{
+				us_tmp.score += k(us_tmp) * (1.0-win_exp(delta))  * 1.0*us_tmp.score/media_squadra1;
+				us_tmp.wins++;
+			}
+			else if(i>=num_squadra1 && risultato == 0)
+			{
+				us_tmp.score += k(us_tmp) * (0.0-win_exp(-delta))  * 1.0*us_tmp.score/media_squadra2;
+				us_tmp.losses++;
+			}
+			else if(i<num_squadra1 && risultato == 2)
+			{
+				us_tmp.score += k(us_tmp) * (0.5-win_exp(delta))  * 1.0*us_tmp.score/media_squadra1;
+				us_tmp.draws++;
+			}
+			else if(i>=num_squadra1 && risultato == 2)
+			{
+				us_tmp.score += k(us_tmp) * (0.5-win_exp(-delta))  * 1.0*us_tmp.score/media_squadra2;
+				us_tmp.draws++;
+			}
+
+			if(num_squadra2 > 1)
+				us_tmp.tags++;
+			if(us_tmp.score < 100)
+				us_tmp.score = 100;
+			database->setUserStats(us_tmp,nomi[i]);
 			
 			log(INFO,"%s score: %d >(%+d)-> %d\n",us_tmp.username.c_str(),us[i].score,(us_tmp.score-us[i].score),us_tmp.score);
 			

@@ -123,6 +123,38 @@ bool UsersDatabase::setUserStats(UserStats &us)
     return false;
 }
 
+bool UsersDatabase::setUserStats(UserStats &us,LoggerPlayerInfo * lpi)
+{
+
+    //true is success
+    int retries = 3;
+    do
+    {
+        try
+        {
+                    sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
+
+            std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("UPDATE stats SET score = ?, wins = ?, losses = ?, draws = ?,tags = ? ,maxspsummonsturn = GREATEST(maxspsummonsturn , ?) WHERE username = ?"));
+            //stmt->setQueryTimeout(5);
+            stmt->setString(7, us.username);
+            stmt->setInt(1, us.score);
+            stmt->setInt(2, us.wins);
+            stmt->setInt(3, us.losses);
+            stmt->setInt(4, us.draws);
+            stmt->setInt(5, us.tags);
+			stmt->setInt(6,lpi->maxSpSummonTurn);
+            int updateCount = stmt->executeUpdate();
+            return updateCount > 0;
+        }
+        catch (sql::SQLException &e)
+        {
+            MySqlWrapper::getInstance()->notifyException(e);
+        }
+    }
+    while (--retries > 0);
+    return false;
+}
+
 UserStats UsersDatabase::getUserStats(std::string username)
 {
 

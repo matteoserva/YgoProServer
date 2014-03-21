@@ -162,6 +162,7 @@ void Config::LoadConfig()
             CHECK_VARIABLE(waitingroom_min_waiting);
             CHECK_VARIABLE(waitingroom_max_waiting);
             CHECK_VARIABLE(noExternalChat);
+			CHECK_VARIABLE(debugSql);
 
             else
                 cerr<<"Could not understand the keyword at line"<<linenum<<": "<<strbuf<<endl;

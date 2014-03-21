@@ -8,7 +8,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-
+#include "DuelLogger.h"
 namespace ygo
 {
 
@@ -91,6 +91,7 @@ public:
     void Victory(std::string, std::string);
     void Victory(std::string, std::string,std::string, std::string);
 	void UpdateScore(std::vector<std::string> nomi, int risultato);
+	void UpdateStats(std::vector<LoggerPlayerInfo *> nomi, int risultato);
 
 };
 

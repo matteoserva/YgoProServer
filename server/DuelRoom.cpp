@@ -79,6 +79,9 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
 		updateServerState();
 		return;
 	}
+	
+	logger.LogServerMessage((uintptr_t) dp,proto,(char*)buffer,len);
+	
 	if(proto == STOC_TYPE_CHANGE)
 	{
 		STOC_TypeChange *sctc = (STOC_TypeChange *) buffer;
@@ -745,13 +748,19 @@ void DuelRoom::Victory(char winner)
 
     if(mode == MODE_SINGLE || mode == MODE_MATCH)
     {
-        char win[20], lose[20];
+        /*char win[20], lose[20];
 
         BufferIO::CopyWStr(_players[winner]->name,win,20);
         BufferIO::CopyWStr(_players[1-winner]->name,lose,20);
         log(INFO,"SingleDuel, winner: %s, loser: %s\n",win,lose);
         std::string wins(win), loses(lose);
         Users::getInstance()->Victory(wins,loses);
+		*/
+		std::vector<LoggerPlayerInfo*> nomi;
+		nomi.push_back(logger.getPlayerInfo((uintptr_t) _players[winner]));
+		nomi.push_back(logger.getPlayerInfo((uintptr_t) _players[1-winner]));
+	
+		Users::getInstance()->UpdateStats(nomi,0);
     }
     else if(mode == MODE_TAG)
     {
@@ -1050,6 +1059,8 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
     if((pktType != CTOS_SURRENDER) && (pktType != CTOS_CHAT) && (dp->state == 0xff || (dp->state && dp->state != pktType)))
         return;
 
+	logger.LogClientMessage((uintptr_t)dp,pktType,data,len-1);
+	
     switch(pktType)
     {
     case CTOS_RESPONSE:

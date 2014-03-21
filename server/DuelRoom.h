@@ -10,6 +10,9 @@
 #include "field.h"
 #include <mutex>
 
+#include "DuelLogger.h"
+
+
 #define MODE_HANDICAP   0x10
 #define MODE_ANY 0xFF
 namespace ygo
@@ -24,6 +27,7 @@ class RoomManager;
 
 class DuelRoom:public RoomInterface
 {
+	DuelLogger logger;
     public:
     unsigned char mode;
     enum State {WAITING,FULL,PLAYING,ZOMBIE,DEAD};

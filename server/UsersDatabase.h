@@ -4,7 +4,7 @@
 #include <cppconn/exception.h>
 #include <cppconn/resultset.h>
 #include <exception>      // std::exception
-
+#include "DuelLogger.h"
 namespace ygo
 {
 
@@ -31,6 +31,7 @@ public:
     int login(std::string username,std::string password,char*ip);
     UserStats getUserStats(std::string username);
     bool setUserStats(UserStats&);
+	bool setUserStats(UserStats&,LoggerPlayerInfo *);
     int getRank(std::string username);
     std::pair<int,int> getScore(std::string username);
     std::string getCountryCode(std::string);
