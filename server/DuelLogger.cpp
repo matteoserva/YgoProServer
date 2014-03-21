@@ -120,6 +120,15 @@ void DuelLogger::LogServerMessage(uintptr_t dp,unsigned char proto, char*buffer,
 				players[dp].NewTurn();
 			if(buffer[0] ==	MSG_SPSUMMONED)
 				players[dp].SpecialSummon();
+			if(buffer[0] ==	MSG_DAMAGE)
+			{
+				int * p = (int*) &buffer[2];
+				players[dp].Damage(buffer[1],*p);
+				
+			}
+			if(buffer[0] == MSG_START)
+				players[dp].playerID = buffer[1] & 0x0f;
+				
 			break;
 		}
 		

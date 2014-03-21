@@ -19,13 +19,15 @@ public:
 	unsigned int maxSpSummonTurn;
 	unsigned int maxAttacksTurn;
 	unsigned int attacksTurn;
-	
+	signed char playerID;
+	int maxDamage1shot;
 	
 	void NewTurn();
 	void MainPhase();
 	void SpecialSummon();
 	void TypeChange(unsigned char);
 	void attack();
+	void Damage(signed char, int);
 };
 
 class DuelLogger
