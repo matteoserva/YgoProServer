@@ -748,14 +748,18 @@ void DuelRoom::Victory(char winner)
 
     if(mode == MODE_SINGLE || mode == MODE_MATCH)
     {
-        /*char win[20], lose[20];
+        char win[20], lose[20];
 
         BufferIO::CopyWStr(_players[winner]->name,win,20);
         BufferIO::CopyWStr(_players[1-winner]->name,lose,20);
-        log(INFO,"SingleDuel, winner: %s, loser: %s\n",win,lose);
+        
+		/*log(INFO,"SingleDuel, winner: %s, loser: %s\n",win,lose);
         std::string wins(win), loses(lose);
         Users::getInstance()->Victory(wins,loses);
 		*/
+		
+		if(!strcmp(win,logger.getPlayerInfo((uintptr_t) _players[winner])->name))
+			log(BUG,"nome sbagliato %s %s\n",win,logger.getPlayerInfo((uintptr_t) _players[winner])->name);
 		std::vector<LoggerPlayerInfo*> nomi;
 		nomi.push_back(logger.getPlayerInfo((uintptr_t) _players[winner]));
 		nomi.push_back(logger.getPlayerInfo((uintptr_t) _players[1-winner]));
