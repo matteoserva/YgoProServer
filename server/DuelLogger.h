@@ -21,6 +21,7 @@ public:
 	unsigned int attacksTurn;
 	signed char playerID;
 	int maxDamage1shot;
+	unsigned int recoveredDuel;
 	
 	void NewTurn();
 	void MainPhase();
