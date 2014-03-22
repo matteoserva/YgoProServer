@@ -136,7 +136,7 @@ bool UsersDatabase::setUserStats(UserStats &us,LoggerPlayerInfo * lpi)
 
             std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement(
 			"UPDATE stats SET score = ?, wins = ?, losses = ?, draws = ?,tags = ? ,maxspsummonsturn = GREATEST(maxspsummonsturn , ?), longestduel = GREATEST(longestduel, ?),maxattacksturn = GREATEST(maxattacksturn, ?), maxdamage1shot = GREATEST(maxdamage1shot,?), "
-			"recoveredduel = GREATEST(recoveredduel,?) WHERE username = ?"));
+			"recoveredduel = GREATEST(recoveredduel,?),  setmonstersduel = GREATEST(setmonstersduel,?), effectsduel = GREATEST(effectsduel,?), setstduel = GREATEST(setstduel,?) WHERE username = ?"));
             //stmt->setQueryTimeout(5);
             
             stmt->setInt(1, us.score);
@@ -151,6 +151,9 @@ bool UsersDatabase::setUserStats(UserStats &us,LoggerPlayerInfo * lpi)
 			stmt->setInt(9,lpi->maxDamage1shot);
 			int i = 10;
 			stmt->setInt(i++,lpi->recoveredDuel);
+			stmt->setInt(i++,lpi->setMonstersDuel);
+			stmt->setInt(i++,lpi->effectsDuel);
+			stmt->setInt(i++,lpi->setSTDuel);
 			stmt->setString(i++, us.username);
             int updateCount = stmt->executeUpdate();
             return updateCount > 0;

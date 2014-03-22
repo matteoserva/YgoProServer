@@ -43,7 +43,7 @@ void DuelLogger::LogClientMessage(uintptr_t dp,unsigned char proto, char*buffer,
 			case MSG_SELECT_IDLECMD:
 				{
 					debugp("idlecmd: %s %lx risponde %d:",players[dp].name,dp,buffer[1]);
-					players[dp].MainPhase();
+
 					if(buffer[1] == 7)
 						debugp("finisce turno\n");
 					if(buffer[1] == 0)
@@ -51,11 +51,11 @@ void DuelLogger::LogClientMessage(uintptr_t dp,unsigned char proto, char*buffer,
 					//if(buffer[1] == 1)
 						//debugp("special summon\n");
 					if(buffer[1] == 5)
-						debugp("activate card\n");
+						players[dp].Effect();
 					if(buffer[1] == 4)
-						debugp("set spell/trap\n");
+						players[dp].SetST();
 					if(buffer[1] == 3)
-						debugp("set monster\n");
+						players[dp].SetMonster();
 					break;
 				}
 			case MSG_SELECT_CHAIN:
@@ -133,7 +133,8 @@ void DuelLogger::LogServerMessage(uintptr_t dp,unsigned char proto, char*buffer,
 			}
 			if(buffer[0] == MSG_START)
 				players[dp].playerID = buffer[1] & 0x0f;
-				
+			if(buffer[0] == MSG_SELECT_IDLECMD)
+					players[dp].MainPhase();
 			break;
 		}
 		

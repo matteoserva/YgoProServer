@@ -22,6 +22,9 @@ public:
 	signed char playerID;
 	int maxDamage1shot;
 	unsigned int recoveredDuel;
+	unsigned int setMonstersDuel;
+	unsigned int effectsDuel;
+	unsigned int setSTDuel;
 	
 	void NewTurn();
 	void MainPhase();
@@ -30,6 +33,9 @@ public:
 	void attack();
 	void Damage(signed char, int);
 	void Recover(signed char, int);
+	void SetMonster();
+	void Effect();
+	void SetST();
 };
 
 class DuelLogger
