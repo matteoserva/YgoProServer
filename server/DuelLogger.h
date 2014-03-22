@@ -28,6 +28,7 @@ public:
 	void TypeChange(unsigned char);
 	void attack();
 	void Damage(signed char, int);
+	void Recover(signed char, int);
 };
 
 class DuelLogger

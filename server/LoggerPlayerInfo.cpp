@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "DuelLogger.h"
 
-LoggerPlayerInfo::LoggerPlayerInfo():type(7),turns(0),maxSpSummonTurn(0),maxAttacksTurn(0),maxDamage1shot(0)
+LoggerPlayerInfo::LoggerPlayerInfo():type(7),turns(0),maxSpSummonTurn(0),maxAttacksTurn(0),maxDamage1shot(0),recoveredDuel(0)
 {
 	
 }
@@ -42,13 +42,29 @@ void LoggerPlayerInfo::Damage(signed char ID, int damage)
 {
 	if(!hisTurn)
 		return;
-	if(ID != (1-playerID))
-		return;
+	if(ID == (1-playerID))
+	{
 	if(maxDamage1shot < damage)
 		maxDamage1shot = damage;
 	debugp("%s inflicts %d damage\n",name,damage);
+	
+	}
+	
+	
 }
+void LoggerPlayerInfo::Recover(signed char ID, int damage)
+{
+	if(!hisTurn)
+		return;
+	if(ID == playerID)
+	{
+		recoveredDuel += damage;
+		debugp("%s recovers %d damage\n",name,damage);
+	
+	}
 
+	
+}
 void LoggerPlayerInfo::TypeChange(unsigned char t)
 {
 	type = t;

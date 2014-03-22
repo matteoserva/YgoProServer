@@ -9,7 +9,7 @@ void debugp(const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
-	//vprintf(format, args);
+	vprintf(format, args);
 	va_end(args);
 }
 DuelLogger::DuelLogger()
@@ -125,6 +125,11 @@ void DuelLogger::LogServerMessage(uintptr_t dp,unsigned char proto, char*buffer,
 				int * p = (int*) &buffer[2];
 				players[dp].Damage(buffer[1],*p);
 				
+			}
+			if(buffer[0] ==	MSG_RECOVER)
+			{
+				int * p = (int*) &buffer[2];
+				players[dp].Recover(buffer[1],*p);
 			}
 			if(buffer[0] == MSG_START)
 				players[dp].playerID = buffer[1] & 0x0f;
