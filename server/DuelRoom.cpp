@@ -966,7 +966,7 @@ bool DuelRoom::reCheckLfList()
             info.lflist=list_hash;
             info.time_limit=Config::getInstance()->startTimer;
             info.start_lp=8000;
-            info.enable_priority=false;
+            info.enable_priority=(lflist ==2);
             info.no_shuffle_deck=false;
 
             duel_mode->host_info = info;
