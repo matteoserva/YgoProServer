@@ -101,6 +101,7 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
         STOC_JoinGame scjg;
         scjg.info = duel_mode->host_info;
         scjg.info.time_limit=std::max(Config::getInstance()->maxTimer,Config::getInstance()->startTimer);
+		scjg.info.enable_priority= false;
         RoomInterface::SendBufferToPlayer(dp, STOC_JOIN_GAME, &scjg,sizeof(STOC_JoinGame));
 
         for(auto it:players)
@@ -118,6 +119,7 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
     {
         STOC_JoinGame *scjg = (STOC_JoinGame *)buffer;
         scjg->info.time_limit=0;
+		scjg->info.enable_priority= false;
 
     }
 
