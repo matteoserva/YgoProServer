@@ -1080,7 +1080,7 @@ void DuelRoom::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 			int resp_type = dp->type;
             if(mode == MODE_TAG)
                 resp_type= dp->type < 2 ? 0 : 1;
-            if(duel_mode->time_limit[resp_type]>0 and duel_mode->time_limit[resp_type]<Config::getInstance()->maxTimer)
+            if(logger.getPlayerInfo((uintptr_t)dp)->hisTurn and duel_mode->time_limit[resp_type]>0 and duel_mode->time_limit[resp_type]<Config::getInstance()->maxTimer)
                 duel_mode->time_limit[resp_type] +=1;
         }
         catch (std::string &errore)
