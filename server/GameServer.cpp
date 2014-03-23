@@ -147,7 +147,8 @@ void GameServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sock
     setsockopt(fd, SOL_TCP, TCP_KEEPCNT, &optval, optlen);
     optval = 30;
     setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
-
+	optval = 1;
+    setsockopt(fd, SOL_TCP, TCP_NODELAY, &optval, optlen);
 
     bufferevent* bev = bufferevent_socket_new(that->net_evbase, fd, BEV_OPT_CLOSE_ON_FREE);
     DuelPlayer dp;
