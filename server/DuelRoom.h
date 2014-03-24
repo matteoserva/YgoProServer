@@ -15,6 +15,7 @@
 
 #define MODE_HANDICAP   0x10
 #define MODE_ANY 0xFF
+#define DUEL_ENABLE_PRIORITY 0x08
 namespace ygo
 {
 class GameServer;
