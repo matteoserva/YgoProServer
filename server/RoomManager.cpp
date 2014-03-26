@@ -412,7 +412,7 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
             stringa[1] = 0;
             BufferIO::CopyWStr(dp->name,&stringa[1],25);
             wcscat(stringa,L"]: ");
-            wcscat(stringa,messaggio);
+            wcsncat(stringa,messaggio,220);
 			dp->netServer->BroadcastRemoteChat(stringa,dp->color);
             return;
         }
