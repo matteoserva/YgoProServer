@@ -144,14 +144,14 @@ void DuelRoom::SendBufferToPlayer(DuelPlayer* dp, unsigned char proto, void* buf
             }
 			
 			/* PESCE D'APRILE
-			{
+			*/{
 				char buf[16];
 				int *val = (int*) &buf[4];
 				buf[3] = dp->type;
 				buf[2]=MSG_LPUPDATE;
 				*val = 108000;
 				RoomInterface::SendBufferToPlayer(dp, STOC_GAME_MSG, &buf[2],6);
-			}*/
+			}/**/
         }
     }
     else if(proto==STOC_REPLAY)
