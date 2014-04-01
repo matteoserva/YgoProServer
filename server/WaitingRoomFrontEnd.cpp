@@ -2,6 +2,7 @@
 #include "RoomManager.h"
 #include "DuelRoom.h"
 #include <time.h>
+#include "GameServer.h"
 namespace ygo
 {
 
@@ -484,7 +485,42 @@ bool WaitingRoom::handleChatCommand(DuelPlayer* dp,wchar_t* messaggio)
         //ExtractPlayer(dp);
         //roomManager->InsertPlayer(dp,MODE_TAG);
 
-    }
+    }/*
+	else if(!wcsncmp(messaggio,L"!join ",6) )
+    {
+        
+
+        if(wcslen(messaggio) < 7)
+        {
+            SystemChatToPlayer(dp,L"I need a username",true);
+            return true;
+        }
+        
+        std::wstring nome(&messaggio[6]);
+        
+
+        DuelPlayer* nemico = gameServer->findPlayer(nome);
+
+        if(nemico==nullptr)
+		{
+            SystemChatToPlayer(dp,L"Player not found, or player with a different server PID",true);
+			return true;
+		}
+			
+			
+		DuelRoom * room = dynamic_cast<DuelRoom*> nemico->netServer;
+		if(room==nullptr)
+		{
+			SystemChatToPlayer(dp,L"The Player is not in a duel room",true);
+			return true;
+			
+		}
+		ExtractPlayer(dp);
+		room->InsertPlayer(dp);
+		//roomManager->tryToInsertPlayerInServer(dp,(DuelRoom *)nemico->netServer);
+		
+        return true;
+    }*/
     else if(!wcscmp(messaggio,L"!single") || !wcscmp(messaggio,L"!s") || !wcscmp(messaggio,L"single!"))
     {
         SystemChatToPlayer(dp,L"http://ygopro.it/help.php",true);
