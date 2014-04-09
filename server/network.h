@@ -124,7 +124,7 @@ struct DuelPlayer {
 	}
     int lflist;
     std::string countryCode;
-    std::list<time_t> chatTimestamp;
+    std::list<std::pair<time_t,std::wstring> > chatTimestamp;
 };
 
 

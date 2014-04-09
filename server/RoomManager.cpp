@@ -256,6 +256,44 @@ bool RoomManager::isBanned(std::string ip)
     return count>1;
 }
 
+bool RoomManager::checkSpam(DuelPlayer*dp,std::wstring messaggio)
+{
+	dp->chatTimestamp.push_back(std::pair<time_t,std::wstring>(time(NULL),messaggio));
+	if(dp->chatTimestamp.size() < 3)
+		return false;
+	
+	auto it = dp->chatTimestamp.begin();
+	auto primo = *(++it);
+	auto secondo = *(++it);
+	
+	bool daBannare = false;
+	
+	
+	if(messaggio == primo.second && messaggio == secondo.second)
+	{
+		daBannare = true;
+	}
+	else if(dp->chatTimestamp.size() > 5)
+	{	
+		if(dp->chatTimestamp.back().first - dp->chatTimestamp.front().first <5)
+			daBannare = true;
+		dp->chatTimestamp.pop_front();
+	} 
+	if(daBannare)
+	{
+		wchar_t name[20];
+
+		BufferIO::CopyWStr(dp->name, name, 20);
+		std::wstring banmessage = std::wstring(name) + std::wstring(L" is muted for spamming!");
+		ban(std::string(dp->ip));
+		dp->color = -3;
+		BroadcastMessage(banmessage,-1);
+		
+	}
+	
+	return daBannare;
+}
+
 bool RoomManager::InsertPlayerInWaitingRoom(DuelPlayer*dp)
 {
     //true is success
@@ -365,26 +403,8 @@ void RoomManager::HandleCTOSPacket(DuelPlayer* dp, char* data, unsigned int len)
 		bool daBroadcastare = 	msgbuf[0]!='-' && (dp->loginStatus == Users::LoginResult::AUTHENTICATED || dp->loginStatus == Users::LoginResult::NOPASSWORD);
         if(dp->netServer == waitingRoom ||daBroadcastare)
         { //se dobbiamo fare un controllo spam
-
-			dp->chatTimestamp.push_back(time(NULL));
-			if(dp->chatTimestamp.size() > 5)
-			{
-				if(dp->chatTimestamp.back() - dp->chatTimestamp.front() <5)
-				{
-					wchar_t name[20];
-
-					BufferIO::CopyWStr(dp->name, name, 20);
-					std::wstring banmessage = std::wstring(name) + std::wstring(L" is muted for spamming!");
-					ban(std::string(dp->ip));
-					dp->color = -3;
-					BroadcastMessage(banmessage,-1);
-					//std::cout<<"banned: "<<std::string(dp->ip)<<std::endl;
-					//dp->netServer->LeaveGame(dp);
-					return;
-				}
-				else
-					dp->chatTimestamp.pop_front();
-			}
+			if(checkSpam(dp,messaggio))
+				return;
 		}
 		if( daBroadcastare)
 		{  //se dobbiamo broadcastare
