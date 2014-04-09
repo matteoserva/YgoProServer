@@ -284,9 +284,14 @@ bool RoomManager::checkSpam(DuelPlayer*dp,std::wstring messaggio)
 		wchar_t name[20];
 
 		BufferIO::CopyWStr(dp->name, name, 20);
-		std::wstring banmessage = std::wstring(name) + std::wstring(L" is muted for spamming!");
 		ban(std::string(dp->ip));
 		dp->color = -3;
+		std::wstring banmessage;
+		if(isBanned(dp->ip))
+			banmessage = std::wstring(name) + std::wstring(L" is BANNED for spamming!");
+		else
+			banmessage = std::wstring(name) + std::wstring(L" is muted for spamming!");
+
 		BroadcastMessage(banmessage,-1);
 		
 	}
