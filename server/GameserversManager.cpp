@@ -322,7 +322,7 @@ void GameserversManager::parent_loop()
                 //il figlio ha chiuso
                 printf("figlio terminato,fd: %d, pid: %d\n",child_fd,children[child_fd].pid);
                 int status;
-                waitpid(children[child_fd].pid,&status,0);
+                waitpid(children[child_fd].pid,&status,WNOHANG);
                 closeChild(child_fd);
                 children.erase(child_fd);
 
