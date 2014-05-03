@@ -100,7 +100,7 @@ void Config::LoadConfig()
 #endif //_WIN32
 
     signal(SIGPIPE, SIG_IGN);
-
+	signal(SIGCHLD, SIG_IGN);
     deckManager.LoadLFList();
     if(wcsstr(deckManager._lfList[0].listName,L"TCG"))
         std::swap(deckManager._lfList[0],deckManager._lfList[1]);
