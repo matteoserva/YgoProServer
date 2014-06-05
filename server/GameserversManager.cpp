@@ -15,7 +15,7 @@ namespace ygo
 
 
 
-static volatile bool needsReboot;
+volatile bool needsReboot;
 GameServer *child_gameserver = nullptr;
 void sigterm_handler(int signum)
 {

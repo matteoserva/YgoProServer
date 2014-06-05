@@ -12,6 +12,9 @@
 using ygo::Config;
 namespace ygo
 {
+	
+	extern volatile bool needsReboot;
+	
 GameServer::GameServer()
 {
     net_evbase = 0;
@@ -121,9 +124,11 @@ void GameServer::StopServer()
 
     if(listener == nullptr)
         return;
+	if(needsReboot)
+		return;
     StopListen();
-    evconnlistener_free(listener);
-    listener = nullptr;
+    
+    needsReboot = true;
 
 
 }
@@ -271,7 +276,7 @@ void GameServer::ServerEchoEvent(bufferevent* bev, short events, void* ctx)
 
 void GameServer::RestartListen()
 {
-    if(!isListening)
+    if(!isListening && !needsReboot)
     {
         evconnlistener_enable(listener);
         isListening = true;
@@ -293,7 +298,7 @@ void GameServer::sendStats(evutil_socket_t fd, short events, void* arg)
     GameServerStats gss;
     gss.rooms = Statistics::getInstance()->getNumRooms();
     gss.players = Statistics::getInstance()->getNumPlayers();
-    gss.isAlive = that->listener != nullptr;
+    gss.isAlive = that->listener != nullptr && !needsReboot;
     gss.type = STATS;
     bufferevent_write(that->manager_buf, &gss,sizeof(GameServerStats));
 
@@ -322,6 +327,8 @@ int GameServer::ServerThread(void* parama)
     */
 
     event_base_dispatch(that->net_evbase);
+	evconnlistener_free(that->listener);
+	that->listener = nullptr;
     event_free(keepAliveEvent);
     event_free(statsEvent);
     //event_free(cicle_injected);
