@@ -304,7 +304,12 @@ void GameServer::sendStats(evutil_socket_t fd, short events, void* arg)
 
     if(!gss.isAlive && !that->getNumPlayers())
         event_base_loopbreak(that->net_evbase);
-
+    if(that->listener != nullptr && needsReboot)
+	{
+		evconnlistener_free(that->listener);
+		that->listener = nullptr;
+	
+	}
 }
 
 
@@ -327,8 +332,12 @@ int GameServer::ServerThread(void* parama)
     */
 
     event_base_dispatch(that->net_evbase);
+	if(that->listener != nullptr)
+	{
 	evconnlistener_free(that->listener);
 	that->listener = nullptr;
+	
+	}
     event_free(keepAliveEvent);
     event_free(statsEvent);
     //event_free(cicle_injected);
