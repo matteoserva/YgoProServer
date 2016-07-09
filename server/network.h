@@ -8,6 +8,8 @@
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
 #include <event2/thread.h>
+#include "Users.h"
+#include <list>
 
 namespace ygo {
 
@@ -97,31 +99,42 @@ struct STOC_HS_WatchChange {
 };
 
 class DuelMode;
-class CMNetServerInterface;
+class RoomInterface;
 struct DuelPlayer {
 	unsigned short name[20];
+	wchar_t namew_low[20];
 	DuelMode* game;
 	unsigned char type;
 	unsigned char state;
 	bufferevent* bev;
-	CMNetServerInterface* netServer;
+	RoomInterface* netServer;
+    char ip[INET_ADDRSTRLEN];
+    unsigned int cachedRankScore;
+    unsigned int cachedGameScore;
+    signed char color;
+    Users::LoginResult loginStatus;
 	DuelPlayer() {
 		game = 0;
 		type = 0;
 		state = 0;
 		bev = 0;
         netServer=0;
+        lflist=2;
+        color = 0;
 	}
+    int lflist;
+    std::string countryCode;
+    std::list<std::pair<time_t,std::wstring> > chatTimestamp;
 };
 
 
-class CMNetServer;
+class DuelRoom;
 class DuelMode {
 public:
 
-    CMNetServer* netServer;
+    DuelRoom* netServer;
 
-    void setNetServer(CMNetServer* net)
+    void setNetServer(DuelRoom* net)
     {
         netServer=net;
     }
@@ -154,6 +167,10 @@ public:
 	unsigned long pduel;
 	wchar_t name[20];
 	wchar_t pass[20];
+
+	unsigned short time_limit[2];
+	unsigned short time_elapsed;
+	unsigned char last_response;
 };
 
 }
@@ -221,4 +238,5 @@ public:
 #define MODE_SINGLE		0x0
 #define MODE_MATCH		0x1
 #define MODE_TAG		0x2
+
 #endif //NETWORK_H

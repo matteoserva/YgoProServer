@@ -1,19 +1,26 @@
 #include "Users.h"
+#include "UsersDatabase.h"
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <thread>
 #include <exception>
 #include <algorithm>
+#include <list>
+#include <math.h>
+#include "debug.h"
 namespace ygo
 {
 Users::Users()
 {
-    LoadDB();
-
-
-    t1 = std::thread(SaveThread,this);
+    database = new UsersDatabase();
 }
+
+Users::~Users()
+{
+    delete database;
+}
+
 bool Users::validLoginString(std::string loginString)
 {
     try
@@ -26,26 +33,11 @@ bool Users::validLoginString(std::string loginString)
         return false;
     }
 }
-void Users::SaveThread(Users* that)
-{
-    while(1)
-    {
-        sleep(20);
-        that->usersMutex.lock();
-        time_t tempo1,tempo2;
-        time(&tempo1);
-        that->SaveDB();
-        time(&tempo2);
-        int delta = tempo2-tempo1;
-        that->usersMutex.unlock();
-        printf("salvato il DB, ha impiegato %d secondi\n",delta);
 
-    }
-}
 
 std::pair<std::string,std::string> Users::splitLoginString(std::string loginString)
 {
-    printf("splitto %s\n",loginString.c_str());
+    log(VERBOSE,"splitto %s\n",loginString.c_str());
     std::string username;
     std::string password="";
 
@@ -70,13 +62,15 @@ std::pair<std::string,std::string> Users::splitLoginString(std::string loginStri
     if (username.length()<2 || username.length() > 20)
         throw std::exception();
 
+    std::string usernamel = username;
+    std::transform(usernamel.begin(), usernamel.end(), usernamel.begin(), ::tolower);
+    if(usernamel == "duelista" || usernamel == "player")
+        username = "-" + username;
+
     return std::pair<std::string,std::string> (username,password);
 }
 
-
-
-
-std::string Users::login(std::string loginString)
+Users::LoginResultTuple Users::login(std::string loginString,char* ip)
 {
     std::string username;
     std::string password;
@@ -88,95 +82,290 @@ std::string Users::login(std::string loginString)
     }
     catch(std::exception& ex)
     {
-        username ="Player";
-        password = "";
+        return Users::LoginResultTuple ("-Player",Users::LoginResult::INVALIDUSERNAME,0);
     }
 
-    std::lock_guard<std::mutex> guard(usersMutex);
-
-    return login(username,password);
+    return login(username,password,ip);
 }
 
-std::string Users::login(std::string username, std::string password)
+Users::LoginResultTuple Users::login(std::string username, std::string password,char* ip)
 {
-    std::cout<<"Tento il login con "<<username<<" e "<<password<<std::endl;
+    log(INFO,"Tento il login con %s e %s, ip %s\n",username.c_str(),password.c_str(),ip);
     std::string usernamel=username;
-
     std::transform(usernamel.begin(), usernamel.end(), usernamel.begin(), ::tolower);
-    std::cout<<"Tento il login con "<<usernamel<<" e "<<password<<std::endl;
-    if(users.find(usernamel) == users.end())
-    {
-        std::cout<<usernamel<<std::endl;
-        users[usernamel] = new UserData(username,password);
-        time(&users[usernamel]->last_login);
-        return username;
-    }
+    if(username[0] == '-')
+        return Users::LoginResultTuple (username,Users::LoginResult::UNRANKED,0);
 
-    UserData* d = users[usernamel];
-    if(usernamel == "duelista" || usernamel == "player" || d->password=="" || d->password==password )
+    if(int color = database->login(username,password,ip))
     {
-        d->password = password;
-        time(&users[usernamel]->last_login);
-        return users[usernamel]->username;
+        if(password != "")
+            return Users::LoginResultTuple (username,Users::LoginResult::AUTHENTICATED,color-1);
+        else
+            return Users::LoginResultTuple (username,Users::LoginResult::NOPASSWORD,color-1);
     }
+    else
+    {
+        return Users::LoginResultTuple ("-" + username,Users::LoginResult::INVALIDPASSWORD,0);
 
-    username = getFirstAvailableUsername(username);
-    return login(username,password);
+
+    }
+}
+
+std::pair<int,int> Users::getFullScore(std::string username)
+{
+    if(username[0] == '-')
+        return std::pair<int,int>(0,0);
+
+    try
+    {
+        std::pair<int,int> score = database->getScore(username);
+        return score;
+    }
+    catch(std::exception)
+    {
+        return std::pair<int,int>(0,0);
+    }
 
 }
 
 int Users::getScore(std::string username)
 {
-    std::transform(username.begin(), username.end(), username.begin(), ::tolower);
-    std::lock_guard<std::mutex> guard(usersMutex);
-    printf("%s ha %d punti\n",username.c_str(),users[username]->score);
-    return users[username]->score;
+    if(username[0] == '-')
+        return 0;
+
+    std::pair<int,int> full = getFullScore(username);
+    return full.first;
 }
 
+int Users::getRank(std::string username)
+{
+    if(username[0] == '-')
+        return 0;
+    return database->getRank(username);
+}
+
+
+float Users::win_exp(float delta)
+{
+    //delta is my_score - opponent score
+    return 1.0/(exp((-delta)/400.0)+1.0);
+}
+
+
+
+static int k(const UserStats &us)
+{
+    int tempK = 50;
+    int threeshold = 10;
+    if(us.wins + us.losses+us.draws <= threeshold)
+    {
+        tempK += tempK/2;
+        if(us.score <= 800 && us.score >= 200)
+            tempK +=tempK/2;
+    }
+    else if(us.score >= 2000 && us.score < 3000 )
+        tempK /=2;
+    else if(us.score >= 3000)
+        tempK /=3;
+    return tempK;
+}
+
+void Users::Draw(std::string win, std::string los)
+{
+    
+    std::vector<std::string> nomi;
+	nomi.push_back(win);
+	nomi.push_back(los);	
+	
+	UpdateScore(nomi,2);
+}
+
+std::string Users::getCountryCode(std::string ip)
+{
+    return database->getCountryCode(ip);
+
+
+
+}
+
+void Users::UpdateScore(std::vector<std::string> nomi, int risultato) //0= vittoria, 2 = pareggio
+{
+	std::vector<UserStats> us;
+	
+	unsigned int num_squadra1 = nomi.size()/2;
+	unsigned int num_squadra2 = nomi.size() - num_squadra1;
+	
+	unsigned int media_squadra1=0;
+	unsigned int media_squadra2=0;
+	int delta = 0;
+	try
+    {
+		int pos = 0;
+		for(auto nome = nomi.cbegin(); nome != nomi.cend();++nome,++pos)
+		{
+			if((*nome)[0] == '-')
+				return;
+			UserStats us_tmp = database->getUserStats(*nome);
+			us.push_back(us_tmp);
+			if(pos < num_squadra1)
+				media_squadra1 += us_tmp.score;
+			else
+				media_squadra2 += us_tmp.score;
+		}
+		media_squadra1 /= num_squadra1;
+		media_squadra2 /= num_squadra2;
+		delta = media_squadra1 - media_squadra2;
+			
+		
+		for(int i = 0;i<nomi.size();i++)
+		{
+			UserStats us_tmp = us[i];
+			
+			if(i<num_squadra1 && risultato == 0)
+			{
+				us_tmp.score += k(us_tmp) * (1.0-win_exp(delta))  * 1.0*us_tmp.score/media_squadra1;
+				us_tmp.wins++;
+			}
+			else if(i>=num_squadra1 && risultato == 0)
+			{
+				us_tmp.score += k(us_tmp) * (0.0-win_exp(-delta))  * 1.0*us_tmp.score/media_squadra2;
+				us_tmp.losses++;
+			}
+			else if(i<num_squadra1 && risultato == 2)
+			{
+				us_tmp.score += k(us_tmp) * (0.5-win_exp(delta))  * 1.0*us_tmp.score/media_squadra1;
+				us_tmp.draws++;
+			}
+			else if(i>=num_squadra1 && risultato == 2)
+			{
+				us_tmp.score += k(us_tmp) * (0.5-win_exp(-delta))  * 1.0*us_tmp.score/media_squadra2;
+				us_tmp.draws++;
+			}
+
+			if(num_squadra2 > 1)
+				us_tmp.tags++;
+			if(us_tmp.score < 100)
+				us_tmp.score = 100;
+			database->setUserStats(us_tmp);
+			
+			log(INFO,"%s score: %d >(%+d)-> %d\n",us_tmp.username.c_str(),us[i].score,(us_tmp.score-us[i].score),us_tmp.score);
+			
+		}
+		
+	}
+    catch (std::exception e)
+    {
+
+    }
+	
+}
+
+void Users::UpdateStats(std::vector<LoggerPlayerInfo *> nomi, int risultato) //0= vittoria, 2 = pareggio
+{
+	std::vector<UserStats> us;
+	
+	unsigned int num_squadra1 = nomi.size()/2;
+	unsigned int num_squadra2 = nomi.size() - num_squadra1;
+	
+	unsigned int media_squadra1=0;
+	unsigned int media_squadra2=0;
+	int delta = 0;
+	try
+    {
+		int pos = 0;
+		for(auto nome = nomi.cbegin(); nome != nomi.cend();++nome,++pos)
+		{
+			if((*nome)->name[0] == '-')
+				return;
+			UserStats us_tmp = database->getUserStats((*nome)->name);
+			us.push_back(us_tmp);
+			if(pos < num_squadra1)
+				media_squadra1 += us_tmp.score;
+			else
+				media_squadra2 += us_tmp.score;
+		}
+		media_squadra1 /= num_squadra1;
+		media_squadra2 /= num_squadra2;
+		delta = media_squadra1 - media_squadra2;
+			
+		
+		for(int i = 0;i<nomi.size();i++)
+		{
+			UserStats us_tmp = us[i];
+			
+			if(i<num_squadra1 && risultato == 0)
+			{
+				us_tmp.score += k(us_tmp) * (1.0-win_exp(delta))  * 1.0*us_tmp.score/media_squadra1;
+				us_tmp.wins++;
+			}
+			else if(i>=num_squadra1 && risultato == 0)
+			{
+				us_tmp.score += k(us_tmp) * (0.0-win_exp(-delta))  * 1.0*us_tmp.score/media_squadra2;
+				us_tmp.losses++;
+			}
+			else if(i<num_squadra1 && risultato == 2)
+			{
+				us_tmp.score += k(us_tmp) * (0.5-win_exp(delta))  * 1.0*us_tmp.score/media_squadra1;
+				us_tmp.draws++;
+			}
+			else if(i>=num_squadra1 && risultato == 2)
+			{
+				us_tmp.score += k(us_tmp) * (0.5-win_exp(-delta))  * 1.0*us_tmp.score/media_squadra2;
+				us_tmp.draws++;
+			}
+
+			if(num_squadra2 > 1)
+				us_tmp.tags++;
+			if(us_tmp.score < 100)
+				us_tmp.score = 100;
+			database->setUserStats(us_tmp,nomi[i]);
+			
+			log(INFO,"%s score: %d >(%+d)-> %d\n",us_tmp.username.c_str(),us[i].score,(us_tmp.score-us[i].score),us_tmp.score);
+			
+		}
+		
+	}
+    catch (std::exception e)
+    {
+
+    }
+	
+}
+
+void Users::Draw(std::string win1, std::string win2,std::string los1, std::string los2)
+{
+    std::vector<std::string> nomi;
+	nomi.push_back(win1);
+	nomi.push_back(win2);
+	nomi.push_back(los1);
+	nomi.push_back(los2);
+	
+	
+	UpdateScore(nomi,2);
+}
 
 void Users::Victory(std::string win, std::string los)
 {
-    std::transform(win.begin(), win.end(), win.begin(), ::tolower);
-    std::transform(los.begin(), los.end(), los.begin(), ::tolower);
+    std::vector<std::string> nomi;
+	nomi.push_back(win);
+	nomi.push_back(los);	
+	
+	UpdateScore(nomi,0);
 
-
-    std::lock_guard<std::mutex> guard(usersMutex);
-    int winscore = users[win]->score;
-    int losescore = users[los]->score;
-    users[win]->score = winscore + 100*losescore/winscore;
-    users[los]->score = losescore - 100*losescore/winscore;
-    if(users[los]->score < 1000)
-        users[los]->score = 1000;
-    std::cout << win << "ha: "<<users[win]->score;
 }
 void Users::Victory(std::string win1, std::string win2,std::string los1, std::string los2)
 {
-    std::transform(win1.begin(), win1.end(), win1.begin(), ::tolower);
-    std::transform(los1.begin(), los1.end(), los1.begin(), ::tolower);
-    std::transform(win2.begin(), win2.end(), win2.begin(), ::tolower);
-    std::transform(los2.begin(), los2.end(), los2.begin(), ::tolower);
-    std::lock_guard<std::mutex> guard(usersMutex);
-    int win1score = users[win1]->score;
-    int lose1score = users[los1]->score;
-    int win2score = users[win2]->score;
-    int lose2score = users[los2]->score;
 
-    int delta = 200*(lose1score+lose2score)/(win1score+win2score);
-
-    users[win1]->score += delta * win1score/(win1score+win2score);
-    users[win2]->score += delta * win2score/(win1score+win2score);
-    users[los1]->score -= delta * lose1score/(lose1score+lose2score);
-    users[los2]->score -= delta * lose2score/(lose1score+lose2score);
-    if(users[los1]->score < 1000)
-        users[los1]->score = 1000;
-
-    if(users[los2]->score < 1000)
-        users[los2]->score = 1000;
+    std::vector<std::string> nomi;
+	nomi.push_back(win1);
+	nomi.push_back(win2);
+	nomi.push_back(los1);
+	nomi.push_back(los2);
+	
+	
+	UpdateScore(nomi,0);
 
 }
-
-
-
 
 Users* Users::getInstance()
 {
@@ -185,60 +374,17 @@ Users* Users::getInstance()
 }
 std::string Users::getFirstAvailableUsername(std::string base)
 {
-    /*base = base.substr(0,17);
-    for(int i = 1; i < 1000; i++)
-    {
-        std::ostringstream ostr;
-        ostr << i;
-
-        std::string possibleUsername = base+ostr.str();
-        if(users.find(possibleUsername) == users.end())
-        {
-            return possibleUsername;
-        }
-    }*/
-    return "Player";
+    return "-" + base;
 }
-
-void Users::SaveDB()
+static bool compareUserData (UserData* u1, UserData* u2)
 {
-    //return;
-    std::ofstream inf("users.txt");
-    for(auto it = users.cbegin(); it!=users.cend(); ++it)
-    {
-        inf<<it->second->username<<"|"<<it->second->password<<"|"<<it->second->score;
-        inf << "|"<<it->second->last_login<<std::endl;
-    }
+    return (u1->score > u2->score);
 }
-void Users::LoadDB()
-{
-    std::cout<<"LoadDB"<<std::endl;
-    std::ifstream inf("users.txt");
-    std::string username;
-    while(!std::getline(inf, username, '|').eof())
-    {
-        std::string password;
-        std::string iscore;
-        std::string slast_login;
-        unsigned int score;
-        time_t last_login;
-        std::getline(inf, password, '|');
-        std::getline(inf, iscore,'|');
-        std::getline(inf,slast_login);
-        score = stoi(iscore);
-        last_login = stoul(slast_login);
-        std::cout<<"adding user "<<username<<" pass: "<<password<< "score: "<<score<<std::endl;
-        if(!validLoginString(username+"$"+password))
-            continue;
 
-        splitLoginString(username+"$"+password);
-        UserData* ud = new UserData(username,password,score);
-        ud->last_login = last_login;
-        std::transform(username.begin(), username.end(), username.begin(), ::tolower);
-        users[username] = ud;
-    }
 
 }
 
-}
+
+
+
 

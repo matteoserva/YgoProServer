@@ -1,22 +1,85 @@
 #include "Statistics.h"
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <netdb.h>
-#include "mythread.h"
-#include <string>
-#include <sstream>
+#include "Config.h"
 #include "debug.h"
+
+/* sql wrapper */
+#include "MySqlWrapper.h"
+#include <memory> //unique_ptr
+#include <cppconn/prepared_statement.h>
+#include <cppconn/exception.h>
+
 namespace ygo
 {
-Statistics::Statistics():numPlayers(0),numRooms(0)
+
+void Statistics::SendStatisticsRow(ServerStats serverStats)
 {
-    Thread::NewThread(StatisticsThread, this);
+
+        try
+        {
+            sql::Connection *con = MySqlWrapper::getInstance()->getConnection();
+
+            std::unique_ptr<sql::PreparedStatement> stmt(con->prepareStatement("insert into serverstats_instances(PID,users,rooms,max_users,status) values(?,?,?,?,?) ON DUPLICATE KEY UPDATE users=?,rooms=?,max_users=?,status=?"));
+            //stmt->setQueryTimeout(5);
+            stmt->setInt(1, serverStats.PID);
+            stmt->setInt(2, serverStats.users);
+            stmt->setInt(3, serverStats.rooms);
+            stmt->setInt(4, serverStats.max_users);
+            stmt->setString(5, serverStats.status);
+            stmt->setInt(6, serverStats.users);
+            stmt->setInt(7, serverStats.rooms);
+            stmt->setInt(8, serverStats.max_users);
+            stmt->setString(9, serverStats.status);
+            int updateCount = stmt->executeUpdate();
+            return;
+        }
+        catch (sql::SQLException &e)
+        {
+            std::cout << "# ERR: SQLException in " << __FILE__;
+            std::cout << "(" << __FUNCTION__ << ") on line "              << __LINE__ << std::endl;
+            std::cout << "# ERR: " << e.what();
+            std::cout << " (MySQL error code: " << e.getErrorCode();
+            std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+        }
+
+
 }
+
+Statistics::Statistics():numPlayers(0),numRooms(0),last_send(0)
+{
+    isRunning = false;
+}
+
+int Statistics::getNumRooms()
+{
+    return numRooms;
+}
+int Statistics::getNumPlayers()
+{
+    return numPlayers;
+}
+
+void Statistics::StartThread()
+{
+    if(!isRunning)
+    {
+        isRunning = true;
+
+
+    }
+}
+
+void Statistics::StopThread()
+{
+    if(isRunning)
+    {
+        isRunning = false;
+
+
+    }
+}
+
+
 Statistics* Statistics::getInstance()
 {
     static Statistics statistics;
@@ -25,76 +88,46 @@ Statistics* Statistics::getInstance()
 
 void Statistics::setNumPlayers(int numP)
 {
-    log(INFO,"there are %d players\n",numP);
+    log(VERBOSE,"there are %d players\n",numP);
     numPlayers=numP;
+    if(isRunning)
+        sendStatistics();
 
 }
 void Statistics::setNumRooms(int numR)
 {
     if(numRooms != numR)
-        log(INFO,"there are %d rooms\n",numR);
+        log(VERBOSE,"there are %d rooms\n",numR);
     numRooms=numR;
+    if(isRunning)
+        sendStatistics();
 }
 
-int Statistics::StatisticsThread(void* param)
+
+Statistics::ServerStats::ServerStats(int PID,int users,int rooms,int max_users,std::string status):PID(PID),users(users),rooms(rooms),max_users(max_users),status(status)
 {
-    Statistics*that = (Statistics*) param;
 
-    for(;;)
-    {
-        int result = that->sendStatistics();
-        if(result)
-            log(INFO,"risultato statistiche: %d\n",result);
-
-        sleep(20);
-    }
 
 }
 
 int Statistics::sendStatistics()
 {
-    int portno = 80;
-    int sockfd, n;
-    struct sockaddr_in serv_addr;
-    struct hostent *server;
-    std::string hostname = "ygopro.cyberplanet.it";
+    if(!isRunning)
+        return 0;
+    if(time(NULL)-last_send<5)
+        return 0;
 
-    char buffer[256];
+    last_send = time(NULL);
 
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
-        return -1;
-    server = gethostbyname(hostname.c_str());
-    if (server == NULL)
-    {
-        log(INFO,"ERROR, no such host\n");
-        return -2;
-    }
+    char buffer[1024];
+    int n = sprintf(buffer,"rooms: %d\nplayers: %d/%d",numRooms,numPlayers,Config::getInstance()->max_processes*Config::getInstance()->max_users_per_process);
+    if(n>0)
+    if(FILE* fp = fopen("stats.txt", "w"))
+        {
+                fwrite(buffer,n,1,fp);
+                fclose(fp);
+        }
 
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr,(char *)&serv_addr.sin_addr.s_addr, server->h_length);
-    serv_addr.sin_port = htons(portno);
-    if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
-        return -3;
-
-
-
-    std::ostringstream convert;
-    convert << "GET /statistics.php?rooms="<<numRooms<<"&players="<<numPlayers<<" HTTP/1.1\n";
-    convert << "Host: " << hostname <<"\n";
-    convert << "\n";
-    std::string getString = convert.str();
-
-    n = write(sockfd,getString.c_str(),getString.length());
-    if (n < 0)
-        return -4;
-    bzero(buffer,256);
-    n = read(sockfd,buffer,255);
-    if (n < 0)
-        return -5;
-
-    close(sockfd);
     return 0;
 
 }

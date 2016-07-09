@@ -1,5 +1,5 @@
-#ifndef TAG_DUEL_H
-#define TAG_DUEL_H
+#ifndef HANDICAP_DUEL_H
+#define HANDICAP_DUEL_H
 
 #include "config.h"
 #include "network.h"
@@ -7,10 +7,10 @@
 
 namespace ygo {
 
-class TagDuel: public DuelMode {
+class HandicapDuel: public DuelMode {
 public:
-	TagDuel();
-	virtual ~TagDuel();
+	HandicapDuel();
+	virtual ~HandicapDuel();
 	virtual void Chat(DuelPlayer* dp, void* pdata, int len);
 	virtual void JoinGame(DuelPlayer* dp, void* pdata, bool is_creater);
 	virtual void LeaveGame(DuelPlayer* dp);
@@ -49,7 +49,7 @@ protected:
 	bool ready[4];
 	Deck pdeck[4];
 	unsigned char hand_result[2];
-
+	unsigned char last_response;
 	Replay last_replay;
 	unsigned char turn_count;
 

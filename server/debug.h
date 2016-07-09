@@ -6,7 +6,10 @@
 #define DEBUG
 #define DEBUG_LEVEL INFO
 
-enum log_type {INFO,WARN,BUG};
+enum log_type {VERBOSE,INFO,WARN,BUG};
 void log(log_type lt, const char *format, ...);
-
+void prepara_segnali();
+void disattiva_segnali();
+void attiva_segnali();
+void  print_trace (void);
 #endif

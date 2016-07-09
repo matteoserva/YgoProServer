@@ -47,7 +47,6 @@ protected:
 	bool ready[2];
 	Deck pdeck[2];
 	unsigned char hand_result[2];
-	unsigned char last_response;
 	std::set<DuelPlayer*> observers;
 	Replay last_replay;
 	bool match_mode;
@@ -55,8 +54,7 @@ protected:
 	unsigned char duel_count;
 	unsigned char tp_player;
 	unsigned char match_result[3];
-	unsigned short time_limit[2];
-	unsigned short time_elapsed;
+
 };
 
 }

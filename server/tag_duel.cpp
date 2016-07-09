@@ -1,11 +1,12 @@
 #include "tag_duel.h"
-#include "netserver.h"
+#include "DuelRoom.h"
 #include "game.h"
 #include "../ocgcore/ocgapi.h"
 #include "../ocgcore/card.h"
 #include "../ocgcore/duel.h"
 #include "../ocgcore/field.h"
 #include "../ocgcore/mtrandom.h"
+#include <algorithm>
 
 namespace ygo {
 
@@ -25,6 +26,9 @@ void TagDuel::Chat(DuelPlayer* dp, void* pdata, int len) {
 	for(int i = 0; i < 4; ++i)
 		if(players[i] != dp)
 			netServer->SendBufferToPlayer(players[i], STOC_CHAT, &scc, 4 + msglen * 2);
+    for(auto pit = observers.begin(); pit != observers.end(); ++pit)
+			if((*pit) != dp)
+				netServer->ReSendToPlayer(*pit);
 }
 void TagDuel::JoinGame(DuelPlayer* dp, void* pdata, bool is_creater) {
 	if(!is_creater) {
@@ -145,6 +149,8 @@ void TagDuel::LeaveGame(DuelPlayer* dp) {
 			EndDuel();
 			netServer->SendPacketToPlayer(players[0], STOC_DUEL_END);
 			netServer->ReSendToPlayer(players[1]);
+			netServer->ReSendToPlayer(players[2]);
+			netServer->ReSendToPlayer(players[3]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)
 				netServer->ReSendToPlayer(*oit);
 			netServer->StopServer();
@@ -361,22 +367,11 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	last_replay.WriteData(players[2]->name, 40, false);
 	last_replay.WriteData(players[3]->name, 40, false);
 	if(!host_info.no_shuffle_deck) {
-		for(int i = 0; i < pdeck[0].main.size(); ++i) {
-			int swap = rnd.real() * pdeck[0].main.size();
-			std::swap(pdeck[0].main[i], pdeck[0].main[swap]);
-		}
-		for(int i = 0; i < pdeck[1].main.size(); ++i) {
-			int swap = rnd.real() * pdeck[1].main.size();
-			std::swap(pdeck[1].main[i], pdeck[1].main[swap]);
-		}
-		for(int i = 0; i < pdeck[2].main.size(); ++i) {
-			int swap = rnd.real() * pdeck[2].main.size();
-			std::swap(pdeck[2].main[i], pdeck[2].main[swap]);
-		}
-		for(int i = 0; i < pdeck[3].main.size(); ++i) {
-			int swap = rnd.real() * pdeck[3].main.size();
-			std::swap(pdeck[3].main[i], pdeck[3].main[swap]);
-		}
+		random_shuffle(pdeck[0].main.begin(),pdeck[0].main.end());
+        random_shuffle(pdeck[1].main.begin(),pdeck[1].main.end());
+        random_shuffle(pdeck[2].main.begin(),pdeck[2].main.end());
+        random_shuffle(pdeck[3].main.begin(),pdeck[3].main.end());
+
 	}
 	time_limit[0] = host_info.time_limit;
 	time_limit[1] = host_info.time_limit;
@@ -452,10 +447,10 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 	BufferIO::WriteInt16(pbuf, query_field_count(pduel, 1, 0x1));
 	BufferIO::WriteInt16(pbuf, query_field_count(pduel, 1, 0x40));
 	netServer->SendBufferToPlayer(players[0], STOC_GAME_MSG, startbuf, 18);
-	netServer->ReSendToPlayer(players[1]);
+	netServer->SendBufferToPlayer(players[1], STOC_GAME_MSG, startbuf, 18);
 	startbuf[1] = 1;
 	netServer->SendBufferToPlayer(players[2], STOC_GAME_MSG, startbuf, 18);
-	netServer->ReSendToPlayer(players[3]);
+	netServer->SendBufferToPlayer(players[3], STOC_GAME_MSG, startbuf, 18);
 	if(!swapped)
 		startbuf[1] = 0x10;
 	else startbuf[1] = 0x11;
@@ -1335,11 +1330,12 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 		}
 		case MSG_TAG_SWAP: {
 			player = BufferIO::ReadInt8(pbuf);
-			int mcount = BufferIO::ReadInt8(pbuf);
+			/*int mcount = */BufferIO::ReadInt8(pbuf);
 			int ecount = BufferIO::ReadInt8(pbuf);
+			/*int pcount = */BufferIO::ReadInt8(pbuf);
 			int hcount = BufferIO::ReadInt8(pbuf);
 			pbufw = pbuf + 4;
-			pbuf += hcount * 4 + 4;
+			pbuf += hcount * 4 + ecount*4 + 4;
 			netServer->SendBufferToPlayer(cur_player[player], STOC_GAME_MSG, offset, pbuf - offset);
 			for (int i = 0; i < hcount; ++i) {
 				if(!(pbufw[3] & 0x80))
@@ -1347,6 +1343,15 @@ int TagDuel::Analyze(char* msgbuffer, unsigned int len) {
 				else
 					pbufw += 4;
 			}
+
+			for (int i = 0; i < ecount; ++i) {  
+				if(!(pbufw[3] & 0x80))  
+				BufferIO::WriteInt32(pbufw, 0);  
+			else  
+				pbufw += 4;  
+			}  
+
+
 			for(int i = 0; i < 4; ++i)
 				if(players[i] != cur_player[player])
 					netServer->SendBufferToPlayer(players[i], STOC_GAME_MSG, offset, pbuf - offset);
@@ -1389,7 +1394,7 @@ void TagDuel::EndDuel() {
 	if(!pduel)
 		return;
 	last_replay.EndRecord();
-	char replaybuf[0x2000], *pbuf = replaybuf;
+	char replaybuf[0x20000], *pbuf = replaybuf;
 	memcpy(pbuf, &last_replay.pheader, sizeof(ReplayHeader));
 	pbuf += sizeof(ReplayHeader);
 	memcpy(pbuf, last_replay.comp_data, last_replay.comp_size);
