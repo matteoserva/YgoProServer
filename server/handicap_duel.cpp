@@ -1340,11 +1340,12 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 		}
 		case MSG_TAG_SWAP: {
 			player = BufferIO::ReadInt8(pbuf);
-			int mcount = BufferIO::ReadInt8(pbuf);
+			/*int mcount = */BufferIO::ReadInt8(pbuf);
 			int ecount = BufferIO::ReadInt8(pbuf);
+			/*int pcount = */BufferIO::ReadInt8(pbuf);
 			int hcount = BufferIO::ReadInt8(pbuf);
 			pbufw = pbuf + 4;
-			pbuf += hcount * 4 + 4;
+			pbuf += hcount * 4 + ecount*4 + 4;
 			netServer->SendBufferToPlayer(cur_player[player], STOC_GAME_MSG, offset, pbuf - offset);
 			for (int i = 0; i < hcount; ++i) {
 				if(!(pbufw[3] & 0x80))
@@ -1352,6 +1353,15 @@ int HandicapDuel::Analyze(char* msgbuffer, unsigned int len) {
 				else
 					pbufw += 4;
 			}
+
+			for (int i = 0; i < ecount; ++i) {  
+				if(!(pbufw[3] & 0x80))  
+				BufferIO::WriteInt32(pbufw, 0);  
+			else  
+				pbufw += 4;  
+			}  
+
+
 			for(int i = 1; i < 4; ++i)
 				if(players[i] != cur_player[player])
 					netServer->SendBufferToPlayer(players[i], STOC_GAME_MSG, offset, pbuf - offset);

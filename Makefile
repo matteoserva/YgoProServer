@@ -16,7 +16,7 @@ OBJ = $(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRC)))
 
 
 # include directories
-INCLUDES = -I ./server/ -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I ./ygopro-client/ocgcore/ -I ./ygopro-client/gframe/ -I /usr/include/irrlicht1.8
+INCLUDES = -I ./server/ -I /usr/include/lua5.2/ -I /usr/include/freetype2/ -I ./ygopro-client/ocgcore/ -I ./ygopro-client/gframe/ -I /usr/include/irrlicht
 
 # C compiler flags (-g -O2 -Wall)
 CCFLAGS =   -O0 -g -fstack-protector-all -Wall -wd858  -fnon-call-exceptions
